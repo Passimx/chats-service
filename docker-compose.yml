@@ -9,7 +9,7 @@ services:
       POSTGRES_PASSWORD: ${PG_PASSWORD}
     command: -p ${PG_PORT}
     volumes:
-      - ../../data/pg_data:/var/lib/postgresql/data
+      - ./data/pg_data:/var/lib/postgresql/data
     expose:
       - ${PG_PORT}
     ports:
