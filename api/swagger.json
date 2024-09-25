@@ -1,0 +1,24 @@
+{
+	"openapi": "3.0.0",
+	"paths": {},
+	"info": {
+		"title": "passim",
+		"description": "",
+		"version": "0.0.1",
+		"contact": {},
+		"license": {
+			"name": "UNLICENSED",
+			"url": "https://github.com/ramzini22"
+		}
+	},
+	"tags": [],
+	"servers": [
+		{
+			"url": "http://localhost:7020",
+			"description": "development"
+		}
+	],
+	"components": {
+		"schemas": {}
+	}
+}
