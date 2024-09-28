@@ -1,6 +1,37 @@
 {
 	"openapi": "3.0.0",
-	"paths": {},
+	"paths": {
+		"/chats": {
+			"post": {
+				"operationId": "ChatsController_createChat",
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/CreateOpenChatDto"
+							}
+						}
+					}
+				},
+				"responses": {
+					"201": {
+						"description": ""
+					}
+				}
+			},
+			"get": {
+				"operationId": "ChatsController_getChats",
+				"parameters": [],
+				"responses": {
+					"200": {
+						"description": ""
+					}
+				}
+			}
+		}
+	},
 	"info": {
 		"title": "passim",
 		"description": "",
@@ -19,6 +50,11 @@
 		}
 	],
 	"components": {
-		"schemas": {}
+		"schemas": {
+			"CreateOpenChatDto": {
+				"type": "object",
+				"properties": {}
+			}
+		}
 	}
 }
