@@ -4,5 +4,12 @@ import { CreatedUpdatedEntity } from '../../../common/entities/created-updated.e
 @Entity({ tableName: 'chats' })
 export class ChatEntity extends CreatedUpdatedEntity {
     @Property({ nullable: true })
-    readonly title!: string;
+    title!: string;
+    // readonly title!: string;
+
+    // constructor(title: string) {
+    //     super();
+    //
+    //     this.title = title;
+    // }
 }
