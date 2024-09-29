@@ -16,17 +16,51 @@
 					}
 				},
 				"responses": {
-					"201": {
-						"description": ""
+					"200": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ChatEntity"
+								}
+							}
+						}
 					}
 				}
 			},
 			"get": {
 				"operationId": "ChatsController_getChats",
-				"parameters": [],
+				"parameters": [
+					{
+						"name": "title",
+						"required": false,
+						"in": "query",
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"name": "limit",
+						"required": false,
+						"in": "query",
+						"schema": {
+							"type": "number"
+						}
+					}
+				],
 				"responses": {
 					"200": {
-						"description": ""
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "array",
+									"items": {
+										"$ref": "#/components/schemas/ChatEntity"
+									}
+								}
+							}
+						}
 					}
 				}
 			}
@@ -53,7 +87,39 @@
 		"schemas": {
 			"CreateOpenChatDto": {
 				"type": "object",
-				"properties": {}
+				"properties": {
+					"title": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"title"
+				]
+			},
+			"ChatEntity": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"type": "number"
+					},
+					"createdAt": {
+						"format": "date-time",
+						"type": "string"
+					},
+					"updatedAt": {
+						"format": "date-time",
+						"type": "string"
+					},
+					"title": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"id",
+					"createdAt",
+					"updatedAt",
+					"title"
+				]
 			}
 		}
 	}
