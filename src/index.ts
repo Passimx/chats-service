@@ -31,8 +31,8 @@ export class App {
                 validateCustomDecorators: true,
                 whitelist: true,
                 transform: true,
-                transformOptions: { enableImplicitConversion: false },
-                forbidNonWhitelisted: true,
+                transformOptions: { enableImplicitConversion: true },
+                // forbidNonWhitelisted: true,
                 skipMissingProperties: false,
                 validationError: {
                     target: true,

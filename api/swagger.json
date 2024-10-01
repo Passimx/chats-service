@@ -64,6 +64,34 @@
 					}
 				}
 			}
+		},
+		"/messages": {
+			"post": {
+				"operationId": "MessagesController_createMessage",
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/CreateMessageDto"
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/MessageEntity"
+								}
+							}
+						}
+					}
+				}
+			}
 		}
 	},
 	"info": {
@@ -119,6 +147,39 @@
 					"createdAt",
 					"updatedAt",
 					"title"
+				]
+			},
+			"CreateMessageDto": {
+				"type": "object",
+				"properties": {}
+			},
+			"MessageEntity": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"type": "number"
+					},
+					"createdAt": {
+						"format": "date-time",
+						"type": "string"
+					},
+					"updatedAt": {
+						"format": "date-time",
+						"type": "string"
+					},
+					"encryptMessage": {
+						"type": "string"
+					},
+					"chatId": {
+						"type": "number"
+					}
+				},
+				"required": [
+					"id",
+					"createdAt",
+					"updatedAt",
+					"encryptMessage",
+					"chatId"
 				]
 			}
 		}

@@ -1,9 +1,9 @@
 import { Body, Controller, Get, Post, Query } from '@nestjs/common';
 import { ApiOkResponse } from '@nestjs/swagger';
-import { ChatsService } from './services/chats.service';
-import { CreateOpenChatDto } from './dto/responses/create-open-chat.dto';
-import { QueryGetChatsDto } from './dto/responses/query-get-chats.dto';
-import { ChatEntity } from './entities/chat.entity';
+import { ChatsService } from '../services/chats.service';
+import { CreateOpenChatDto } from '../dto/requests/create-open-chat.dto';
+import { QueryGetChatsDto } from '../dto/requests/query-get-chats.dto';
+import { ChatEntity } from '../entities/chat.entity';
 
 @Controller('chats')
 export class ChatsController {

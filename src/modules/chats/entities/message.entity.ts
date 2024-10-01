@@ -6,9 +6,15 @@ import { CreatedUpdatedEntity } from '../../../common/entities/created-updated.e
 export class MessageEntity extends CreatedUpdatedEntity {
     @ApiProperty()
     @Property({ length: 1000 })
-    readonly encryptMessage!: string;
+    readonly encryptMessage: string;
 
     @ApiProperty()
     @Property()
-    chatId!: number;
+    readonly chatId!: number;
+
+    constructor(message: string, id: number) {
+        super();
+        this.encryptMessage = message;
+        this.chatId = id;
+    }
 }
