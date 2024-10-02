@@ -91,6 +91,50 @@
 						}
 					}
 				}
+			},
+			"get": {
+				"operationId": "MessagesController_getMessages",
+				"parameters": [
+					{
+						"name": "chatId",
+						"required": false,
+						"in": "query",
+						"schema": {
+							"type": "number"
+						}
+					},
+					{
+						"name": "limit",
+						"required": false,
+						"in": "query",
+						"schema": {
+							"type": "number"
+						}
+					},
+					{
+						"name": "offset",
+						"required": false,
+						"in": "query",
+						"schema": {
+							"type": "number"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "array",
+									"items": {
+										"$ref": "#/components/schemas/MessageEntity"
+									}
+								}
+							}
+						}
+					}
+				}
 			}
 		}
 	},
@@ -151,7 +195,18 @@
 			},
 			"CreateMessageDto": {
 				"type": "object",
-				"properties": {}
+				"properties": {
+					"encryptMessage": {
+						"type": "string"
+					},
+					"chatId": {
+						"type": "number"
+					}
+				},
+				"required": [
+					"encryptMessage",
+					"chatId"
+				]
 			},
 			"MessageEntity": {
 				"type": "object",
