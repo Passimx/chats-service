@@ -16,17 +16,123 @@
 					}
 				},
 				"responses": {
-					"201": {
-						"description": ""
+					"200": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ChatEntity"
+								}
+							}
+						}
 					}
 				}
 			},
 			"get": {
 				"operationId": "ChatsController_getChats",
-				"parameters": [],
+				"parameters": [
+					{
+						"name": "title",
+						"required": false,
+						"in": "query",
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"name": "limit",
+						"required": false,
+						"in": "query",
+						"schema": {
+							"type": "number"
+						}
+					}
+				],
 				"responses": {
 					"200": {
-						"description": ""
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "array",
+									"items": {
+										"$ref": "#/components/schemas/ChatEntity"
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/messages": {
+			"post": {
+				"operationId": "MessagesController_createMessage",
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/CreateMessageDto"
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/MessageEntity"
+								}
+							}
+						}
+					}
+				}
+			},
+			"get": {
+				"operationId": "MessagesController_getMessages",
+				"parameters": [
+					{
+						"name": "chatId",
+						"required": false,
+						"in": "query",
+						"schema": {
+							"type": "number"
+						}
+					},
+					{
+						"name": "limit",
+						"required": false,
+						"in": "query",
+						"schema": {
+							"type": "number"
+						}
+					},
+					{
+						"name": "offset",
+						"required": false,
+						"in": "query",
+						"schema": {
+							"type": "number"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "array",
+									"items": {
+										"$ref": "#/components/schemas/MessageEntity"
+									}
+								}
+							}
+						}
 					}
 				}
 			}
@@ -53,7 +159,89 @@
 		"schemas": {
 			"CreateOpenChatDto": {
 				"type": "object",
-				"properties": {}
+				"properties": {
+					"title": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"title"
+				]
+			},
+			"ChatEntity": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"type": "number"
+					},
+					"createdAt": {
+						"format": "date-time",
+						"type": "string"
+					},
+					"title": {
+						"type": "string"
+					},
+					"countMessages": {
+						"type": "number"
+					},
+					"createdUserId": {
+						"type": "number"
+					}
+				},
+				"required": [
+					"id",
+					"createdAt",
+					"title",
+					"countMessages",
+					"createdUserId"
+				]
+			},
+			"CreateMessageDto": {
+				"type": "object",
+				"properties": {
+					"encryptMessage": {
+						"type": "string"
+					},
+					"chatId": {
+						"type": "number"
+					}
+				},
+				"required": [
+					"encryptMessage",
+					"chatId"
+				]
+			},
+			"MessageEntity": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"type": "number"
+					},
+					"createdAt": {
+						"format": "date-time",
+						"type": "string"
+					},
+					"encryptMessage": {
+						"type": "string"
+					},
+					"chatId": {
+						"type": "number"
+					},
+					"number": {
+						"type": "number"
+					},
+					"message": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"id",
+					"createdAt",
+					"encryptMessage",
+					"chatId",
+					"number",
+					"message"
+				]
 			}
 		}
 	}

@@ -2,17 +2,17 @@ import { Entity, Property } from '@mikro-orm/core';
 import { ApiProperty } from '@nestjs/swagger';
 import { CreatedEntity } from '../../../common/entities/created.entity';
 
-@Entity({ tableName: 'chats' })
-export class ChatEntity extends CreatedEntity {
+@Entity({ tableName: 'chat_members' })
+export class ChatMembersEntity extends CreatedEntity {
     @ApiProperty()
     @Property()
-    title!: string;
+    chatId!: number;
 
     @ApiProperty()
-    @Property({ default: 0 })
-    countMessages!: number;
+    @Property()
+    userId!: number;
 
     @ApiProperty()
-    @Property({ nullable: true })
-    createdUserId!: number;
+    @Property()
+    lastNumberMessage!: number;
 }

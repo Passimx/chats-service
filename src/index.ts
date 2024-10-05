@@ -1,5 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify';
+import { ValidationPipe } from '@nestjs/common';
 import { version } from '../package.json';
 import { AppModule } from './modules/app.module';
 import { Envs } from './common/envs/env';
@@ -24,6 +25,21 @@ export class App {
 
             if (Envs.postgres.migrationsRun) await migrationService.migrate();
         }
+
+        app.useGlobalPipes(
+            new ValidationPipe({
+                validateCustomDecorators: true,
+                whitelist: true,
+                transform: true,
+                transformOptions: { enableImplicitConversion: true },
+                // forbidNonWhitelisted: true,
+                skipMissingProperties: false,
+                validationError: {
+                    target: true,
+                    value: true,
+                },
+            }),
+        );
 
         if (Envs.swagger.isWriteConfig) useSwagger(app);
 

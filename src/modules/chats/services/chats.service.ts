@@ -10,8 +10,9 @@ export class ChatsService {
         private readonly chatRepository: EntityRepository<ChatEntity>, // chatRepository - это объект для запросов в бд
     ) {}
 
-    async createOpenChat(title: string) {
+    async createOpenChat(title: string): Promise<ChatEntity> {
         const chatEntity = new ChatEntity();
+
         chatEntity.title = title;
 
         await this.chatRepository.insert(chatEntity);
@@ -19,7 +20,7 @@ export class ChatsService {
         return chatEntity;
     }
 
-    async getOpenChats(title: string, limit?: number) {
-        return await this.chatRepository.find({ title }, { limit });
+    async getOpenChats(title: string, limit?: number): Promise<ChatEntity[]> {
+        return await this.chatRepository.find({ title: { $ilike: `%${title}%` } }, { limit });
     }
 }

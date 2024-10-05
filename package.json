@@ -40,6 +40,7 @@
     "@nestjs/platform-express": "^10.0.0",
     "@nestjs/platform-fastify": "^10.3.9",
     "@nestjs/swagger": "^7.3.1",
+    "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
     "dotenv": "^16.4.5",
     "reflect-metadata": "^0.1.13",
@@ -101,7 +102,7 @@
   "mikro-orm": {
     "useTsNode": true,
     "configPaths": [
-      "./src/common/config/mikro-orm/mikroorm.config.ts",
+      "./src/common/config/mikro-orm/mikro-orm.config.ts",
       "./dist/src/config/db/mikroorm.config.js"
     ]
   }
