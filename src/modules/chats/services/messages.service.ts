@@ -26,7 +26,7 @@ export class MessagesService {
     }
 
     async getMessages(chatId: number, limit: number, offset: number): Promise<MessageEntity[]> {
-        return await this.messageRepository.find(
+        return this.messageRepository.find(
             { chatId },
             { limit: limit, offset: offset, orderBy: { createdAt: 'DESC' } },
         );

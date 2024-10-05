@@ -178,19 +178,22 @@
 						"format": "date-time",
 						"type": "string"
 					},
-					"updatedAt": {
-						"format": "date-time",
-						"type": "string"
-					},
 					"title": {
 						"type": "string"
+					},
+					"countMessages": {
+						"type": "number"
+					},
+					"createdUserId": {
+						"type": "number"
 					}
 				},
 				"required": [
 					"id",
 					"createdAt",
-					"updatedAt",
-					"title"
+					"title",
+					"countMessages",
+					"createdUserId"
 				]
 			},
 			"CreateMessageDto": {
@@ -218,23 +221,26 @@
 						"format": "date-time",
 						"type": "string"
 					},
-					"updatedAt": {
-						"format": "date-time",
-						"type": "string"
-					},
 					"encryptMessage": {
 						"type": "string"
 					},
 					"chatId": {
 						"type": "number"
+					},
+					"number": {
+						"type": "number"
+					},
+					"message": {
+						"type": "string"
 					}
 				},
 				"required": [
 					"id",
 					"createdAt",
-					"updatedAt",
 					"encryptMessage",
-					"chatId"
+					"chatId",
+					"number",
+					"message"
 				]
 			}
 		}

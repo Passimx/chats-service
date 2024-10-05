@@ -6,9 +6,10 @@ import { MessageEntity } from './entities/message.entity';
 import { ChatsController } from './controllers/chats.controller';
 import { MessagesController } from './controllers/messages.controller';
 import { MessagesService } from './services/messages.service';
+import { ChatMembersEntity } from './entities/chat-members.entity';
 
 @Module({
-    imports: [MikroOrmModule.forFeature([ChatEntity, MessageEntity])],
+    imports: [MikroOrmModule.forFeature([ChatEntity, MessageEntity, ChatMembersEntity])],
     providers: [ChatsService, MessagesService],
     controllers: [ChatsController, MessagesController],
 })

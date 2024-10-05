@@ -1,15 +1,15 @@
 version: '3.8'
 services:
   postgres:
-    image: postgres:14-alpine
+    image: postgres:17-alpine
     restart: always
     environment:
       POSTGRES_DB: ${PG_DATABASE}
       POSTGRES_USER: ${PG_USERNAME}
       POSTGRES_PASSWORD: ${PG_PASSWORD}
     command: -p ${PG_PORT}
-    volumes:
-      - ./data/pg_data:/var/lib/postgresql/data
+#    volumes:
+#      - ./data/pg_data:/var/lib/postgresql/data
     expose:
       - ${PG_PORT}
     ports:
