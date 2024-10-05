@@ -12,6 +12,7 @@ export class MessagesService {
         @InjectRepository(ChatEntity)
         private readonly chatRepository: EntityRepository<ChatEntity>,
     ) {}
+
     async createMessage(message: string, id: number): Promise<MessageEntity | string> {
         const messageEntity = new MessageEntity(message, id);
         const chat = await this.chatRepository.findOne({ id: id });

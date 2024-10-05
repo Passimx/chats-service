@@ -21,7 +21,7 @@ export class MessagesController {
         isArray: true,
     })
     @Get()
-    getMessages(@Query() query: QueryGetMessagesDto) {
+    getMessages(@Query() query: QueryGetMessagesDto): Promise<MessageEntity[]> {
         return this.messagesService.getMessages(query.chatId, query.limit, query.offset);
     }
 }
