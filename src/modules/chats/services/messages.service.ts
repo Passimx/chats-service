@@ -13,11 +13,14 @@ export class MessagesService {
         private readonly chatRepository: EntityRepository<ChatEntity>,
     ) {}
 
-    async createMessage(message: string, id: number): Promise<MessageEntity | string> {
-        const messageEntity = new MessageEntity(message, id);
+    async createMessage(encryptMessage: string, id: number, message: string): Promise<MessageEntity | string> {
+        const messageEntity = new MessageEntity(encryptMessage, id, message);
         const chat = await this.chatRepository.findOne({ id: id });
 
         if (chat?.id) {
+            const countMessages = chat.countMessages || 0;
+            chat.countMessages = countMessages + 1;
+
             await this.messageRepository.insert(messageEntity);
 
             return messageEntity;

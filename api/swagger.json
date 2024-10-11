@@ -67,7 +67,7 @@
 		},
 		"/messages": {
 			"post": {
-				"operationId": "MessagesController_createMessage",
+				"operationId": "MessagesController_createMessage23",
 				"parameters": [],
 				"requestBody": {
 					"required": true,
@@ -204,11 +204,15 @@
 					},
 					"chatId": {
 						"type": "number"
+					},
+					"message": {
+						"type": "string"
 					}
 				},
 				"required": [
 					"encryptMessage",
-					"chatId"
+					"chatId",
+					"message"
 				]
 			},
 			"MessageEntity": {

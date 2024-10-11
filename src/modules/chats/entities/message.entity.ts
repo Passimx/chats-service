@@ -5,7 +5,7 @@ import { CreatedEntity } from '../../../common/entities/created.entity';
 @Entity({ tableName: 'messages' })
 export class MessageEntity extends CreatedEntity {
     @ApiProperty()
-    @Property({ length: 1000 })
+    @Property({ length: 1000, nullable: true })
     readonly encryptMessage: string;
 
     @ApiProperty()
@@ -17,12 +17,14 @@ export class MessageEntity extends CreatedEntity {
     number!: number;
 
     @ApiProperty()
-    @Property()
+    @Property({ nullable: true })
     message!: string; //используется только для openChat, в остальных частах используется encryptMessage
 
-    constructor(message: string, id: number) {
+    constructor(encryptMessage: string, id: number, message: string) {
         super();
-        this.encryptMessage = message;
+        this.encryptMessage = encryptMessage;
+        this.message = message;
         this.chatId = id;
+        this.number = 1;
     }
 }
