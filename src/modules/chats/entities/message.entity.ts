@@ -20,11 +20,11 @@ export class MessageEntity extends CreatedEntity {
     @Property({ nullable: true })
     message!: string; //используется только для openChat, в остальных частах используется encryptMessage
 
-    constructor(encryptMessage: string, id: number, message: string) {
+    constructor(encryptMessage: string, chatId: number, message: string, number: number) {
         super();
         this.encryptMessage = encryptMessage;
         this.message = message;
-        this.chatId = id;
-        this.number = 1;
+        this.chatId = chatId;
+        this.number = number;
     }
 }
