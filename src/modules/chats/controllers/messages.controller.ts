@@ -12,7 +12,7 @@ export class MessagesController {
         type: MessageEntity,
     })
     @Post()
-    createMessage23(@Body() message: CreateMessageDto) {
+    createMessage(@Body() message: CreateMessageDto) {
         return this.messagesService.createMessage(message.encryptMessage, message.chatId, message.message);
     }
 
