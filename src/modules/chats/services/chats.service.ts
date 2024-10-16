@@ -20,7 +20,11 @@ export class ChatsService {
         return chatEntity;
     }
 
-    async getOpenChats(title: string, limit?: number): Promise<ChatEntity[]> {
-        return await this.chatRepository.find({ title: { $ilike: `%${title}%` } }, { limit });
+    async getOpenChats(title: string, offset: number, limit?: number): Promise<ChatEntity[]> {
+        if (title) {
+            return await this.chatRepository.find({ title: { $ilike: `%${title}%` } }, { limit, offset: offset });
+        } else {
+            return await this.chatRepository.find({}, { limit, offset: offset });
+        }
     }
 }

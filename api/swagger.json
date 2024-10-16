@@ -46,6 +46,14 @@
 						"schema": {
 							"type": "number"
 						}
+					},
+					{
+						"name": "offset",
+						"required": false,
+						"in": "query",
+						"schema": {
+							"type": "number"
+						}
 					}
 				],
 				"responses": {
@@ -67,7 +75,7 @@
 		},
 		"/messages": {
 			"post": {
-				"operationId": "MessagesController_createMessage23",
+				"operationId": "MessagesController_createMessage",
 				"parameters": [],
 				"requestBody": {
 					"required": true,

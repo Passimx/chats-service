@@ -22,6 +22,6 @@ export class ChatsController {
     })
     @Get()
     async getChats(@Query() query: QueryGetChatsDto): Promise<ChatEntity[]> {
-        return await this.chatsService.getOpenChats(query.title, query.limit);
+        return await this.chatsService.getOpenChats(query.title, query.offset, query.limit);
     }
 }

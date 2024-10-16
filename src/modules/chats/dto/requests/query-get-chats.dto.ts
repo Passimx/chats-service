@@ -11,4 +11,9 @@ export class QueryGetChatsDto {
     @IsNumber()
     @IsOptional()
     limit!: number;
+
+    @ApiPropertyOptional()
+    @IsNumber()
+    @IsOptional()
+    offset!: number;
 }
