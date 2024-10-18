@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Entity, Property } from '@mikro-orm/core';
+import { Entity, OneToOne, Property } from '@mikro-orm/core';
 import { CreatedEntity } from '../../../common/entities/created.entity';
+import { ChatEntity } from './chat.entity';
 
 @Entity({ tableName: 'messages' })
 export class MessageEntity extends CreatedEntity {
@@ -27,4 +28,7 @@ export class MessageEntity extends CreatedEntity {
         this.chatId = chatId;
         this.number = number;
     }
+
+    @OneToOne(() => ChatEntity, { persist: false })
+    chat!: ChatEntity;
 }

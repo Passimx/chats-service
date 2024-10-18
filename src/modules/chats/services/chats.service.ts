@@ -22,9 +22,25 @@ export class ChatsService {
 
     async getOpenChats(title: string, offset: number, limit?: number): Promise<ChatEntity[]> {
         if (title) {
-            return await this.chatRepository.find({ title: { $ilike: `%${title}%` } }, { limit, offset: offset });
+            return await this.chatRepository.find(
+                { title: { $ilike: `%${title}%` } },
+                {
+                    limit,
+                    offset: offset,
+                    orderBy: { title: 'ASC', messages: { number: 'DESC NULLS LAST' }, createdAt: 'DESC' },
+                    populate: ['messages'],
+                },
+            );
         } else {
-            return await this.chatRepository.find({}, { limit, offset: offset });
+            return await this.chatRepository.find(
+                {},
+                {
+                    limit,
+                    offset: offset,
+                    orderBy: { messages: { number: 'DESC' }, createdAt: 'DESC' },
+                    populate: ['messages'],
+                },
+            );
         }
     }
 }
