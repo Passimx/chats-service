@@ -43,4 +43,13 @@ export class ChatsService {
             );
         }
     }
+    async findChat(id: number): Promise<string | ChatEntity> {
+        const chat = await this.chatRepository.findOne(id);
+
+        if (chat) {
+            return chat;
+        }
+
+        return `Chat with ID' + ${id} + 'not found`;
+    }
 }

@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import { ApiOkResponse } from '@nestjs/swagger';
 import { ChatsService } from '../services/chats.service';
 import { CreateOpenChatDto } from '../dto/requests/create-open-chat.dto';
@@ -23,5 +23,10 @@ export class ChatsController {
     @Get()
     async getChats(@Query() query: QueryGetChatsDto): Promise<ChatEntity[]> {
         return await this.chatsService.getOpenChats(query.title, query.offset, query.limit);
+    }
+
+    @Get(':id')
+    async getChat(@Param('id') id: number): Promise<string | ChatEntity> {
+        return this.chatsService.findChat(id);
     }
 }
