@@ -15,4 +15,9 @@ export class CreateMessageDto {
     @ApiProperty()
     @IsOptional()
     readonly message!: string;
+
+    @IsNumber()
+    @ApiProperty()
+    @IsOptional()
+    readonly parentMessageId!: number;
 }

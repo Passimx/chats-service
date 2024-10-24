@@ -13,7 +13,12 @@ export class MessagesController {
     })
     @Post()
     createMessage(@Body() message: CreateMessageDto) {
-        return this.messagesService.createMessage(message.encryptMessage, message.chatId, message.message);
+        return this.messagesService.createMessage(
+            message.encryptMessage,
+            message.chatId,
+            message.message,
+            message.parentMessageId,
+        );
     }
 
     @ApiOkResponse({

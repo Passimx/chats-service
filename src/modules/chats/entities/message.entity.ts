@@ -21,12 +21,26 @@ export class MessageEntity extends CreatedEntity {
     @Property({ nullable: true })
     message!: string; //используется только для openChat, в остальных частах используется encryptMessage
 
-    constructor(encryptMessage: string, chatId: number, message: string, number: number) {
+    @ApiProperty()
+    @Property({ nullable: true })
+    parentMessageId!: number;
+
+    constructor(
+        encryptMessage: string,
+        chatId: number,
+        message: string,
+        number: number,
+        parentMessageId: number | undefined,
+    ) {
         super();
         this.encryptMessage = encryptMessage;
         this.message = message;
         this.chatId = chatId;
         this.number = number;
+
+        if (parentMessageId) {
+            this.parentMessageId = parentMessageId;
+        }
     }
 
     @OneToOne(() => ChatEntity, { persist: false })

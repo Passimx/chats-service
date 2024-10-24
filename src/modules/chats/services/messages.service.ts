@@ -13,14 +13,29 @@ export class MessagesService {
         private readonly chatRepository: EntityRepository<ChatEntity>,
     ) {}
 
-    async createMessage(encryptMessage: string, chatId: number, message: string): Promise<MessageEntity | string> {
+    async createMessage(
+        encryptMessage: string,
+        chatId: number,
+        message: string,
+        parentMessageId?: number,
+    ): Promise<MessageEntity | string> {
         const chat = await this.chatRepository.findOne({ id: chatId });
 
         if (chat) {
             chat.countMessages++;
+            const parentMessage = await this.messageRepository.findOne({ id: parentMessageId });
 
-            const messageEntity = new MessageEntity(encryptMessage, chatId, message, chat.countMessages);
+            if (!parentMessage) {
+                return 'Родительское сообщение не найдено';
+            }
 
+            const messageEntity = new MessageEntity(
+                encryptMessage,
+                chatId,
+                message,
+                chat.countMessages,
+                parentMessageId,
+            );
             await this.messageRepository.insert(messageEntity);
             await this.chatRepository.nativeUpdate({ id: chatId }, { countMessages: chat.countMessages });
 

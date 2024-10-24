@@ -146,6 +146,14 @@
 						"schema": {
 							"type": "number"
 						}
+					},
+					{
+						"name": "parentMessageId",
+						"required": true,
+						"in": "query",
+						"schema": {
+							"type": "number"
+						}
 					}
 				],
 				"responses": {
@@ -179,7 +187,7 @@
 	"tags": [],
 	"servers": [
 		{
-			"url": "http://localhost:7020",
+			"url": "http://localhost:6020",
 			"description": "development"
 		}
 	],
@@ -235,12 +243,16 @@
 					},
 					"message": {
 						"type": "string"
+					},
+					"parentMessageId": {
+						"type": "number"
 					}
 				},
 				"required": [
 					"encryptMessage",
 					"chatId",
-					"message"
+					"message",
+					"parentMessageId"
 				]
 			},
 			"MessageEntity": {
@@ -264,6 +276,9 @@
 					},
 					"message": {
 						"type": "string"
+					},
+					"parentMessageId": {
+						"type": "number"
 					}
 				},
 				"required": [
@@ -272,7 +287,8 @@
 					"encryptMessage",
 					"chatId",
 					"number",
-					"message"
+					"message",
+					"parentMessageId"
 				]
 			}
 		}
