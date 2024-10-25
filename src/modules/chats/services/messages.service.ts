@@ -23,10 +23,13 @@ export class MessagesService {
 
         if (chat) {
             chat.countMessages++;
-            const parentMessage = await this.messageRepository.findOne({ id: parentMessageId });
 
-            if (!parentMessage) {
-                return 'Родительское сообщение не найдено';
+            if (parentMessageId) {
+                const parentMessage = await this.messageRepository.findOne({ id: parentMessageId });
+
+                if (!parentMessage) {
+                    return 'Родительское сообщение не найдено';
+                }
             }
 
             const messageEntity = new MessageEntity(
