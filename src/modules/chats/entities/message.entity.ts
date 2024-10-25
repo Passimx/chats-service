@@ -45,4 +45,7 @@ export class MessageEntity extends CreatedEntity {
 
     @OneToOne(() => ChatEntity, { persist: false })
     chat!: ChatEntity;
+
+    @OneToOne(() => MessageEntity, { persist: false })
+    parentMessage!: MessageEntity;
 }
