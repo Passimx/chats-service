@@ -26,6 +26,8 @@ export class App {
             if (Envs.postgres.migrationsRun) await migrationService.migrate();
         }
 
+        app.enableCors({ origin: true, credentials: true });
+
         app.useGlobalPipes(
             new ValidationPipe({
                 validateCustomDecorators: true,
