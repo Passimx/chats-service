@@ -1,4 +1,4 @@
-import { ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsNumber, IsOptional } from 'class-validator';
 
 export class QueryGetMessagesDto {
@@ -15,4 +15,9 @@ export class QueryGetMessagesDto {
     @IsNumber()
     @IsOptional()
     offset!: number;
+
+    @IsNumber()
+    @ApiProperty()
+    @IsOptional()
+    readonly parentMessageId!: number;
 }

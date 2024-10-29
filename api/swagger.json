@@ -46,6 +46,14 @@
 						"schema": {
 							"type": "number"
 						}
+					},
+					{
+						"name": "offset",
+						"required": false,
+						"in": "query",
+						"schema": {
+							"type": "number"
+						}
 					}
 				],
 				"responses": {
@@ -61,6 +69,26 @@
 								}
 							}
 						}
+					}
+				}
+			}
+		},
+		"/chats/{id}": {
+			"get": {
+				"operationId": "ChatsController_getChat",
+				"parameters": [
+					{
+						"name": "id",
+						"required": true,
+						"in": "path",
+						"schema": {
+							"type": "number"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": ""
 					}
 				}
 			}
@@ -118,6 +146,14 @@
 						"schema": {
 							"type": "number"
 						}
+					},
+					{
+						"name": "parentMessageId",
+						"required": true,
+						"in": "query",
+						"schema": {
+							"type": "number"
+						}
 					}
 				],
 				"responses": {
@@ -151,7 +187,7 @@
 	"tags": [],
 	"servers": [
 		{
-			"url": "http://localhost:7020",
+			"url": "http://localhost:6020",
 			"description": "development"
 		}
 	],
@@ -204,11 +240,19 @@
 					},
 					"chatId": {
 						"type": "number"
+					},
+					"message": {
+						"type": "string"
+					},
+					"parentMessageId": {
+						"type": "number"
 					}
 				},
 				"required": [
 					"encryptMessage",
-					"chatId"
+					"chatId",
+					"message",
+					"parentMessageId"
 				]
 			},
 			"MessageEntity": {
@@ -232,6 +276,9 @@
 					},
 					"message": {
 						"type": "string"
+					},
+					"parentMessageId": {
+						"type": "number"
 					}
 				},
 				"required": [
@@ -240,7 +287,8 @@
 					"encryptMessage",
 					"chatId",
 					"number",
-					"message"
+					"message",
+					"parentMessageId"
 				]
 			}
 		}
