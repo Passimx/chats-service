@@ -1,304 +1,308 @@
 {
-  "openapi": "3.0.0",
-  "paths": {
-    "/chats": {
-      "post": {
-        "operationId": "ChatsController_createChat",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateOpenChatDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ChatEntity"
-                }
-              }
-            }
-          }
-        }
-      },
-      "get": {
-        "operationId": "ChatsController_getChats",
-        "parameters": [
-          {
-            "name": "title",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "limit",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "number"
-            }
-          },
-          {
-            "name": "offset",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "number"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/ChatEntity"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/chats/{id}": {
-      "get": {
-        "operationId": "ChatsController_getChat",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "number"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        }
-      }
-    },
-    "/messages": {
-      "post": {
-        "operationId": "MessagesController_createMessage",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateMessageDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/MessageEntity"
-                }
-              }
-            }
-          }
-        }
-      },
-      "get": {
-        "operationId": "MessagesController_getMessages",
-        "parameters": [
-          {
-            "name": "chatId",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "number"
-            }
-          },
-          {
-            "name": "limit",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "number"
-            }
-          },
-          {
-            "name": "offset",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "number"
-            }
-          },
-          {
-            "name": "parentMessageId",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "number"
-            }
-          },
-          {
-            "name": "search",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/MessageEntity"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  },
-  "info": {
-    "title": "passim",
-    "description": "",
-    "version": "0.0.1",
-    "contact": {},
-    "license": {
-      "name": "UNLICENSED",
-      "url": "https://github.com/ramzini22"
-    }
-  },
-  "tags": [],
-  "servers": [
-    {
-      "url": "http://localhost:7020",
-      "description": "development"
-    }
-  ],
-  "components": {
-    "schemas": {
-      "CreateOpenChatDto": {
-        "type": "object",
-        "properties": {
-          "title": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "title"
-        ]
-      },
-      "ChatEntity": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "number"
-          },
-          "createdAt": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "title": {
-            "type": "string"
-          },
-          "countMessages": {
-            "type": "number"
-          },
-          "createdUserId": {
-            "type": "number"
-          }
-        },
-        "required": [
-          "id",
-          "createdAt",
-          "title",
-          "countMessages",
-          "createdUserId"
-        ]
-      },
-      "CreateMessageDto": {
-        "type": "object",
-        "properties": {
-          "encryptMessage": {
-            "type": "string"
-          },
-          "chatId": {
-            "type": "number"
-          },
-          "message": {
-            "type": "string"
-          },
-          "parentMessageId": {
-            "type": "number"
-          }
-        },
-        "required": [
-          "encryptMessage",
-          "chatId",
-          "message",
-          "parentMessageId"
-        ]
-      },
-      "MessageEntity": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "number"
-          },
-          "createdAt": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "encryptMessage": {
-            "type": "string"
-          },
-          "chatId": {
-            "type": "number"
-          },
-          "number": {
-            "type": "number"
-          },
-          "message": {
-            "type": "string"
-          },
-          "parentMessageId": {
-            "type": "number"
-          }
-        },
-        "required": [
-          "id",
-          "createdAt",
-          "encryptMessage",
-          "chatId",
-          "number",
-          "message",
-          "parentMessageId"
-        ]
-      }
-    }
-  }
+	"openapi": "3.0.0",
+	"paths": {
+		"/chats": {
+			"post": {
+				"operationId": "ChatsController_createChat",
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/CreateOpenChatDto"
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ChatEntity"
+								}
+							}
+						}
+					}
+				}
+			},
+			"get": {
+				"operationId": "ChatsController_getChats",
+				"parameters": [
+					{
+						"name": "title",
+						"required": false,
+						"in": "query",
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"name": "limit",
+						"required": false,
+						"in": "query",
+						"schema": {
+							"type": "number"
+						}
+					},
+					{
+						"name": "offset",
+						"required": false,
+						"in": "query",
+						"schema": {
+							"type": "number"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "array",
+									"items": {
+										"$ref": "#/components/schemas/ChatEntity"
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/chats/{id}": {
+			"get": {
+				"operationId": "ChatsController_getChat",
+				"parameters": [
+					{
+						"name": "id",
+						"required": true,
+						"in": "path",
+						"schema": {
+							"type": "number"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": ""
+					}
+				}
+			}
+		},
+		"/messages": {
+			"post": {
+				"operationId": "MessagesController_createMessage",
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/CreateMessageDto"
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/MessageEntity"
+								}
+							}
+						}
+					}
+				}
+			},
+			"get": {
+				"operationId": "MessagesController_getMessages",
+				"parameters": [
+					{
+						"name": "chatId",
+						"required": false,
+						"in": "query",
+						"schema": {
+							"type": "number"
+						}
+					},
+					{
+						"name": "limit",
+						"required": false,
+						"in": "query",
+						"schema": {
+							"type": "number"
+						}
+					},
+					{
+						"name": "offset",
+						"required": false,
+						"in": "query",
+						"schema": {
+							"type": "number"
+						}
+					},
+					{
+						"name": "parentMessageId",
+						"required": true,
+						"in": "query",
+						"schema": {
+							"type": "number"
+						}
+					},
+					{
+						"name": "search",
+						"required": true,
+						"in": "query",
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "array",
+									"items": {
+										"$ref": "#/components/schemas/MessageEntity"
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	},
+	"info": {
+		"title": "passim",
+		"description": "",
+		"version": "0.0.1",
+		"contact": {},
+		"license": {
+			"name": "UNLICENSED",
+			"url": "https://github.com/ramzini22"
+		}
+	},
+	"tags": [],
+	"servers": [
+		{
+			"url": "http://localhost:7020",
+			"description": "development"
+		}
+	],
+	"components": {
+		"schemas": {
+			"CreateOpenChatDto": {
+				"type": "object",
+				"properties": {
+					"title": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"title"
+				]
+			},
+			"ChatEntity": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"type": "number"
+					},
+					"createdAt": {
+						"format": "date-time",
+						"type": "string"
+					},
+					"title": {
+						"type": "string"
+					},
+					"countMessages": {
+						"type": "number"
+					},
+					"createdUserId": {
+						"type": "number"
+					},
+					"type": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"id",
+					"createdAt",
+					"title",
+					"countMessages",
+					"createdUserId",
+					"type"
+				]
+			},
+			"CreateMessageDto": {
+				"type": "object",
+				"properties": {
+					"encryptMessage": {
+						"type": "string"
+					},
+					"chatId": {
+						"type": "number"
+					},
+					"message": {
+						"type": "string"
+					},
+					"parentMessageId": {
+						"type": "number"
+					}
+				},
+				"required": [
+					"encryptMessage",
+					"chatId",
+					"message",
+					"parentMessageId"
+				]
+			},
+			"MessageEntity": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"type": "number"
+					},
+					"createdAt": {
+						"format": "date-time",
+						"type": "string"
+					},
+					"encryptMessage": {
+						"type": "string"
+					},
+					"chatId": {
+						"type": "number"
+					},
+					"number": {
+						"type": "number"
+					},
+					"message": {
+						"type": "string"
+					},
+					"parentMessageId": {
+						"type": "number"
+					}
+				},
+				"required": [
+					"id",
+					"createdAt",
+					"encryptMessage",
+					"chatId",
+					"number",
+					"message",
+					"parentMessageId"
+				]
+			}
+		}
+	}
 }
