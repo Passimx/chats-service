@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Entity, OneToOne, Property } from '@mikro-orm/core';
+import { Entity, Index, OneToOne, Property } from '@mikro-orm/core';
 import { CreatedEntity } from '../../../common/entities/created.entity';
 import { ChatEntity } from './chat.entity';
 
@@ -17,6 +17,7 @@ export class MessageEntity extends CreatedEntity {
     @Property()
     number!: number;
 
+    @Index()
     @ApiProperty()
     @Property({ nullable: true })
     message!: string; //используется только для openChat, в остальных частах используется encryptMessage

@@ -154,6 +154,14 @@
 						"schema": {
 							"type": "number"
 						}
+					},
+					{
+						"name": "search",
+						"required": true,
+						"in": "query",
+						"schema": {
+							"type": "string"
+						}
 					}
 				],
 				"responses": {
@@ -187,7 +195,7 @@
 	"tags": [],
 	"servers": [
 		{
-			"url": "http://localhost:6020",
+			"url": "http://localhost:7020",
 			"description": "development"
 		}
 	],
@@ -222,6 +230,9 @@
 					},
 					"createdUserId": {
 						"type": "number"
+					},
+					"type": {
+						"type": "string"
 					}
 				},
 				"required": [
@@ -229,7 +240,8 @@
 					"createdAt",
 					"title",
 					"countMessages",
-					"createdUserId"
+					"createdUserId",
+					"type"
 				]
 			},
 			"CreateMessageDto": {
