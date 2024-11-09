@@ -4,7 +4,16 @@
 		"/chats": {
 			"post": {
 				"operationId": "ChatsController_createChat",
-				"parameters": [],
+				"parameters": [
+					{
+						"name": "socket_id",
+						"required": true,
+						"in": "header",
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
 				"requestBody": {
 					"required": true,
 					"content": {

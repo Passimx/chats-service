@@ -27,4 +27,12 @@ export const Envs = {
         url: `http://localhost:${process.env.APP_PORT ?? 3000}`,
         description: 'development',
     },
+
+    kafka: {
+        host: process.env.KAFKA_HOST,
+        port: process.env.KAFKA_EXTERNAL_PORT,
+        user: String(process.env.KAFKA_CLIENT_USERS),
+        password: String(process.env.KAFKA_USER_PASSWORD),
+        kafkaIsConnect: BooleanUtils.strToBoolWithDefault(process.env.KAFKA_IS_CONNECT, false),
+    },
 };

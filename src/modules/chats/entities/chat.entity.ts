@@ -8,7 +8,7 @@ import { MessageEntity } from './message.entity';
 export class ChatEntity extends CreatedEntity {
     @ApiProperty()
     @Property()
-    title!: string;
+    readonly title: string;
 
     @ApiProperty()
     @Property({ default: 0 })
@@ -16,12 +16,18 @@ export class ChatEntity extends CreatedEntity {
 
     @ApiProperty()
     @Property({ nullable: true })
-    createdUserId!: number;
+    readonly createdUserId!: number;
 
     @ApiProperty()
     @Enum({ default: ChatTypeEnum.IS_OPEN, items: () => ChatTypeEnum, nativeEnumName: 'chat_type_enum' })
     readonly type!: ChatTypeEnum;
 
+    constructor(title: string) {
+        super();
+
+        this.title = title;
+    }
+
     @OneToOne(() => MessageEntity, (message) => message.chat)
-    messages!: MessageEntity[];
+    readonly messages!: MessageEntity[];
 }
