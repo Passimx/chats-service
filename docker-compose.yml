@@ -20,8 +20,8 @@ services:
     ports:
       - ${KAFKA_CLIENT_PORT}:${KAFKA_CLIENT_PORT}
       - ${KAFKA_EXTERNAL_PORT}:${KAFKA_EXTERNAL_PORT}
-    volumes:
-      - ./mq_data_kafka:/bitnami/kafka
+    #    volumes:
+    #      - ./mq_data_kafka:/bitnami/kafka
     environment:
       - KAFKA_ENABLE_KRAFT=yes
       - KAFKA_BROKER_ID=1
