@@ -25,5 +25,7 @@ export class QueueService {
         const message = new MessageDto(to, event, data);
 
         this.producer.send({ topic: 'message', messages: [{ value: JSON.stringify(message) }] });
+
+        // topic "message" это название связи в kafka которую слушаю только те сервесы которым мы укажем какой топик слушать
     }
 }

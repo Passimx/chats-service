@@ -5,6 +5,8 @@ import { EntityRepository } from '@mikro-orm/postgresql';
 import { MessageEntity } from '../entities/message.entity';
 import { ChatEntity } from '../entities/chat.entity';
 import { DataResponse } from '../../../common/swagger/data-response.dto';
+import { QueueService } from '../../queue/queue.service';
+import { EventsEnum } from '../../queue/types/events.enum';
 
 @Injectable()
 export class MessagesService {
@@ -13,6 +15,7 @@ export class MessagesService {
         private readonly messageRepository: EntityRepository<MessageEntity>,
         @InjectRepository(ChatEntity)
         private readonly chatRepository: EntityRepository<ChatEntity>,
+        private readonly queueService: QueueService,
     ) {}
 
     async createMessage(
@@ -42,10 +45,12 @@ export class MessagesService {
                 chat.countMessages,
                 parentMessageId,
             );
+            const response = new DataResponse<MessageEntity>(messageEntity);
             await this.messageRepository.insert(messageEntity);
             await this.chatRepository.nativeUpdate({ id: chatId }, { countMessages: chat.countMessages });
+            this.queueService.sendMessage(String(chatId), EventsEnum.CREATE_MESSAGE, response);
 
-            return new DataResponse(messageEntity);
+            return response;
         } else {
             return new DataResponse('Чат не найден');
         }
