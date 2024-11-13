@@ -26,34 +26,26 @@ export class MessagesService {
     ): Promise<DataResponse<MessageEntity | string>> {
         const chat = await this.chatRepository.findOne({ id: chatId });
 
-        if (chat) {
-            chat.countMessages++;
+        if (!chat) return new DataResponse('Chat not found');
 
-            if (parentMessageId) {
-                const parentMessage = await this.messageRepository.findOne({ id: parentMessageId });
+        chat.countMessages++;
 
-                if (!parentMessage) {
-                    return new DataResponse('Родительское сообщение не найдено');
-                    // return { success: false, data: 'Родительское сообщение не найдено' };
-                }
+        if (parentMessageId) {
+            const parentMessage = await this.messageRepository.findOne({ id: parentMessageId });
+
+            if (!parentMessage) {
+                return new DataResponse('Родительское сообщение не найдено');
+                // return { success: false, data: 'Родительское сообщение не найдено' };
             }
-
-            const messageEntity = new MessageEntity(
-                encryptMessage,
-                chatId,
-                message,
-                chat.countMessages,
-                parentMessageId,
-            );
-            const response = new DataResponse<MessageEntity>(messageEntity);
-            await this.messageRepository.insert(messageEntity);
-            await this.chatRepository.nativeUpdate({ id: chatId }, { countMessages: chat.countMessages });
-            this.queueService.sendMessage(String(chatId), EventsEnum.CREATE_MESSAGE, response);
-
-            return response;
-        } else {
-            return new DataResponse('Чат не найден');
         }
+
+        const messageEntity = new MessageEntity(encryptMessage, chatId, message, chat.countMessages, parentMessageId);
+        const response = new DataResponse<MessageEntity>(messageEntity);
+        await this.messageRepository.insert(messageEntity);
+        await this.chatRepository.nativeUpdate({ id: chatId }, { countMessages: chat.countMessages });
+        this.queueService.sendMessage(String(chatId), EventsEnum.CREATE_MESSAGE, response);
+
+        return response;
     }
 
     async getMessages(

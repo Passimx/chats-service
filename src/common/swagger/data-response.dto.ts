@@ -7,11 +7,7 @@ export class DataResponse<T> {
     readonly data: string | T;
 
     constructor(data: string | T) {
-        if (typeof data === 'string') {
-            this.success = false;
-        }
-
-        this.success = true;
+        this.success = typeof data !== 'string';
 
         this.data = data;
     }
