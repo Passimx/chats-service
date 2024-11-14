@@ -19,9 +19,9 @@ export class MessagesService {
     ) {}
 
     async createMessage(
-        encryptMessage: string,
         chatId: number,
-        message: string,
+        encryptMessage?: string,
+        message?: string,
         parentMessageId?: number,
     ): Promise<DataResponse<MessageEntity | string>> {
         const chat = await this.chatRepository.findOne({ id: chatId });
@@ -39,7 +39,7 @@ export class MessagesService {
             }
         }
 
-        const messageEntity = new MessageEntity(encryptMessage, chatId, message, chat.countMessages, parentMessageId);
+        const messageEntity = new MessageEntity(chatId, chat.countMessages, encryptMessage, message, parentMessageId);
         const response = new DataResponse<MessageEntity>(messageEntity);
         await this.messageRepository.insert(messageEntity);
         await this.chatRepository.nativeUpdate({ id: chatId }, { countMessages: chat.countMessages });

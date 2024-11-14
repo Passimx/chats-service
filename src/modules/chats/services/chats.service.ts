@@ -5,6 +5,7 @@ import { ChatEntity } from '../entities/chat.entity';
 import { DataResponse } from '../../../common/swagger/data-response.dto';
 import { EventsEnum } from '../../queue/types/events.enum';
 import { QueueService } from '../../queue/queue.service';
+import { MessagesService } from './messages.service';
 
 @Injectable()
 export class ChatsService {
@@ -12,6 +13,7 @@ export class ChatsService {
         @InjectRepository(ChatEntity)
         private readonly chatRepository: EntityRepository<ChatEntity>, // chatRepository - это объект для запросов в бд
         private readonly queueService: QueueService,
+        private readonly messagesService: MessagesService,
     ) {}
 
     async createOpenChat(title: string, socketId?: string): Promise<DataResponse<ChatEntity>> {
@@ -20,6 +22,8 @@ export class ChatsService {
         const response = new DataResponse<ChatEntity>(chatEntity);
 
         await this.chatRepository.insert(chatEntity);
+
+        await this.messagesService.createMessage(chatEntity.id, undefined, 'Чат создан!', undefined);
 
         this.queueService.sendMessage(socketId, EventsEnum.CREATE_CHAT, response);
 
@@ -33,7 +37,8 @@ export class ChatsService {
                 {
                     limit,
                     offset: offset,
-                    orderBy: { title: 'ASC', messages: { number: 'DESC NULLS LAST' }, createdAt: 'DESC' },
+
+                    orderBy: { title: 'ASC', messages: { createdAt: 'DESC NULLS LAST' } },
                     populate: ['messages'],
                 },
             );
@@ -45,7 +50,7 @@ export class ChatsService {
                 {
                     limit,
                     offset: offset,
-                    orderBy: { messages: { number: 'DESC' }, createdAt: 'DESC' },
+                    orderBy: { messages: { createdAt: 'DESC NULLS LAST' } },
                     populate: ['messages'],
                 },
             );

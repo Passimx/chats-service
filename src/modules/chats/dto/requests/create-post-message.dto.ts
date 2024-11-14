@@ -6,7 +6,7 @@ export class CreateMessageDto {
     @ApiProperty()
     @Length(1, 163824)
     @IsOptional()
-    readonly encryptMessage!: string;
+    readonly encryptMessage?: string;
 
     @IsNumber()
     @ApiProperty()
@@ -16,7 +16,7 @@ export class CreateMessageDto {
     @ApiProperty()
     @Length(1, 163824)
     @IsOptional()
-    readonly message!: string;
+    readonly message?: string;
 
     @IsNumber()
     @ApiProperty()

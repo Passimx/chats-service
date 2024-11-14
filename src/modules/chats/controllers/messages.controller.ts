@@ -16,8 +16,8 @@ export class MessagesController {
     @Post()
     createMessage(@Body() message: CreateMessageDto): Promise<DataResponse<MessageEntity | string>> {
         return this.messagesService.createMessage(
-            message.encryptMessage,
             message.chatId,
+            message.encryptMessage,
             message.message,
             message.parentMessageId,
         );

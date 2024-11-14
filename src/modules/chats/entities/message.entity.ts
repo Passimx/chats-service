@@ -7,7 +7,7 @@ import { ChatEntity } from './chat.entity';
 export class MessageEntity extends CreatedEntity {
     @ApiProperty()
     @Property({ length: 1000, nullable: true })
-    readonly encryptMessage: string;
+    readonly encryptMessage!: string;
 
     @ApiProperty()
     @Property()
@@ -26,18 +26,14 @@ export class MessageEntity extends CreatedEntity {
     @Property({ nullable: true })
     parentMessageId!: number;
 
-    constructor(
-        encryptMessage: string,
-        chatId: number,
-        message: string,
-        number: number,
-        parentMessageId: number | undefined,
-    ) {
+    constructor(chatId: number, number: number, encryptMessage?: string, message?: string, parentMessageId?: number) {
         super();
-        this.encryptMessage = encryptMessage;
-        this.message = message;
         this.chatId = chatId;
         this.number = number;
+
+        if (encryptMessage) this.encryptMessage = encryptMessage;
+
+        if (message) this.message = message;
 
         if (parentMessageId) {
             this.parentMessageId = parentMessageId;
