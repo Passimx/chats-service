@@ -7,6 +7,7 @@ import { ChatEntity } from '../entities/chat.entity';
 import { DataResponse } from '../../../common/swagger/data-response.dto';
 import { QueueService } from '../../queue/queue.service';
 import { EventsEnum } from '../../queue/types/events.enum';
+import { MessageTypeEnum } from '../types/message-type.enum';
 
 @Injectable()
 export class MessagesService {
@@ -20,6 +21,7 @@ export class MessagesService {
 
     async createMessage(
         chatId: number,
+        type: MessageTypeEnum,
         encryptMessage?: string,
         message?: string,
         parentMessageId?: number,
@@ -39,7 +41,14 @@ export class MessagesService {
             }
         }
 
-        const messageEntity = new MessageEntity(chatId, chat.countMessages, encryptMessage, message, parentMessageId);
+        const messageEntity = new MessageEntity(
+            chatId,
+            chat.countMessages,
+            type,
+            encryptMessage,
+            message,
+            parentMessageId,
+        );
         const response = new DataResponse<MessageEntity>(messageEntity);
         await this.messageRepository.insert(messageEntity);
         await this.chatRepository.nativeUpdate({ id: chatId }, { countMessages: chat.countMessages });

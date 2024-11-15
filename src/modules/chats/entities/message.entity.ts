@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Entity, Index, OneToOne, Property } from '@mikro-orm/core';
+import { Entity, Enum, Index, OneToOne, Property } from '@mikro-orm/core';
 import { CreatedEntity } from '../../../common/entities/created.entity';
+import { MessageTypeEnum } from '../types/message-type.enum';
 import { ChatEntity } from './chat.entity';
 
 @Entity({ tableName: 'messages' })
@@ -26,7 +27,18 @@ export class MessageEntity extends CreatedEntity {
     @Property({ nullable: true })
     parentMessageId!: number;
 
-    constructor(chatId: number, number: number, encryptMessage?: string, message?: string, parentMessageId?: number) {
+    @ApiProperty()
+    @Enum({ items: () => MessageTypeEnum, nativeEnumName: 'message_type_enum', nullable: true })
+    readonly type!: MessageTypeEnum;
+
+    constructor(
+        chatId: number,
+        number: number,
+        type: MessageTypeEnum,
+        encryptMessage?: string,
+        message?: string,
+        parentMessageId?: number,
+    ) {
         super();
         this.chatId = chatId;
         this.number = number;
@@ -35,9 +47,9 @@ export class MessageEntity extends CreatedEntity {
 
         if (message) this.message = message;
 
-        if (parentMessageId) {
-            this.parentMessageId = parentMessageId;
-        }
+        if (parentMessageId) this.parentMessageId = parentMessageId;
+
+        if (type) this.type = type;
     }
 
     @OneToOne(() => ChatEntity, { persist: false })

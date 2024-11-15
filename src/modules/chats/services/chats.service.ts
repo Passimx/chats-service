@@ -5,6 +5,7 @@ import { ChatEntity } from '../entities/chat.entity';
 import { DataResponse } from '../../../common/swagger/data-response.dto';
 import { EventsEnum } from '../../queue/types/events.enum';
 import { QueueService } from '../../queue/queue.service';
+import { MessageTypeEnum } from '../types/message-type.enum';
 import { MessagesService } from './messages.service';
 
 @Injectable()
@@ -23,7 +24,13 @@ export class ChatsService {
 
         await this.chatRepository.insert(chatEntity);
 
-        await this.messagesService.createMessage(chatEntity.id, undefined, 'Чат создан!', undefined);
+        await this.messagesService.createMessage(
+            chatEntity.id,
+            MessageTypeEnum.IS_SYSTEM,
+            undefined,
+            'Чат создан!',
+            undefined,
+        );
 
         this.queueService.sendMessage(socketId, EventsEnum.CREATE_CHAT, response);
 
