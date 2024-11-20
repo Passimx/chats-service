@@ -30,29 +30,21 @@ export class MessagesService {
 
         if (!chat) return new DataResponse('Chat not found');
 
-        chat.countMessages++;
-
         if (parentMessageId) {
             const parentMessage = await this.messageRepository.findOne({ id: parentMessageId });
 
-            if (!parentMessage) {
-                return new DataResponse('Родительское сообщение не найдено');
-                // return { success: false, data: 'Родительское сообщение не найдено' };
-            }
+            if (!parentMessage) return new DataResponse('Родительское сообщение не найдено');
         }
 
-        const messageEntity = new MessageEntity(
-            chatId,
-            chat.countMessages,
-            type,
-            encryptMessage,
-            message,
-            parentMessageId,
-        );
+        const countMessages = chat.countMessages + 1;
+        const messageEntity = new MessageEntity(chatId, countMessages, type, encryptMessage, message, parentMessageId);
         const response = new DataResponse<MessageEntity>(messageEntity);
-        await this.messageRepository.insert(messageEntity);
-        await this.chatRepository.nativeUpdate({ id: chatId }, { countMessages: chat.countMessages });
+
         this.queueService.sendMessage(String(chatId), EventsEnum.CREATE_MESSAGE, response);
+        await Promise.all([
+            this.messageRepository.insert(messageEntity),
+            this.chatRepository.nativeUpdate({ id: chatId }, { countMessages }),
+        ]);
 
         return response;
     }

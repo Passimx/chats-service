@@ -9,10 +9,12 @@ import { MessageDto } from './dto/message.dto';
 
 @Injectable()
 export class QueueService {
-    private readonly producer: Producer;
+    private readonly producer!: Producer;
     private isConnected: boolean = false;
 
     constructor(@Inject(InjectEnum.NOTIFICATIONS_MICROSERVICE) private readonly kafkaClient: ClientKafka) {
+        if (!Envs.kafka.kafkaIsConnect) return;
+
         const client = this.kafkaClient.createClient<Kafka>();
         this.producer = client.producer();
 
@@ -25,7 +27,6 @@ export class QueueService {
         const message = new MessageDto(to, event, data);
 
         this.producer.send({ topic: 'message', messages: [{ value: JSON.stringify(message) }] });
-
         // topic "message" это название связи в kafka которую слушаю только те сервесы которым мы укажем какой топик слушать
     }
 }

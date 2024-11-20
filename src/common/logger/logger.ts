@@ -3,7 +3,7 @@ const infoColor = '\x1B[34m';
 const errorColor = '\x1B[31m';
 const debugColor = '\x1B[33m';
 
-const log = (level: string, msg: string) => {
+const log = (level: string, msg: unknown) => {
     let prefix = `${infoColor}info:${endColor}`;
 
     switch (level) {
@@ -20,7 +20,7 @@ const log = (level: string, msg: string) => {
 };
 
 export const logger = {
-    info: (message: string) => log('info', message),
-    error: (message: string) => log('error', message),
-    debug: (message: string) => log('debug', message),
+    info: (message: unknown) => log('info', message),
+    error: (message: unknown) => log('error', message),
+    debug: (message: unknown) => log('debug', message),
 };
