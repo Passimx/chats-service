@@ -16,6 +16,7 @@ export class QueueService {
         if (!Envs.kafka.kafkaIsConnect) return;
 
         const client = this.kafkaClient.createClient<Kafka>();
+
         this.producer = client.producer();
 
         this.producer.connect().then(() => (this.isConnected = true));
