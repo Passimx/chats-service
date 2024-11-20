@@ -9,11 +9,14 @@ import { MessageDto } from './dto/message.dto';
 
 @Injectable()
 export class QueueService {
-    private readonly producer: Producer;
+    private readonly producer!: Producer;
     private isConnected: boolean = false;
 
     constructor(@Inject(InjectEnum.NOTIFICATIONS_MICROSERVICE) private readonly kafkaClient: ClientKafka) {
+        if (!Envs.kafka.kafkaIsConnect) return;
+
         const client = this.kafkaClient.createClient<Kafka>();
+
         this.producer = client.producer();
 
         this.producer.connect().then(() => (this.isConnected = true));
