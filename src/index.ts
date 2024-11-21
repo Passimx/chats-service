@@ -55,6 +55,7 @@ export class App {
             bufferLogs: true,
         });
     }
+
     private logInformationAfterStartServer(url: string) {
         logger.info(`Server is running on url: ${url} at ${Date()}. Version: '${version}'.`);
 

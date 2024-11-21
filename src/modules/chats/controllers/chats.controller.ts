@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Headers, Param, Post, Query } from '@nestjs/common';
 import { ApiOkResponse } from '@nestjs/swagger';
 import { ChatsService } from '../services/chats.service';
 import { CreateOpenChatDto } from '../dto/requests/create-open-chat.dto';
@@ -14,8 +14,11 @@ export class ChatsController {
         type: ChatEntity,
     })
     @Post()
-    createChat(@Body() body: CreateOpenChatDto): Promise<DataResponse<ChatEntity>> {
-        return this.chatsService.createOpenChat(body.title);
+    createChat(
+        @Body() body: CreateOpenChatDto,
+        @Headers('socket_id') socketId: string,
+    ): Promise<DataResponse<ChatEntity>> {
+        return this.chatsService.createOpenChat(body.title, socketId);
     }
 
     @ApiOkResponse({

@@ -8,9 +8,65 @@ services:
       POSTGRES_USER: ${PG_USERNAME}
       POSTGRES_PASSWORD: ${PG_PASSWORD}
     command: -p ${PG_PORT}
-#    volumes:
-#      - ./data/pg_data:/var/lib/postgresql/data
+    #    volumes:
+    #      - ./data/pg_data:/var/lib/postgresql/data
     expose:
       - ${PG_PORT}
     ports:
       - ${PG_PORT}:${PG_PORT}
+
+  kafka:
+    image: 'bitnami/kafka:latest'
+    ports:
+      - ${KAFKA_CLIENT_PORT}:${KAFKA_CLIENT_PORT}
+      - ${KAFKA_EXTERNAL_PORT}:${KAFKA_EXTERNAL_PORT}
+    #    volumes:
+    #      - ./mq_data_kafka:/bitnami/kafka
+    environment:
+      - KAFKA_ENABLE_KRAFT=yes
+      - KAFKA_BROKER_ID=1
+      - KAFKA_CFG_NODE_ID=1
+      - KAFKA_CFG_PROCESS_ROLES=broker,controller
+      - KAFKA_CFG_LISTENERS=CLIENT://:${KAFKA_CLIENT_PORT},INTERNAL://:9093,EXTERNAL://:${KAFKA_EXTERNAL_PORT},
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=INTERNAL:PLAINTEXT,CLIENT:SASL_PLAINTEXT,EXTERNAL:SASL_PLAINTEXT
+      - KAFKA_CFG_ADVERTISED_LISTENERS=CLIENT://kafka:${KAFKA_CLIENT_PORT},EXTERNAL://localhost:${KAFKA_EXTERNAL_PORT}
+      - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=CLIENT
+      - KAFKA_CFG_SASL_MECHANISM_INTER_BROKER_PROTOCOL=PLAIN
+      - KAFKA_CFG_SASL_ENABLED_MECHANISMS=PLAIN
+      - KAFKA_CLIENT_USERS=${KAFKA_CLIENT_USERS}
+      - KAFKA_CLIENT_PASSWORDS=${KAFKA_USER_PASSWORD}
+      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=INTERNAL
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=1@127.0.0.1:9093
+      - ALLOW_PLAINTEXT_LISTENER=yes
+    command:
+      - bash
+      - -c
+      - |
+        (
+          IFS="," read -ra TOPICS <<< "$$PRE_CREATE_TOPICS";
+          for T in "$${TOPICS[@]}"; do
+            /opt/bitnami/kafka/bin/kafka-topics.sh \
+              --bootstrap-server localhost:9094 \
+              --create --topic "$$T" --if-not-exists &&
+            echo "Created $$T" ||
+            echo "Failed to create $$T";
+          done;
+        ) & /opt/bitnami/scripts/kafka/run.sh
+
+  kafka-ui:
+    container_name: kafka-ui
+    image: provectuslabs/kafka-ui:latest
+    depends_on:
+      - kafka
+    ports:
+      - ${KAFKA_UI_PORT}:${KAFKA_UI_PORT}
+    environment:
+      - KAFKA_CLUSTERS_0_NAME=local
+      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:${KAFKA_CLIENT_PORT}
+      - KAFKA_CLUSTERS_0_PROPERTIES_SECURITY_PROTOCOL=SASL_PLAINTEXT
+      - KAFKA_CLUSTERS_0_PROPERTIES_SASL_MECHANISM=PLAIN
+      - >
+        KAFKA_CLUSTERS_0_PROPERTIES_SASL_JAAS_CONFIG=org.apache.kafka.common.security.plain.PlainLoginModule
+          required
+          username="${KAFKA_CLIENT_USERS}"
+          password="${KAFKA_USER_PASSWORD}";

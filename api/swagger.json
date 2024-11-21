@@ -4,7 +4,16 @@
 		"/chats": {
 			"post": {
 				"operationId": "ChatsController_createChat",
-				"parameters": [],
+				"parameters": [
+					{
+						"name": "socket_id",
+						"required": true,
+						"in": "header",
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
 				"requestBody": {
 					"required": true,
 					"content": {
@@ -195,7 +204,7 @@
 	"tags": [],
 	"servers": [
 		{
-			"url": "http://localhost:7020",
+			"url": "http://localhost:6020",
 			"description": "development"
 		}
 	],
@@ -291,6 +300,9 @@
 					},
 					"parentMessageId": {
 						"type": "number"
+					},
+					"type": {
+						"type": "string"
 					}
 				},
 				"required": [
@@ -300,7 +312,8 @@
 					"chatId",
 					"number",
 					"message",
-					"parentMessageId"
+					"parentMessageId",
+					"type"
 				]
 			}
 		}
