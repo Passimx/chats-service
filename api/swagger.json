@@ -30,7 +30,40 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/ChatEntity"
+									"anyOf": [
+										{
+											"type": "object",
+											"properties": {
+												"success": {
+													"type": "boolean",
+													"example": true
+												},
+												"data": {
+													"$ref": "#/components/schemas/ChatEntity"
+												}
+											},
+											"required": [
+												"success",
+												"data"
+											]
+										},
+										{
+											"type": "object",
+											"properties": {
+												"success": {
+													"type": "boolean",
+													"example": false
+												},
+												"data": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"success",
+												"data"
+											]
+										}
+									]
 								}
 							}
 						}
@@ -71,10 +104,43 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "array",
-									"items": {
-										"$ref": "#/components/schemas/ChatEntity"
-									}
+									"anyOf": [
+										{
+											"type": "object",
+											"properties": {
+												"success": {
+													"type": "boolean",
+													"example": true
+												},
+												"data": {
+													"type": "array",
+													"items": {
+														"$ref": "#/components/schemas/ChatEntity"
+													}
+												}
+											},
+											"required": [
+												"success",
+												"data"
+											]
+										},
+										{
+											"type": "object",
+											"properties": {
+												"success": {
+													"type": "boolean",
+													"example": false
+												},
+												"data": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"success",
+												"data"
+											]
+										}
+									]
 								}
 							}
 						}
@@ -97,7 +163,50 @@
 				],
 				"responses": {
 					"200": {
-						"description": ""
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"type": "object",
+											"properties": {
+												"success": {
+													"type": "boolean",
+													"example": true
+												},
+												"data": {
+													"type": "array",
+													"items": {
+														"$ref": "#/components/schemas/ChatEntity"
+													}
+												}
+											},
+											"required": [
+												"success",
+												"data"
+											]
+										},
+										{
+											"type": "object",
+											"properties": {
+												"success": {
+													"type": "boolean",
+													"example": false
+												},
+												"data": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"success",
+												"data"
+											]
+										}
+									]
+								}
+							}
+						}
 					}
 				}
 			}
@@ -122,7 +231,40 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/MessageEntity"
+									"anyOf": [
+										{
+											"type": "object",
+											"properties": {
+												"success": {
+													"type": "boolean",
+													"example": true
+												},
+												"data": {
+													"$ref": "#/components/schemas/MessageEntity"
+												}
+											},
+											"required": [
+												"success",
+												"data"
+											]
+										},
+										{
+											"type": "object",
+											"properties": {
+												"success": {
+													"type": "boolean",
+													"example": false
+												},
+												"data": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"success",
+												"data"
+											]
+										}
+									]
 								}
 							}
 						}
@@ -179,10 +321,43 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "array",
-									"items": {
-										"$ref": "#/components/schemas/MessageEntity"
-									}
+									"anyOf": [
+										{
+											"type": "object",
+											"properties": {
+												"success": {
+													"type": "boolean",
+													"example": true
+												},
+												"data": {
+													"type": "array",
+													"items": {
+														"$ref": "#/components/schemas/MessageEntity"
+													}
+												}
+											},
+											"required": [
+												"success",
+												"data"
+											]
+										},
+										{
+											"type": "object",
+											"properties": {
+												"success": {
+													"type": "boolean",
+													"example": false
+												},
+												"data": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"success",
+												"data"
+											]
+										}
+									]
 								}
 							}
 						}
@@ -204,23 +379,12 @@
 	"tags": [],
 	"servers": [
 		{
-			"url": "http://localhost:6020",
+			"url": "http://localhost:7020",
 			"description": "development"
 		}
 	],
 	"components": {
 		"schemas": {
-			"CreateOpenChatDto": {
-				"type": "object",
-				"properties": {
-					"title": {
-						"type": "string"
-					}
-				},
-				"required": [
-					"title"
-				]
-			},
 			"ChatEntity": {
 				"type": "object",
 				"properties": {
@@ -251,29 +415,6 @@
 					"countMessages",
 					"createdUserId",
 					"type"
-				]
-			},
-			"CreateMessageDto": {
-				"type": "object",
-				"properties": {
-					"encryptMessage": {
-						"type": "string"
-					},
-					"chatId": {
-						"type": "number"
-					},
-					"message": {
-						"type": "string"
-					},
-					"parentMessageId": {
-						"type": "number"
-					}
-				},
-				"required": [
-					"encryptMessage",
-					"chatId",
-					"message",
-					"parentMessageId"
 				]
 			},
 			"MessageEntity": {
@@ -314,6 +455,40 @@
 					"message",
 					"parentMessageId",
 					"type"
+				]
+			},
+			"CreateOpenChatDto": {
+				"type": "object",
+				"properties": {
+					"title": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"title"
+				]
+			},
+			"CreateMessageDto": {
+				"type": "object",
+				"properties": {
+					"encryptMessage": {
+						"type": "string"
+					},
+					"chatId": {
+						"type": "number"
+					},
+					"message": {
+						"type": "string"
+					},
+					"parentMessageId": {
+						"type": "number"
+					}
+				},
+				"required": [
+					"encryptMessage",
+					"chatId",
+					"message",
+					"parentMessageId"
 				]
 			}
 		}
