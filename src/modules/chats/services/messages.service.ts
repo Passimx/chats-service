@@ -8,6 +8,7 @@ import { DataResponse } from '../../../common/swagger/data-response.dto';
 import { QueueService } from '../../queue/queue.service';
 import { EventsEnum } from '../../queue/types/events.enum';
 import { MessageTypeEnum } from '../types/message-type.enum';
+import { MessageErrorLanguageEnum } from '../types/message-error-language.enum';
 
 @Injectable()
 export class MessagesService {
@@ -28,7 +29,7 @@ export class MessagesService {
     ): Promise<DataResponse<MessageEntity | string>> {
         const chat = await this.chatRepository.findOne({ id: chatId });
 
-        if (!chat) return new DataResponse('Chat not found');
+        if (!chat) return new DataResponse(MessageErrorLanguageEnum.CHAT_NOT_FOUND);
 
         chat.countMessages++;
 
@@ -36,8 +37,7 @@ export class MessagesService {
             const parentMessage = await this.messageRepository.findOne({ id: parentMessageId });
 
             if (!parentMessage) {
-                return new DataResponse('Родительское сообщение не найдено');
-                // return { success: false, data: 'Родительское сообщение не найдено' };
+                return new DataResponse(MessageErrorLanguageEnum.PARENTAL_MESSAGE_NOT_FOUND);
             }
         }
 

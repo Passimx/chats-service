@@ -6,6 +6,8 @@ import { DataResponse } from '../../../common/swagger/data-response.dto';
 import { EventsEnum } from '../../queue/types/events.enum';
 import { QueueService } from '../../queue/queue.service';
 import { MessageTypeEnum } from '../types/message-type.enum';
+import { MessageErrorLanguageEnum } from '../types/message-error-language.enum';
+import { SystemMessageLanguageEnum } from '../types/system-message-language.enum';
 import { MessagesService } from './messages.service';
 
 @Injectable()
@@ -28,7 +30,7 @@ export class ChatsService {
             chatEntity.id,
             MessageTypeEnum.IS_SYSTEM,
             undefined,
-            'Чат создан!',
+            SystemMessageLanguageEnum.create_chat,
             undefined,
         );
 
@@ -73,6 +75,6 @@ export class ChatsService {
             return new DataResponse(chat);
         }
 
-        return new DataResponse(`Chat with ID' + ${id} + 'not found`);
+        return new DataResponse(MessageErrorLanguageEnum.CHAT_WITH_ID_NOT_FOUND);
     }
 }
