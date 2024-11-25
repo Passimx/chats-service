@@ -37,7 +37,7 @@ export class MessagesService {
             const parentMessage = await this.messageRepository.findOne({ id: parentMessageId });
 
             if (!parentMessage) {
-                return new DataResponse(MessageErrorLanguageEnum.PARENTAL_MESSAGE_NOT_FOUND);
+                return new DataResponse(MessageErrorLanguageEnum.PARENT_MESSAGE_NOT_FOUND);
             }
         }
 
