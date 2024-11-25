@@ -4,7 +4,7 @@ import { CreateOpenChatDto } from '../dto/requests/create-open-chat.dto';
 import { QueryGetChatsDto } from '../dto/requests/query-get-chats.dto';
 import { ChatEntity } from '../entities/chat.entity';
 import { DataResponse } from '../../../common/swagger/data-response.dto';
-import { ApiData } from '../../../common/swagger/ decorator';
+import { ApiData } from '../../../common/swagger/api-data.decorator';
 
 @Controller('chats')
 export class ChatsController {

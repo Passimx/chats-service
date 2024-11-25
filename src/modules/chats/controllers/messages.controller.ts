@@ -5,7 +5,7 @@ import { MessageEntity } from '../entities/message.entity';
 import { QueryGetMessagesDto } from '../dto/requests/query-get-messages.dto';
 import { DataResponse } from '../../../common/swagger/data-response.dto';
 import { MessageTypeEnum } from '../types/message-type.enum';
-import { ApiData } from '../../../common/swagger/ decorator';
+import { ApiData } from '../../../common/swagger/api-data.decorator';
 
 @Controller('messages')
 export class MessagesController {
