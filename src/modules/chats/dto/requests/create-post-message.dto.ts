@@ -1,5 +1,6 @@
-import { IsNotEmpty, IsNumber, IsOptional, IsPositive, IsString, Length } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString, Length } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { IsInteger } from '../../decorators/is-integer.decorator';
 
 export class CreateMessageDto {
     @IsString()
@@ -8,10 +9,8 @@ export class CreateMessageDto {
     @IsOptional()
     readonly encryptMessage?: string;
 
-    @IsNumber()
     @IsNotEmpty()
-    @IsPositive()
-    @IsNotEmpty()
+    @IsInteger()
     @ApiProperty()
     readonly chatId!: number;
 
@@ -21,8 +20,7 @@ export class CreateMessageDto {
     @IsOptional()
     readonly message?: string;
 
-    @IsNumber()
-    @IsPositive()
+    @IsInteger()
     @ApiProperty()
     @IsOptional()
     readonly parentMessageId?: number;

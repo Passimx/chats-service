@@ -1,5 +1,6 @@
-import { IsNumber, IsOptional, IsPositive, IsString } from 'class-validator';
+import { IsOptional, IsString } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
+import { IsInteger } from '../../decorators/is-integer.decorator';
 
 export class QueryGetChatsDto {
     @ApiPropertyOptional()
@@ -8,14 +9,12 @@ export class QueryGetChatsDto {
     title!: string;
 
     @ApiPropertyOptional()
-    @IsPositive()
-    @IsNumber()
+    @IsInteger()
     @IsOptional()
     limit!: number;
 
     @ApiPropertyOptional()
-    @IsNumber()
-    @IsPositive()
+    @IsInteger()
     @IsOptional()
     offset!: number;
 }
