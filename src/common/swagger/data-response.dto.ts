@@ -1,6 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { IsBoolean } from 'class-validator';
 
 export class DataResponse<T> {
+    @IsBoolean()
     @ApiProperty()
     readonly success: boolean;
 

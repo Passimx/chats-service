@@ -1,28 +1,24 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsOptional, IsString } from 'class-validator';
+import { IsInteger } from '../../decorators/is-integer.decorator';
 
 export class QueryGetMessagesDto {
-    @ApiPropertyOptional()
-    @IsNumber()
+    @IsInteger()
+    @ApiProperty()
     chatId!: number;
 
-    @ApiPropertyOptional()
-    @IsNumber()
+    @ApiPropertyOptional({ description: 'Limit message' })
+    @IsInteger()
     @IsOptional()
     limit!: number;
 
-    @ApiPropertyOptional()
-    @IsNumber()
+    @ApiPropertyOptional({ description: 'Offset message' })
     @IsOptional()
+    @IsInteger()
     offset!: number;
 
-    @IsNumber()
-    @ApiProperty()
-    @IsOptional()
-    readonly parentMessageId!: number;
-
     @IsString()
-    @ApiProperty()
+    @ApiPropertyOptional({ description: 'Search message' })
     @IsOptional()
     search!: string;
 }
