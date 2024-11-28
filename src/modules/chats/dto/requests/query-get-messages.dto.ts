@@ -7,18 +7,18 @@ export class QueryGetMessagesDto {
     @ApiProperty()
     chatId!: number;
 
-    @ApiPropertyOptional()
+    @ApiPropertyOptional({ description: 'Limit message' })
     @IsInteger()
     @IsOptional()
     limit!: number;
 
-    @ApiPropertyOptional()
+    @ApiPropertyOptional({ description: 'Offset message' })
     @IsOptional()
     @IsInteger()
     offset!: number;
 
     @IsString()
-    @ApiPropertyOptional()
+    @ApiPropertyOptional({ description: 'Search message' })
     @IsOptional()
     search!: string;
 }
