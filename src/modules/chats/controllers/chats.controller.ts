@@ -30,4 +30,10 @@ export class ChatsController {
     async getChat(@Param('id') id: number): Promise<DataResponse<string | ChatEntity>> {
         return this.chatsService.findChat(id);
     }
+
+    // @ApiData()
+    // @Post()
+    // async favoritesChats(@Body() favoriteChatsDto: FavoriteChatsDto, @Headers('socket_id') socketId: string) {
+    //     this.chatsService.favoriteChats(favoriteChatsDto.favoriteChatId, socketId);
+    // }
 }

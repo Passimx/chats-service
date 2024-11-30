@@ -77,4 +77,9 @@ export class ChatsService {
 
         return new DataResponse(MessageErrorLanguageEnum.CHAT_WITH_ID_NOT_FOUND);
     }
+
+    //
+    // favoriteChats(favoriteChatId: string[], socketId?: string) {
+    //     this.favoriteChat =
+    // }
 }
