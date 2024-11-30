@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Entity, Enum, Index, OneToOne, Property } from '@mikro-orm/core';
+import { Entity, Enum, Index, ManyToOne, OneToOne, Property } from '@mikro-orm/core';
 import { CreatedEntity } from '../../../common/entities/created.entity';
 import { MessageTypeEnum } from '../types/message-type.enum';
 import { ChatEntity } from './chat.entity';
@@ -52,7 +52,7 @@ export class MessageEntity extends CreatedEntity {
         if (type) this.type = type;
     }
 
-    @OneToOne(() => ChatEntity, { persist: false })
+    @ManyToOne(() => ChatEntity, { persist: false })
     chat!: ChatEntity;
 
     @OneToOne(() => MessageEntity, { persist: false })
