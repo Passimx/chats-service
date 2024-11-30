@@ -1,4 +1,4 @@
-import { Entity, Enum, OneToOne, Property } from '@mikro-orm/core';
+import { Entity, Enum, OneToMany, Property } from '@mikro-orm/core';
 import { ApiProperty } from '@nestjs/swagger';
 import { CreatedEntity } from '../../../common/entities/created.entity';
 import { ChatTypeEnum } from '../types/chat-type.enum';
@@ -28,6 +28,6 @@ export class ChatEntity extends CreatedEntity {
         this.title = title;
     }
 
-    @OneToOne(() => MessageEntity, (message) => message.chat)
+    @OneToMany(() => MessageEntity, (message) => message.chat)
     readonly messages!: MessageEntity[];
 }
