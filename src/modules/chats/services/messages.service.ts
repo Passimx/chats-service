@@ -49,9 +49,13 @@ export class MessagesService {
             message,
             parentMessageId,
         );
-        const response = new DataResponse<MessageEntity>(messageEntity);
+        messageEntity.chat = chat;
+
         await this.messageRepository.insert(messageEntity);
         await this.chatRepository.nativeUpdate({ id: chatId }, { countMessages: chat.countMessages });
+
+        const response = new DataResponse<MessageEntity>(messageEntity);
+
         this.queueService.sendMessage(String(chatId), EventsEnum.CREATE_MESSAGE, response);
 
         return response;
