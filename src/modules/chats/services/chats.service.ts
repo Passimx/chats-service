@@ -69,7 +69,12 @@ export class ChatsService {
     }
 
     async findChat(id: number): Promise<DataResponse<string | ChatEntity>> {
-        const chat = await this.chatRepository.findOne(id, { populate: ['messages'] });
+        const chat = await this.chatRepository.findOne(id, {
+            orderBy: {
+                messages: { createdAt: 'DESC NULLS LAST' },
+            },
+            populate: ['messages'],
+        });
 
         if (chat) {
             return new DataResponse(chat);
