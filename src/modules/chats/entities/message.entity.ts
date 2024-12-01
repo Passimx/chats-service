@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Entity, Enum, Index, ManyToOne, OneToOne, Property } from '@mikro-orm/core';
 import { CreatedEntity } from '../../../common/entities/created.entity';
 import { MessageTypeEnum } from '../types/message-type.enum';
@@ -8,7 +8,7 @@ import { ChatEntity } from './chat.entity';
 export class MessageEntity extends CreatedEntity {
     @ApiProperty()
     @Property({ length: 1000, nullable: true })
-    readonly encryptMessage!: string;
+    readonly encryptMessage?: string;
 
     @ApiProperty()
     @Property()
@@ -21,11 +21,11 @@ export class MessageEntity extends CreatedEntity {
     @Index()
     @ApiProperty()
     @Property({ nullable: true })
-    message!: string; //используется только для openChat, в остальных частах используется encryptMessage
+    message?: string; //используется только для openChat, в остальных частах используется encryptMessage
 
     @ApiProperty()
     @Property({ nullable: true })
-    parentMessageId!: number;
+    parentMessageId?: number;
 
     @ApiProperty()
     @Enum({ items: () => MessageTypeEnum, nativeEnumName: 'message_type_enum', nullable: true })
@@ -52,9 +52,11 @@ export class MessageEntity extends CreatedEntity {
         if (type) this.type = type;
     }
 
+    @ApiPropertyOptional({ type: () => ChatEntity, isArray: false })
     @ManyToOne(() => ChatEntity, { persist: false })
     chat!: ChatEntity;
 
+    @ApiPropertyOptional({ type: () => MessageEntity, isArray: false })
     @OneToOne(() => MessageEntity, { persist: false })
     parentMessage!: MessageEntity;
 }
