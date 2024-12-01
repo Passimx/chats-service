@@ -14,8 +14,8 @@ export class ChatsController {
     @Post()
     createChat(
         @Body() body: CreateOpenChatDto,
-        @Headers('socket_id') socketId: string,
-    ): Promise<DataResponse<ChatEntity>> {
+        @Headers('Websocket-key') socketId: string,
+    ): Promise<DataResponse<string | ChatEntity>> {
         return this.chatsService.createOpenChat(body.title, socketId);
     }
 
