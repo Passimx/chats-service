@@ -81,20 +81,20 @@ export class ChatsService {
         return new DataResponse(MessageErrorLanguageEnum.CHAT_WITH_ID_NOT_FOUND);
     }
 
-    async favoriteChats(favoriteChatIds: number[], socketId?: string) {
-        const newFavoriteChats = await this.chatRepository.find({
+    async favoriteChats(favoriteChatIds: number[], socketId?: string): Promise<DataResponse<string | number[]>> {
+        const newFavoriteChats = await this.chatRepository.count({
             id: { $in: favoriteChatIds },
             type: ChatTypeEnum.IS_OPEN,
         });
-        const newFavoriteChatIds = newFavoriteChats.map((chat) => chat.id);
-
-        if (favoriteChatIds.length !== newFavoriteChatIds.length) {
-            return newFavoriteChatIds.join() + ' часть чатов не найдена';
-        }
 
         const response: DataResponse<number[]> = new DataResponse<number[]>(favoriteChatIds);
+
+        if (favoriteChatIds.length !== newFavoriteChats) {
+            return new DataResponse<string>('Часть чатов не  найдена');
+        }
+
         this.queueService.sendMessage(socketId, EventsEnum.JOIN_CHAT, response);
 
-        return newFavoriteChatIds;
+        return response;
     }
 }

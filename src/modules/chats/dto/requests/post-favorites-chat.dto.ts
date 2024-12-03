@@ -1,10 +1,12 @@
-import { IsArray, IsOptional } from 'class-validator';
-import { ApiPropertyOptional } from '@nestjs/swagger';
+import { IsArray, IsInt } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
 
 export class FavoriteChatsDto {
-    // @IsNumber({}, { each: true })
+    @IsInt({ each: true })
     @IsArray()
-    @ApiPropertyOptional()
-    @IsOptional()
+    @ApiProperty({
+        isArray: true,
+        type: Number,
+    })
     favoriteChatIds!: number[];
 }

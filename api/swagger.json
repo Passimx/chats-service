@@ -251,7 +251,7 @@
 												"data": {
 													"type": "array",
 													"items": {
-														"$ref": "#/components/schemas/DataResponse"
+														"type": "number"
 													}
 												}
 											},
@@ -547,10 +547,13 @@
 					"favoriteChatIds": {
 						"type": "array",
 						"items": {
-							"type": "string"
+							"type": "number"
 						}
 					}
-				}
+				},
+				"required": [
+					"favoriteChatIds"
+				]
 			},
 			"CreateMessageDto": {
 				"type": "object",
