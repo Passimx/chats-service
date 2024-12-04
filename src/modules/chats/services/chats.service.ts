@@ -1,3 +1,5 @@
+// @ts-ignore
+
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { EntityRepository } from '@mikro-orm/postgresql';
@@ -8,6 +10,7 @@ import { QueueService } from '../../queue/queue.service';
 import { MessageTypeEnum } from '../types/message-type.enum';
 import { MessageErrorLanguageEnum } from '../types/message-error-language.enum';
 import { SystemMessageLanguageEnum } from '../types/system-message-language.enum';
+import { ChatTypeEnum } from '../types/chat-type.enum';
 import { MessagesService } from './messages.service';
 
 @Injectable()
@@ -81,5 +84,22 @@ export class ChatsService {
         }
 
         return new DataResponse(MessageErrorLanguageEnum.CHAT_WITH_ID_NOT_FOUND);
+    }
+
+    async favoriteChats(favoriteChatIds: number[], socketId?: string): Promise<DataResponse<string | number[]>> {
+        const newFavoriteChats = await this.chatRepository.count({
+            id: { $in: favoriteChatIds },
+            type: ChatTypeEnum.IS_OPEN,
+        });
+
+        const response: DataResponse<number[]> = new DataResponse<number[]>(favoriteChatIds);
+
+        if (favoriteChatIds.length !== newFavoriteChats) {
+            return new DataResponse<string>('Часть чатов не  найдена');
+        }
+
+        this.queueService.sendMessage(socketId, EventsEnum.JOIN_CHAT, response);
+
+        return response;
     }
 }

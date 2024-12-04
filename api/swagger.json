@@ -214,6 +214,79 @@
 				}
 			}
 		},
+		"/chats/join": {
+			"post": {
+				"operationId": "ChatsController_favoritesChats",
+				"parameters": [
+					{
+						"name": "socket_id",
+						"required": true,
+						"in": "header",
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/FavoriteChatsDto"
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"type": "object",
+											"properties": {
+												"success": {
+													"type": "boolean",
+													"example": true
+												},
+												"data": {
+													"type": "array",
+													"items": {
+														"type": "number"
+													}
+												}
+											},
+											"required": [
+												"success",
+												"data"
+											]
+										},
+										{
+											"type": "object",
+											"properties": {
+												"success": {
+													"type": "boolean",
+													"example": false
+												},
+												"data": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"success",
+												"data"
+											]
+										}
+									]
+								}
+							}
+						}
+					}
+				}
+			}
+		},
 		"/messages": {
 			"post": {
 				"operationId": "MessagesController_createMessage",
@@ -477,6 +550,20 @@
 				},
 				"required": [
 					"title"
+				]
+			},
+			"FavoriteChatsDto": {
+				"type": "object",
+				"properties": {
+					"favoriteChatIds": {
+						"type": "array",
+						"items": {
+							"type": "number"
+						}
+					}
+				},
+				"required": [
+					"favoriteChatIds"
 				]
 			},
 			"CreateMessageDto": {
