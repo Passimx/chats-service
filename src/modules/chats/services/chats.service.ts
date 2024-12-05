@@ -25,8 +25,6 @@ export class ChatsService {
     async createOpenChat(title: string, socketId?: string): Promise<DataResponse<ChatEntity>> {
         const chatEntity = new ChatEntity(title);
 
-        const response = new DataResponse<ChatEntity>(chatEntity);
-
         await this.chatRepository.insert(chatEntity);
 
         await this.messagesService.createMessage(
@@ -36,7 +34,9 @@ export class ChatsService {
             SystemMessageLanguageEnum.create_chat,
             undefined,
         );
+        const createChat = await this.chatRepository.findOne({ id: chatEntity.id }, { populate: ['messages'] });
 
+        const response = new DataResponse<ChatEntity>(createChat!);
         this.queueService.sendMessage(socketId, EventsEnum.CREATE_CHAT, response);
 
         return response;

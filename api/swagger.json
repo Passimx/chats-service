@@ -6,7 +6,7 @@
 				"operationId": "ChatsController_createChat",
 				"parameters": [
 					{
-						"name": "socket_id",
+						"name": "Websocket-key",
 						"required": true,
 						"in": "header",
 						"schema": {
