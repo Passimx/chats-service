@@ -6,6 +6,7 @@ import { Envs } from '../../common/envs/env';
 import { InjectEnum } from './types/inject.enum';
 import { EventsEnum } from './types/events.enum';
 import { MessageDto } from './dto/message.dto';
+import { TopicsEnum } from './types/topics.enum';
 
 @Injectable()
 export class QueueService {
@@ -22,13 +23,16 @@ export class QueueService {
         this.producer.connect().then(() => (this.isConnected = true));
     }
 
-    public sendMessage(to: string | undefined, event: EventsEnum, data: DataResponse<unknown>): void {
+    public sendMessage(
+        topic: TopicsEnum,
+        to: string | undefined,
+        event: EventsEnum,
+        data: DataResponse<unknown>,
+    ): void {
         if (!Envs.kafka.kafkaIsConnect || !this.isConnected || !to) return;
 
         const message = new MessageDto(to, event, data);
 
-        this.producer.send({ topic: 'message', messages: [{ value: JSON.stringify(message) }] });
-
-        // topic "message" это название связи в kafka которую слушаю только те сервесы которым мы укажем какой топик слушать
+        this.producer.send({ topic, messages: [{ value: JSON.stringify(message) }] });
     }
 }
