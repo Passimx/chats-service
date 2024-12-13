@@ -11,6 +11,7 @@ import { MessageTypeEnum } from '../types/message-type.enum';
 import { MessageErrorLanguageEnum } from '../types/message-error-language.enum';
 import { SystemMessageLanguageEnum } from '../types/system-message-language.enum';
 import { ChatTypeEnum } from '../types/chat-type.enum';
+import { TopicsEnum } from '../../queue/types/topics.enum';
 import { MessagesService } from './messages.service';
 
 @Injectable()
@@ -37,7 +38,7 @@ export class ChatsService {
         const createChat = await this.chatRepository.findOne({ id: chatEntity.id }, { populate: ['messages'] });
 
         const response = new DataResponse<ChatEntity>(createChat!);
-        this.queueService.sendMessage(socketId, EventsEnum.CREATE_CHAT, response);
+        this.queueService.sendMessage(TopicsEnum.EMIT, socketId, EventsEnum.CREATE_CHAT, response);
 
         return response;
     }
@@ -98,7 +99,7 @@ export class ChatsService {
             return new DataResponse<string>('Часть чатов не  найдена');
         }
 
-        this.queueService.sendMessage(socketId, EventsEnum.JOIN_CHAT, response);
+        this.queueService.sendMessage(TopicsEnum.JOIN, socketId, EventsEnum.JOIN_CHAT, response);
 
         return response;
     }

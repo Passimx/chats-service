@@ -9,6 +9,7 @@ import { QueueService } from '../../queue/queue.service';
 import { EventsEnum } from '../../queue/types/events.enum';
 import { MessageTypeEnum } from '../types/message-type.enum';
 import { MessageErrorLanguageEnum } from '../types/message-error-language.enum';
+import { TopicsEnum } from '../../queue/types/topics.enum';
 
 @Injectable()
 export class MessagesService {
@@ -56,7 +57,7 @@ export class MessagesService {
 
         const response = new DataResponse<MessageEntity>(messageEntity);
 
-        this.queueService.sendMessage(String(chatId), EventsEnum.CREATE_MESSAGE, response);
+        this.queueService.sendMessage(TopicsEnum.EMIT, String(chatId), EventsEnum.CREATE_MESSAGE, response);
 
         return response;
     }
