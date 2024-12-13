@@ -87,7 +87,7 @@ export class ChatsService {
         return new DataResponse(MessageErrorLanguageEnum.CHAT_WITH_ID_NOT_FOUND);
     }
 
-    async favoriteChats(favoriteChatIds: number[], socketId?: string): Promise<DataResponse<string | number[]>> {
+    async favoriteChats(favoriteChatIds: number[], socketId: string): Promise<DataResponse<string | number[]>> {
         const newFavoriteChats = await this.chatRepository.count({
             id: { $in: favoriteChatIds },
             type: ChatTypeEnum.IS_OPEN,

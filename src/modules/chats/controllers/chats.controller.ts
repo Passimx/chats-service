@@ -37,7 +37,7 @@ export class ChatsController {
     @Post('join')
     async favoritesChats(
         @Body() favoriteChatsDto: FavoriteChatsDto,
-        @Headers('socket_id') socketId?: string,
+        @Headers('socket_id') socketId: string,
     ): Promise<DataResponse<string | number[]>> {
         return this.chatsService.favoriteChats(favoriteChatsDto.favoriteChatIds, socketId);
     }
