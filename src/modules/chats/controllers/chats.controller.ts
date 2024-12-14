@@ -16,7 +16,7 @@ export class ChatsController {
     @Post()
     createChat(
         @Body() body: CreateOpenChatDto,
-        @Headers('Websocket-key') socketId: string,
+        @Headers('socket_id') socketId: string,
     ): Promise<DataResponse<string | ChatEntity>> {
         return this.chatsService.createOpenChat(body.title, socketId);
     }
@@ -37,7 +37,7 @@ export class ChatsController {
     @Post('join')
     async favoritesChats(
         @Body() favoriteChatsDto: FavoriteChatsDto,
-        @Headers('socket_id') socketId?: string,
+        @Headers('socket_id') socketId: string,
     ): Promise<DataResponse<string | number[]>> {
         return this.chatsService.favoriteChats(favoriteChatsDto.favoriteChatIds, socketId);
     }
