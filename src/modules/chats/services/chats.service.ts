@@ -23,7 +23,7 @@ export class ChatsService {
         private readonly messagesService: MessagesService,
     ) {}
 
-    async createOpenChat(title: string, socketId?: string): Promise<DataResponse<ChatEntity>> {
+    async createOpenChat(title: string, socketId: string): Promise<DataResponse<ChatEntity>> {
         const chatEntity = new ChatEntity(title);
 
         await this.chatRepository.insert(chatEntity);
@@ -39,6 +39,14 @@ export class ChatsService {
 
         const response = new DataResponse<ChatEntity>(createChat!);
         this.queueService.sendMessage(TopicsEnum.EMIT, socketId, EventsEnum.CREATE_CHAT, response);
+        const chatId: number[] = [chatEntity.id];
+
+        this.queueService.sendMessage(
+            TopicsEnum.JOIN,
+            socketId,
+            EventsEnum.JOIN_CHAT,
+            new DataResponse<number[]>(chatId),
+        );
 
         return response;
     }
@@ -87,7 +95,7 @@ export class ChatsService {
         return new DataResponse(MessageErrorLanguageEnum.CHAT_WITH_ID_NOT_FOUND);
     }
 
-    async favoriteChats(favoriteChatIds: number[], socketId?: string): Promise<DataResponse<string | number[]>> {
+    async favoriteChats(favoriteChatIds: number[], socketId: string): Promise<DataResponse<string | number[]>> {
         const newFavoriteChats = await this.chatRepository.count({
             id: { $in: favoriteChatIds },
             type: ChatTypeEnum.IS_OPEN,
@@ -96,7 +104,7 @@ export class ChatsService {
         const response: DataResponse<number[]> = new DataResponse<number[]>(favoriteChatIds);
 
         if (favoriteChatIds.length !== newFavoriteChats) {
-            return new DataResponse<string>('Часть чатов не  найдена');
+            return new DataResponse<string>(MessageErrorLanguageEnum.SOME_CHATS_NOT_FOUND);
         }
 
         this.queueService.sendMessage(TopicsEnum.JOIN, socketId, EventsEnum.JOIN_CHAT, response);
