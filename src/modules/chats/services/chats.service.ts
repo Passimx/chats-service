@@ -53,8 +53,12 @@ export class ChatsService {
 
     async getOpenChats(title: string, offset: number, limit?: number): Promise<DataResponse<ChatEntity[]>> {
         if (title) {
+            const queryWords = title.toLowerCase().split(' ');
+            const arrayWords = queryWords.map((words) => ({
+                title: { $ilike: `%${words}%` },
+            }));
             const getChatTitle = await this.chatRepository.find(
-                { title: { $ilike: `%${title}%` } },
+                { $and: arrayWords },
                 {
                     limit,
                     offset: offset,
