@@ -1,10 +1,11 @@
-import { Entity, Enum, OneToMany, Property } from '@mikro-orm/core';
+import { Entity, Enum, Index, OneToMany, Property } from '@mikro-orm/core';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { CreatedEntity } from '../../../common/entities/created.entity';
 import { ChatTypeEnum } from '../types/chat-type.enum';
 import { MessageEntity } from './message.entity';
 
 @Entity({ tableName: 'chats' })
+@Index({ type: 'GIN', properties: 'title' })
 export class ChatEntity extends CreatedEntity {
     @ApiProperty()
     @Property()
