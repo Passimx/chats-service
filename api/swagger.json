@@ -99,6 +99,28 @@
 						"schema": {
 							"type": "number"
 						}
+					},
+					{
+						"name": "favoriteChatIds",
+						"required": false,
+						"in": "query",
+						"schema": {
+							"type": "array",
+							"items": {
+								"type": "number"
+							}
+						}
+					},
+					{
+						"name": "notFavoriteChatIds",
+						"required": false,
+						"in": "query",
+						"schema": {
+							"type": "array",
+							"items": {
+								"type": "number"
+							}
+						}
 					}
 				],
 				"responses": {
