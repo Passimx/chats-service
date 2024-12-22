@@ -51,14 +51,22 @@ export class ChatsService {
         return response;
     }
 
-    async getOpenChats(title: string, offset: number, limit?: number): Promise<DataResponse<ChatEntity[]>> {
+    async getOpenChats(
+        title: string,
+        offset: number,
+        limit?: number,
+        notFavoriteChatIds?: number[],
+    ): Promise<DataResponse<ChatEntity[]>> {
         if (title) {
             const queryWords = title.toLowerCase().split(' ');
             const arrayWords = queryWords.map((word) => ({
                 $or: [{ title: { $ilike: `${word}%` } }, { title: { $ilike: `% ${word}%` } }],
             }));
             const getChatTitle = await this.chatRepository.find(
-                { $and: arrayWords },
+                {
+                    $and: arrayWords,
+                    id: { $nin: notFavoriteChatIds },
+                },
                 {
                     limit,
                     offset: offset,
@@ -71,7 +79,7 @@ export class ChatsService {
             return new DataResponse(getChatTitle);
         } else {
             const getChatNotTitle = await this.chatRepository.find(
-                {},
+                { id: { $nin: notFavoriteChatIds } },
                 {
                     limit,
                     offset: offset,

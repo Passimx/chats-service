@@ -24,7 +24,7 @@ export class ChatsController {
     @ApiData(ChatEntity, true)
     @Get()
     async getChats(@Query() query: QueryGetChatsDto): Promise<DataResponse<ChatEntity[]>> {
-        return await this.chatsService.getOpenChats(query.title, query.offset, query.limit);
+        return await this.chatsService.getOpenChats(query.title, query.offset, query.limit, query.notFavoriteChatIds);
     }
 
     @ApiData(ChatEntity, true)

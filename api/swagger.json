@@ -99,6 +99,17 @@
 						"schema": {
 							"type": "number"
 						}
+					},
+					{
+						"name": "notFavoriteChatIds",
+						"required": false,
+						"in": "query",
+						"schema": {
+							"type": "array",
+							"items": {
+								"type": "number"
+							}
+						}
 					}
 				],
 				"responses": {
