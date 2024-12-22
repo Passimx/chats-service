@@ -5,20 +5,20 @@ import { IsInteger } from '../../decorators/is-integer.decorator';
 export class QueryGetMessagesDto {
     @IsInteger()
     @ApiProperty()
-    chatId!: number;
+    readonly chatId!: number;
 
     @ApiPropertyOptional({ description: 'Limit message' })
     @IsInteger()
     @IsOptional()
-    limit!: number;
+    readonly limit!: number;
 
     @ApiPropertyOptional({ description: 'Offset message' })
     @IsOptional()
     @IsInteger()
-    offset!: number;
+    readonly offset!: number;
 
     @IsString()
     @ApiPropertyOptional({ description: 'Search message' })
     @IsOptional()
-    search!: string;
+    readonly search!: string;
 }

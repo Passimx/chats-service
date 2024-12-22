@@ -7,17 +7,17 @@ export class QueryGetChatsDto {
     @ApiPropertyOptional({ description: 'Chat name' })
     @IsString()
     @IsOptional()
-    title!: string;
+    readonly title!: string;
 
     @ApiPropertyOptional({ description: 'Limit chat' })
     @IsInteger()
     @IsOptional()
-    limit!: number;
+    readonly limit!: number;
 
     @ApiPropertyOptional({ description: 'Offset chat' })
     @IsInteger()
     @IsOptional()
-    offset!: number;
+    readonly offset!: number;
 
     @IsInt({ each: true })
     @IsArray()
@@ -27,5 +27,5 @@ export class QueryGetChatsDto {
         isArray: true,
         type: Number,
     })
-    notFavoriteChatIds!: number[];
+    readonly notFavoriteChatIds!: number[];
 }
