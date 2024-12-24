@@ -35,7 +35,7 @@ export class ChatsService {
             SystemMessageLanguageEnum.create_chat,
             undefined,
         );
-        const createChat = await this.chatRepository.findOne({ id: chatEntity.id }, { populate: ['messages'] });
+        const createChat = await this.chatRepository.findOne({ id: chatEntity.id }, { populate: ['message'] });
 
         const response = new DataResponse<ChatEntity>(createChat!);
         this.queueService.sendMessage(TopicsEnum.EMIT, socketId, EventsEnum.CREATE_CHAT, response);
@@ -71,8 +71,8 @@ export class ChatsService {
                     limit,
                     offset: offset,
 
-                    orderBy: { title: 'ASC', messages: { createdAt: 'DESC NULLS LAST' } },
-                    populate: ['messages'],
+                    orderBy: { title: 'ASC', message: { createdAt: 'DESC NULLS LAST' } },
+                    populate: ['message'],
                 },
             );
 
@@ -83,8 +83,8 @@ export class ChatsService {
                 {
                     limit,
                     offset: offset,
-                    orderBy: { messages: { createdAt: 'DESC NULLS LAST' } },
-                    populate: ['messages'],
+                    orderBy: { message: { createdAt: 'DESC NULLS LAST' } },
+                    populate: ['message'],
                 },
             );
 
@@ -95,9 +95,9 @@ export class ChatsService {
     async findChat(id: number): Promise<DataResponse<string | ChatEntity>> {
         const chat = await this.chatRepository.findOne(id, {
             orderBy: {
-                messages: { createdAt: 'DESC NULLS LAST' },
+                message: { createdAt: 'DESC NULLS LAST' },
             },
-            populate: ['messages'],
+            populate: ['message'],
         });
 
         if (chat) {
