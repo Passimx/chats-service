@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@mikro-orm/nestjs';
-import { EntityRepository } from '@mikro-orm/postgresql';
+import { EntityRepository, raw } from '@mikro-orm/postgresql';
 
 import { MessageEntity } from '../entities/message.entity';
 import { ChatEntity } from '../entities/chat.entity';
@@ -28,12 +28,6 @@ export class MessagesService {
         message?: string,
         parentMessageId?: number,
     ): Promise<DataResponse<MessageEntity | string>> {
-        const chat = await this.chatRepository.findOne({ id: chatId });
-
-        if (!chat) return new DataResponse(MessageErrorLanguageEnum.CHAT_NOT_FOUND);
-
-        chat.countMessages++;
-
         if (parentMessageId) {
             const parentMessage = await this.messageRepository.findOne({ id: parentMessageId });
 
@@ -41,6 +35,15 @@ export class MessagesService {
                 return new DataResponse(MessageErrorLanguageEnum.PARENT_MESSAGE_NOT_FOUND);
             }
         }
+
+        const chat = await this.chatRepository
+            .createQueryBuilder('chats')
+            .update({ countMessages: raw('count_messages + 1') })
+            .where({ id: chatId })
+            .returning('*')
+            .getSingleResult();
+
+        if (!chat) return new DataResponse(MessageErrorLanguageEnum.CHAT_NOT_FOUND);
 
         const messageEntity = new MessageEntity(
             chatId,
@@ -53,7 +56,6 @@ export class MessagesService {
         messageEntity.chat = chat;
 
         await this.messageRepository.insert(messageEntity);
-        await this.chatRepository.nativeUpdate({ id: chatId }, { countMessages: chat.countMessages });
 
         const response = new DataResponse<MessageEntity>(messageEntity);
 
