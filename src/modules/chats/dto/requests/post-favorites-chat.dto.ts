@@ -8,5 +8,5 @@ export class FavoriteChatsDto {
         isArray: true,
         type: Number,
     })
-    favoriteChatIds!: number[];
+    favoriteChatIds!: string[];
 }

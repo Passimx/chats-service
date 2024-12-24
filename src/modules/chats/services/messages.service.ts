@@ -22,11 +22,11 @@ export class MessagesService {
     ) {}
 
     async createMessage(
-        chatId: number,
+        chatId: string,
         type: MessageTypeEnum,
         encryptMessage?: string,
         message?: string,
-        parentMessageId?: number,
+        parentMessageId?: string,
     ): Promise<DataResponse<MessageEntity | string>> {
         if (parentMessageId) {
             const parentMessage = await this.messageRepository.findOne({ id: parentMessageId });
@@ -65,7 +65,7 @@ export class MessagesService {
     }
 
     async getMessages(
-        chatId: number,
+        chatId: string,
         limit: number,
         offset: number,
         search?: string,
