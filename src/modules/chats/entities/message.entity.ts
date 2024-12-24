@@ -11,8 +11,8 @@ export class MessageEntity extends CreatedEntity {
     readonly encryptMessage?: string;
 
     @ApiProperty()
-    @Property()
-    readonly chatId!: number;
+    @Property({ type: 'uuid' })
+    readonly chatId!: string;
 
     @ApiProperty()
     @Property()
@@ -24,20 +24,20 @@ export class MessageEntity extends CreatedEntity {
     message?: string; //используется только для openChat, в остальных частах используется encryptMessage
 
     @ApiProperty()
-    @Property({ nullable: true })
-    parentMessageId?: number;
+    @Property({ type: 'uuid', nullable: true })
+    parentMessageId?: string;
 
     @ApiProperty()
     @Enum({ items: () => MessageTypeEnum, nativeEnumName: 'message_type_enum', nullable: true })
     readonly type!: MessageTypeEnum;
 
     constructor(
-        chatId: number,
+        chatId: string,
         number: number,
         type: MessageTypeEnum,
         encryptMessage?: string,
         message?: string,
-        parentMessageId?: number,
+        parentMessageId?: string,
     ) {
         super();
         this.chatId = chatId;

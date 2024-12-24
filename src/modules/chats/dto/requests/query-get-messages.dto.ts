@@ -5,7 +5,7 @@ import { IsInteger } from '../../decorators/is-integer.decorator';
 export class QueryGetMessagesDto {
     @IsInteger()
     @ApiProperty()
-    readonly chatId!: number;
+    readonly chatId!: string;
 
     @ApiPropertyOptional({ description: 'Limit message' })
     @IsInteger()

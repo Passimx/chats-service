@@ -171,7 +171,7 @@
 						"required": true,
 						"in": "path",
 						"schema": {
-							"type": "number"
+							"type": "string"
 						}
 					}
 				],
@@ -366,7 +366,7 @@
 						"required": true,
 						"in": "query",
 						"schema": {
-							"type": "number"
+							"type": "string"
 						}
 					},
 					{
@@ -471,7 +471,7 @@
 				"type": "object",
 				"properties": {
 					"id": {
-						"type": "number"
+						"type": "string"
 					},
 					"createdAt": {
 						"format": "date-time",
@@ -509,7 +509,7 @@
 				"type": "object",
 				"properties": {
 					"id": {
-						"type": "number"
+						"type": "string"
 					},
 					"createdAt": {
 						"format": "date-time",
@@ -519,7 +519,7 @@
 						"type": "string"
 					},
 					"chatId": {
-						"type": "number"
+						"type": "string"
 					},
 					"number": {
 						"type": "number"
@@ -528,7 +528,7 @@
 						"type": "string"
 					},
 					"parentMessageId": {
-						"type": "number"
+						"type": "string"
 					},
 					"type": {
 						"type": "string"
@@ -587,7 +587,7 @@
 						"maxLength": 32768
 					},
 					"chatId": {
-						"type": "number",
+						"type": "string",
 						"description": "Chat id"
 					},
 					"message": {
@@ -597,8 +597,8 @@
 						"maxLength": 1024
 					},
 					"parentMessageId": {
-						"type": "number",
-						"description": "Message"
+						"type": "string",
+						"description": "Message id"
 					}
 				},
 				"required": [

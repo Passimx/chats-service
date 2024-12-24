@@ -39,13 +39,13 @@ export class ChatsService {
 
         const response = new DataResponse<ChatEntity>(createChat!);
         this.queueService.sendMessage(TopicsEnum.EMIT, socketId, EventsEnum.CREATE_CHAT, response);
-        const chatId: number[] = [chatEntity.id];
+        const chatId: string[] = [chatEntity.id];
 
         this.queueService.sendMessage(
             TopicsEnum.JOIN,
             socketId,
             EventsEnum.JOIN_CHAT,
-            new DataResponse<number[]>(chatId),
+            new DataResponse<string[]>(chatId),
         );
 
         return response;
@@ -55,7 +55,7 @@ export class ChatsService {
         title: string,
         offset: number,
         limit?: number,
-        notFavoriteChatIds?: number[],
+        notFavoriteChatIds?: string[],
     ): Promise<DataResponse<ChatEntity[]>> {
         if (title) {
             const queryWords = title.toLowerCase().split(' ');
@@ -92,7 +92,7 @@ export class ChatsService {
         }
     }
 
-    async findChat(id: number): Promise<DataResponse<string | ChatEntity>> {
+    async findChat(id: string): Promise<DataResponse<string | ChatEntity>> {
         const chat = await this.chatRepository.findOne(id, {
             orderBy: {
                 messages: { createdAt: 'DESC NULLS LAST' },
@@ -107,13 +107,13 @@ export class ChatsService {
         return new DataResponse(MessageErrorLanguageEnum.CHAT_WITH_ID_NOT_FOUND);
     }
 
-    async favoriteChats(favoriteChatIds: number[], socketId: string): Promise<DataResponse<string | number[]>> {
+    async favoriteChats(favoriteChatIds: string[], socketId: string): Promise<DataResponse<string | string[]>> {
         const newFavoriteChats = await this.chatRepository.count({
             id: { $in: favoriteChatIds },
             type: ChatTypeEnum.IS_OPEN,
         });
 
-        const response: DataResponse<number[]> = new DataResponse<number[]>(favoriteChatIds);
+        const response: DataResponse<string[]> = new DataResponse<string[]>(favoriteChatIds);
 
         if (favoriteChatIds.length !== newFavoriteChats) {
             return new DataResponse<string>(MessageErrorLanguageEnum.SOME_CHATS_NOT_FOUND);

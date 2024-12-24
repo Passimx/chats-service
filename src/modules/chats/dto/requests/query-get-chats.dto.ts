@@ -27,5 +27,5 @@ export class QueryGetChatsDto {
         isArray: true,
         type: Number,
     })
-    readonly notFavoriteChatIds!: number[];
+    readonly notFavoriteChatIds!: string[];
 }
