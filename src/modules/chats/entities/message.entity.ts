@@ -5,6 +5,7 @@ import { MessageTypeEnum } from '../types/message-type.enum';
 import { ChatEntity } from './chat.entity';
 
 @Entity({ tableName: 'messages' })
+@Index({ properties: ['chatId', 'number'], type: 'btree' })
 export class MessageEntity extends CreatedEntity {
     @ApiProperty()
     @Property({ length: 1000, nullable: true })
