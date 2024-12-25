@@ -461,7 +461,7 @@
 	"tags": [],
 	"servers": [
 		{
-			"url": "http://localhost:6020",
+			"url": "http://localhost:8020",
 			"description": "development"
 		}
 	],
