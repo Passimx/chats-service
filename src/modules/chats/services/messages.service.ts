@@ -72,8 +72,8 @@ export class MessagesService {
     ): Promise<DataResponse<MessageEntity[]>> {
         if (search) {
             const getMessageSearch = await this.messageRepository.find(
-                { chatId, message: { $ilike: `%${search}%` }, number: { $lt: offset } },
-                { limit: limit, orderBy: { number: 'DESC' }, populate: ['parentMessage'] },
+                { chatId, message: { $ilike: `%${search}%` } },
+                { limit: limit, offset: offset, orderBy: { createdAt: 'DESC' }, populate: ['parentMessage'] },
             );
 
             return new DataResponse(getMessageSearch);
