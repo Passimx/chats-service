@@ -1,12 +1,22 @@
-import { IsArray, IsUUID } from 'class-validator';
+import { IsArray, IsInt, IsUUID, Min, ValidateNested } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
+
+class FavoriteChat {
+    @IsUUID('4')
+    @ApiProperty()
+    chatId!: string;
+
+    @IsInt()
+    @Min(0)
+    @ApiProperty()
+    lastReadMessageNumber!: number;
+}
 
 export class FavoriteChatsDto {
-    @IsUUID('4', { each: true })
     @IsArray()
-    @ApiProperty({
-        isArray: true,
-        type: Number,
-    })
-    favoriteChatIds!: string[];
+    @ValidateNested({ each: true })
+    @Type(() => FavoriteChat)
+    @ApiProperty()
+    readonly chatsMap!: { chatId: string; lastReadMessageNumber: number }[];
 }

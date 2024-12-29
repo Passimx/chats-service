@@ -107,7 +107,7 @@
 						"schema": {
 							"type": "array",
 							"items": {
-								"type": "number"
+								"type": "string"
 							}
 						}
 					}
@@ -566,15 +566,15 @@
 			"FavoriteChatsDto": {
 				"type": "object",
 				"properties": {
-					"favoriteChatIds": {
+					"chatsMap": {
 						"type": "array",
 						"items": {
-							"type": "number"
+							"type": "string"
 						}
 					}
 				},
 				"required": [
-					"favoriteChatIds"
+					"chatsMap"
 				]
 			},
 			"CreateMessageDto": {

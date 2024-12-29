@@ -12,11 +12,14 @@ import { MessageErrorLanguageEnum } from '../types/message-error-language.enum';
 import { SystemMessageLanguageEnum } from '../types/system-message-language.enum';
 import { ChatTypeEnum } from '../types/chat-type.enum';
 import { TopicsEnum } from '../../queue/types/topics.enum';
+import { MessageEntity } from '../entities/message.entity';
 import { MessagesService } from './messages.service';
 
 @Injectable()
 export class ChatsService {
     constructor(
+        @InjectRepository(MessageEntity)
+        private readonly messageRepository: EntityRepository<MessageEntity>,
         @InjectRepository(ChatEntity)
         private readonly chatRepository: EntityRepository<ChatEntity>, // chatRepository - это объект для запросов в бд
         private readonly queueService: QueueService,
@@ -107,20 +110,51 @@ export class ChatsService {
         return new DataResponse(MessageErrorLanguageEnum.CHAT_WITH_ID_NOT_FOUND);
     }
 
-    async favoriteChats(favoriteChatIds: string[], socketId: string): Promise<DataResponse<string | string[]>> {
+    async favoriteChats(
+        chatsMap: { chatId: string; lastReadMessageNumber: number }[],
+        socketId: string,
+    ): Promise<DataResponse<string | { chatId: string; lastMessage: any }[]>> {
+        const response: { chatId: string; lastMessage: any }[] = [];
+
+        const chatId = chatsMap.map((chat) => chat.chatId);
+
         const newFavoriteChats = await this.chatRepository.count({
-            id: { $in: favoriteChatIds },
+            id: { $in: chatId },
             type: ChatTypeEnum.IS_OPEN,
         });
 
-        const response: DataResponse<string[]> = new DataResponse<string[]>(favoriteChatIds);
-
-        if (favoriteChatIds.length !== newFavoriteChats) {
+        if (chatId.length !== newFavoriteChats) {
             return new DataResponse<string>(MessageErrorLanguageEnum.SOME_CHATS_NOT_FOUND);
         }
 
-        this.queueService.sendMessage(TopicsEnum.JOIN, socketId, EventsEnum.JOIN_CHAT, response);
+        const responseChat = new DataResponse<string[]>(chatId);
+        this.queueService.sendMessage(TopicsEnum.JOIN, socketId, EventsEnum.JOIN_CHAT, responseChat);
 
-        return response;
+        for (const { chatId, lastReadMessageNumber } of chatsMap) {
+            const chat = await this.chatRepository.findOne({ id: chatId });
+
+            if (!chat) {
+                continue;
+            }
+
+            const countMessages = chat.countMessages;
+
+            if (countMessages > lastReadMessageNumber) {
+                const lastMessage = await this.messageRepository.findOne(
+                    {
+                        chatId: chatId,
+                    },
+                    {
+                        orderBy: { createdAt: 'DESC' },
+                    },
+                );
+
+                if (lastMessage) {
+                    response.push({ chatId, lastMessage });
+                }
+            }
+        }
+
+        return new DataResponse<{ chatId: string; lastMessage: any }[]>(response);
     }
 }

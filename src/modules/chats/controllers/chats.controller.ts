@@ -38,7 +38,7 @@ export class ChatsController {
     async favoritesChats(
         @Body() favoriteChatsDto: FavoriteChatsDto,
         @Headers('socket_id') socketId: string,
-    ): Promise<DataResponse<string | string[]>> {
-        return this.chatsService.favoriteChats(favoriteChatsDto.favoriteChatIds, socketId);
+    ): Promise<DataResponse<string | { chatId: string; lastMessage: any }[]>> {
+        return this.chatsService.favoriteChats(favoriteChatsDto.chatsMap, socketId);
     }
 }
