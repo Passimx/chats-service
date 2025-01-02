@@ -6,7 +6,6 @@ import { ChatEntity } from '../entities/chat.entity';
 import { DataResponse } from '../../../common/swagger/data-response.dto';
 import { ApiData } from '../../../common/swagger/api-data.decorator';
 import { FavoriteChats, FavoriteChatsDto } from '../dto/requests/post-favorites-chat.dto';
-import { ApiDataArrayNumbers } from '../../../common/swagger/api-data-array-numbers.decorator';
 
 @Controller('chats')
 export class ChatsController {
@@ -33,12 +32,12 @@ export class ChatsController {
         return this.chatsService.findChat(id);
     }
 
-    @ApiDataArrayNumbers()
+    @ApiData(FavoriteChatsDto, true)
     @Post('join')
     async favoritesChats(
         @Body() favoriteChatsDto: FavoriteChatsDto,
         @Headers('socket_id') socketId: string,
-    ): Promise<DataResponse<string | FavoriteChats>> {
+    ): Promise<DataResponse<string | FavoriteChats[]>> {
         return this.chatsService.favoriteChats(favoriteChatsDto.chats, socketId);
     }
 }

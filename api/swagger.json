@@ -265,7 +265,7 @@
 												"data": {
 													"type": "array",
 													"items": {
-														"type": "number"
+														"$ref": "#/components/schemas/FavoriteChatsDto"
 													}
 												}
 											},
@@ -563,13 +563,30 @@
 					"title"
 				]
 			},
+			"ChatDto": {
+				"type": "object",
+				"properties": {
+					"chatId": {
+						"type": "string",
+						"description": "Id chat"
+					},
+					"lastMessage": {
+						"type": "number",
+						"description": "Number last message"
+					}
+				},
+				"required": [
+					"chatId",
+					"lastMessage"
+				]
+			},
 			"FavoriteChatsDto": {
 				"type": "object",
 				"properties": {
 					"chats": {
 						"type": "array",
 						"items": {
-							"type": "string"
+							"$ref": "#/components/schemas/ChatDto"
 						}
 					}
 				},
