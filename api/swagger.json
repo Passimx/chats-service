@@ -566,7 +566,7 @@
 			"FavoriteChatsDto": {
 				"type": "object",
 				"properties": {
-					"chatsMap": {
+					"chats": {
 						"type": "array",
 						"items": {
 							"type": "string"
@@ -574,7 +574,7 @@
 					}
 				},
 				"required": [
-					"chatsMap"
+					"chats"
 				]
 			},
 			"CreateMessageDto": {

@@ -5,7 +5,7 @@ import { QueryGetChatsDto } from '../dto/requests/query-get-chats.dto';
 import { ChatEntity } from '../entities/chat.entity';
 import { DataResponse } from '../../../common/swagger/data-response.dto';
 import { ApiData } from '../../../common/swagger/api-data.decorator';
-import { FavoriteChatsDto } from '../dto/requests/post-favorites-chat.dto';
+import { FavoriteChats, FavoriteChatsDto } from '../dto/requests/post-favorites-chat.dto';
 import { ApiDataArrayNumbers } from '../../../common/swagger/api-data-array-numbers.decorator';
 
 @Controller('chats')
@@ -38,7 +38,7 @@ export class ChatsController {
     async favoritesChats(
         @Body() favoriteChatsDto: FavoriteChatsDto,
         @Headers('socket_id') socketId: string,
-    ): Promise<DataResponse<string | { chatId: string; lastMessage: any }[]>> {
-        return this.chatsService.favoriteChats(favoriteChatsDto.chatsMap, socketId);
+    ): Promise<DataResponse<string | FavoriteChats>> {
+        return this.chatsService.favoriteChats(favoriteChatsDto.chats, socketId);
     }
 }

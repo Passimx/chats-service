@@ -33,7 +33,6 @@ export class QueueService {
 
         const message = new MessageDto(to, event, data);
 
-        console.log(message);
         this.producer.send({ topic, messages: [{ value: JSON.stringify(message) }] });
     }
 }

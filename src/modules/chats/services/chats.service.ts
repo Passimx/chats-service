@@ -13,6 +13,7 @@ import { SystemMessageLanguageEnum } from '../types/system-message-language.enum
 import { ChatTypeEnum } from '../types/chat-type.enum';
 import { TopicsEnum } from '../../queue/types/topics.enum';
 import { MessageEntity } from '../entities/message.entity';
+import { FavoriteChats } from '../dto/requests/post-favorites-chat.dto';
 import { MessagesService } from './messages.service';
 
 @Injectable()
@@ -111,50 +112,51 @@ export class ChatsService {
     }
 
     async favoriteChats(
-        chatsMap: { chatId: string; lastReadMessageNumber: number }[],
+        chatsMap: {
+            chatId: string;
+            lastMessage: number;
+        }[],
         socketId: string,
-    ): Promise<DataResponse<string | { chatId: string; lastMessage: any }[]>> {
-        const response: { chatId: string; lastMessage: any }[] = [];
-
-        const chatId = chatsMap.map((chat) => chat.chatId);
-
-        const newFavoriteChats = await this.chatRepository.count({
-            id: { $in: chatId },
-            type: ChatTypeEnum.IS_OPEN,
-        });
-
-        if (chatId.length !== newFavoriteChats) {
-            return new DataResponse<string>(MessageErrorLanguageEnum.SOME_CHATS_NOT_FOUND);
-        }
-
-        const responseChat = new DataResponse<string[]>(chatId);
+    ): Promise<DataResponse<string | FavoriteChats>> {
+        const response: FavoriteChats = [];
+        const chatIds = chatsMap.map((chat) => chat.chatId);
+        const responseChat = new DataResponse<string[]>(chatIds);
         this.queueService.sendMessage(TopicsEnum.JOIN, socketId, EventsEnum.JOIN_CHAT, responseChat);
 
-        for (const { chatId, lastReadMessageNumber } of chatsMap) {
-            const chat = await this.chatRepository.findOne({ id: chatId });
+        const uniqueChatIds = new Set<string>();
 
-            if (!chat) {
-                continue;
+        const promises = chatsMap.map(async ({ chatId, lastMessage }) => {
+            const chat = await this.chatRepository.findOne({ id: chatId, type: ChatTypeEnum.IS_OPEN });
+
+            if (!chat || chat.countMessages <= lastMessage) {
+                return;
             }
 
-            const countMessages = chat.countMessages;
+            const lastMessageEntity = await this.messageRepository.findOne(
+                {
+                    chatId: chatId,
+                },
+                {
+                    orderBy: { createdAt: 'DESC' },
+                },
+            );
 
-            if (countMessages > lastReadMessageNumber) {
-                const lastMessage = await this.messageRepository.findOne(
-                    {
-                        chatId: chatId,
-                    },
-                    {
-                        orderBy: { createdAt: 'DESC' },
-                    },
-                );
+            if (lastMessageEntity && !uniqueChatIds.has(chatId)) {
+                uniqueChatIds.add(chatId);
 
-                if (lastMessage) {
-                    response.push({ chatId, lastMessage });
-                }
+                return { chatId, lastMessage: lastMessageEntity };
             }
-        }
 
-        return new DataResponse<{ chatId: string; lastMessage: any }[]>(response);
+            return;
+        });
+
+        const results = await Promise.allSettled(promises);
+        results.forEach((result) => {
+            if (result.status === 'fulfilled' && result.value) {
+                response.push(result.value);
+            }
+        });
+
+        return new DataResponse<FavoriteChats>(response);
     }
 }
