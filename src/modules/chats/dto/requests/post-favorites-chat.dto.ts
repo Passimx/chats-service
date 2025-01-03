@@ -3,29 +3,33 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { MessageEntity } from '../../entities/message.entity';
 
-export type FavoriteChats = { chatId: string; lastMessage: MessageEntity };
 export type ChatsDto = { chatId: string; lastMessage: number };
 
 export class FavoriteChat {
     @IsString()
     @ApiProperty({ description: 'Id chat' })
-    chatId!: string;
+    readonly chatId!: string;
 
     @ValidateNested()
     @Type(() => MessageEntity)
     @ApiProperty({ type: MessageEntity })
-    lastMessage!: MessageEntity;
+    readonly lastMessage!: MessageEntity;
+
+    constructor(chatId: string, lastMessage: MessageEntity) {
+        this.chatId = chatId;
+        this.lastMessage = lastMessage;
+    }
 }
 
 class ChatDto {
     @IsString()
     @ApiProperty({ description: 'Id chat' })
-    chatId!: string;
+    readonly chatId!: string;
 
     @IsNumber()
     @IsInt()
     @ApiProperty({ description: 'Number last message' })
-    lastMessage!: number;
+    readonly lastMessage!: number;
 }
 
 export class FavoriteChatsDto {

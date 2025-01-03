@@ -551,6 +551,22 @@
 					"type"
 				]
 			},
+			"FavoriteChat": {
+				"type": "object",
+				"properties": {
+					"chatId": {
+						"type": "string",
+						"description": "Id chat"
+					},
+					"lastMessage": {
+						"$ref": "#/components/schemas/MessageEntity"
+					}
+				},
+				"required": [
+					"chatId",
+					"lastMessage"
+				]
+			},
 			"CreateOpenChatDto": {
 				"type": "object",
 				"properties": {

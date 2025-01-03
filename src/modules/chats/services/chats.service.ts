@@ -11,7 +11,7 @@ import { SystemMessageLanguageEnum } from '../types/system-message-language.enum
 import { ChatTypeEnum } from '../types/chat-type.enum';
 import { TopicsEnum } from '../../queue/types/topics.enum';
 import { MessageEntity } from '../entities/message.entity';
-import { ChatsDto, FavoriteChats } from '../dto/requests/post-favorites-chat.dto';
+import { ChatsDto, FavoriteChat } from '../dto/requests/post-favorites-chat.dto';
 import { MessagesService } from './messages.service';
 
 @Injectable()
@@ -109,8 +109,8 @@ export class ChatsService {
         return new DataResponse(MessageErrorLanguageEnum.CHAT_WITH_ID_NOT_FOUND);
     }
 
-    async favoriteChats(chatsMap: ChatsDto[], socketId: string): Promise<DataResponse<string | FavoriteChats[]>> {
-        const response: FavoriteChats[] = [];
+    async favoriteChats(chatsMap: ChatsDto[], socketId: string): Promise<DataResponse<string | FavoriteChat[]>> {
+        const response: FavoriteChat[] = [];
         const responseChat: string[] = [];
         const uniqueChatIds = new Set<string>();
 
@@ -133,10 +133,12 @@ export class ChatsService {
                 return;
             }
 
-            if (chat.message && !uniqueChatIds.has(chatId)) {
+            const lastMessageEntity = chat.message;
+
+            if (lastMessageEntity && !uniqueChatIds.has(chatId)) {
                 uniqueChatIds.add(chatId);
 
-                return { chatId, lastMessage: chat.message };
+                return new FavoriteChat(chatId, lastMessageEntity);
             }
 
             return;
@@ -153,8 +155,6 @@ export class ChatsService {
         const responseChats = new DataResponse<string[]>(responseChat);
         this.queueService.sendMessage(TopicsEnum.JOIN, socketId, EventsEnum.JOIN_CHAT, responseChats);
 
-        console.log(response);
-
-        return new DataResponse<FavoriteChats[]>(response);
+        return new DataResponse<FavoriteChat[]>(response);
     }
 }
