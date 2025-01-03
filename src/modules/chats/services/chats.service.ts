@@ -1,5 +1,3 @@
-// @ts-ignore
-
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { EntityRepository } from '@mikro-orm/postgresql';
@@ -20,7 +18,7 @@ import { MessagesService } from './messages.service';
 export class ChatsService {
     constructor(
         @InjectRepository(MessageEntity)
-        private readonly messageRepository: EntityRepository<MessageEntity>,
+        readonly messageRepository: EntityRepository<MessageEntity>,
         @InjectRepository(ChatEntity)
         private readonly chatRepository: EntityRepository<ChatEntity>, // chatRepository - это объект для запросов в бд
         private readonly queueService: QueueService,
@@ -113,43 +111,49 @@ export class ChatsService {
 
     async favoriteChats(chatsMap: ChatsDto[], socketId: string): Promise<DataResponse<string | FavoriteChats[]>> {
         const response: FavoriteChats[] = [];
-        const chatIds = chatsMap.map((chat) => chat.chatId);
-        const responseChat = new DataResponse<string[]>(chatIds);
-        this.queueService.sendMessage(TopicsEnum.JOIN, socketId, EventsEnum.JOIN_CHAT, responseChat);
-
+        const responseChat: string[] = [];
         const uniqueChatIds = new Set<string>();
 
         const promises = chatsMap.map(async ({ chatId, lastMessage }) => {
-            const chat = await this.chatRepository.findOne({ id: chatId, type: ChatTypeEnum.IS_OPEN });
-
-            if (!chat || chat.countMessages < lastMessage) {
-                return;
-            }
-
-            const lastMessageEntity = await this.messageRepository.findOne(
+            const chat = await this.chatRepository.findOne(
+                { id: chatId, type: ChatTypeEnum.IS_OPEN },
                 {
-                    chatId: chatId,
-                },
-                {
-                    orderBy: { createdAt: 'DESC' },
+                    orderBy: { message: { createdAt: 'DESC NULLS LAST' } },
+                    populate: ['message'],
                 },
             );
 
-            if (lastMessageEntity && !uniqueChatIds.has(chatId)) {
+            if (!chat) {
+                return;
+            }
+
+            responseChat.push(chatId);
+
+            if (chat.countMessages <= lastMessage) {
+                return;
+            }
+
+            if (chat.message && !uniqueChatIds.has(chatId)) {
                 uniqueChatIds.add(chatId);
 
-                return { chatId, lastMessage: lastMessageEntity };
+                return { chatId, lastMessage: chat.message };
             }
 
             return;
         });
 
         const results = await Promise.allSettled(promises);
+
         results.forEach((result) => {
             if (result.status === 'fulfilled' && result.value) {
                 response.push(result.value);
             }
         });
+
+        const responseChats = new DataResponse<string[]>(responseChat);
+        this.queueService.sendMessage(TopicsEnum.JOIN, socketId, EventsEnum.JOIN_CHAT, responseChats);
+
+        console.log(response);
 
         return new DataResponse<FavoriteChats[]>(response);
     }

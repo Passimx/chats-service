@@ -265,7 +265,7 @@
 												"data": {
 													"type": "array",
 													"items": {
-														"$ref": "#/components/schemas/FavoriteChatsDto"
+														"$ref": "#/components/schemas/FavoriteChat"
 													}
 												}
 											},

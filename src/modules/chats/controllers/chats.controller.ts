@@ -5,7 +5,7 @@ import { QueryGetChatsDto } from '../dto/requests/query-get-chats.dto';
 import { ChatEntity } from '../entities/chat.entity';
 import { DataResponse } from '../../../common/swagger/data-response.dto';
 import { ApiData } from '../../../common/swagger/api-data.decorator';
-import { FavoriteChats, FavoriteChatsDto } from '../dto/requests/post-favorites-chat.dto';
+import { FavoriteChat, FavoriteChats, FavoriteChatsDto } from '../dto/requests/post-favorites-chat.dto';
 
 @Controller('chats')
 export class ChatsController {
@@ -32,7 +32,7 @@ export class ChatsController {
         return this.chatsService.findChat(id);
     }
 
-    @ApiData(FavoriteChatsDto, true)
+    @ApiData(FavoriteChat, true)
     @Post('join')
     async favoritesChats(
         @Body() favoriteChatsDto: FavoriteChatsDto,
