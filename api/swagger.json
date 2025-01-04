@@ -551,6 +551,18 @@
 					"type"
 				]
 			},
+			"CreateOpenChatDto": {
+				"type": "object",
+				"properties": {
+					"title": {
+						"type": "string",
+						"description": "Chat name"
+					}
+				},
+				"required": [
+					"title"
+				]
+			},
 			"FavoriteChat": {
 				"type": "object",
 				"properties": {
@@ -565,18 +577,6 @@
 				"required": [
 					"chatId",
 					"lastMessage"
-				]
-			},
-			"CreateOpenChatDto": {
-				"type": "object",
-				"properties": {
-					"title": {
-						"type": "string",
-						"description": "Chat name"
-					}
-				},
-				"required": [
-					"title"
 				]
 			},
 			"ChatDto": {
