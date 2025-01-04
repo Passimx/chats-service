@@ -107,7 +107,7 @@
 						"schema": {
 							"type": "array",
 							"items": {
-								"type": "number"
+								"type": "string"
 							}
 						}
 					}
@@ -265,7 +265,7 @@
 												"data": {
 													"type": "array",
 													"items": {
-														"type": "number"
+														"$ref": "#/components/schemas/FavoriteChat"
 													}
 												}
 											},
@@ -563,18 +563,51 @@
 					"title"
 				]
 			},
+			"FavoriteChat": {
+				"type": "object",
+				"properties": {
+					"chatId": {
+						"type": "string",
+						"description": "Id chat"
+					},
+					"lastMessage": {
+						"$ref": "#/components/schemas/MessageEntity"
+					}
+				},
+				"required": [
+					"chatId",
+					"lastMessage"
+				]
+			},
+			"ChatDto": {
+				"type": "object",
+				"properties": {
+					"chatId": {
+						"type": "string",
+						"description": "Id chat"
+					},
+					"lastMessage": {
+						"type": "number",
+						"description": "Number last message"
+					}
+				},
+				"required": [
+					"chatId",
+					"lastMessage"
+				]
+			},
 			"FavoriteChatsDto": {
 				"type": "object",
 				"properties": {
-					"favoriteChatIds": {
+					"chats": {
 						"type": "array",
 						"items": {
-							"type": "number"
+							"$ref": "#/components/schemas/ChatDto"
 						}
 					}
 				},
 				"required": [
-					"favoriteChatIds"
+					"chats"
 				]
 			},
 			"CreateMessageDto": {

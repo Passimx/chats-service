@@ -1,7 +1,5 @@
 import { applyDecorators, Type } from '@nestjs/common';
 import { ApiExtraModels, ApiOkResponse, getSchemaPath } from '@nestjs/swagger';
-import { ChatEntity } from '../../modules/chats/entities/chat.entity';
-import { MessageEntity } from '../../modules/chats/entities/message.entity';
 
 export function ApiData(type: Type, isArray = false) {
     const array = {
@@ -12,7 +10,7 @@ export function ApiData(type: Type, isArray = false) {
     const notArray = { $ref: getSchemaPath(type) };
 
     return applyDecorators(
-        ApiExtraModels(ChatEntity, MessageEntity),
+        ApiExtraModels(type),
         ApiOkResponse({
             schema: {
                 anyOf: [
