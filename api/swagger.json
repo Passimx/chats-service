@@ -68,7 +68,10 @@
 							}
 						}
 					}
-				}
+				},
+				"tags": [
+					"Chats"
+				]
 			},
 			"get": {
 				"operationId": "ChatsController_getChats",
@@ -159,7 +162,10 @@
 							}
 						}
 					}
-				}
+				},
+				"tags": [
+					"Chats"
+				]
 			}
 		},
 		"/chats/{id}": {
@@ -222,12 +228,15 @@
 							}
 						}
 					}
-				}
+				},
+				"tags": [
+					"Chats"
+				]
 			}
 		},
 		"/chats/join": {
 			"post": {
-				"operationId": "ChatsController_favoritesChats",
+				"operationId": "ChatsController_join",
 				"parameters": [
 					{
 						"name": "socket_id",
@@ -265,7 +274,7 @@
 												"data": {
 													"type": "array",
 													"items": {
-														"$ref": "#/components/schemas/FavoriteChat"
+														"$ref": "#/components/schemas/ChatEntity"
 													}
 												}
 											},
@@ -295,7 +304,10 @@
 							}
 						}
 					}
-				}
+				},
+				"tags": [
+					"Chats"
+				]
 			}
 		},
 		"/messages": {
@@ -356,7 +368,10 @@
 							}
 						}
 					}
-				}
+				},
+				"tags": [
+					"Messages"
+				]
 			},
 			"get": {
 				"operationId": "MessagesController_getMessages",
@@ -365,6 +380,7 @@
 						"name": "chatId",
 						"required": true,
 						"in": "query",
+						"description": "Chat id",
 						"schema": {
 							"type": "string"
 						}
@@ -444,7 +460,10 @@
 							}
 						}
 					}
-				}
+				},
+				"tags": [
+					"Messages"
+				]
 			}
 		}
 	},
@@ -461,7 +480,7 @@
 	"tags": [],
 	"servers": [
 		{
-			"url": "http://localhost:8020",
+			"url": "http://localhost:6020",
 			"description": "development"
 		}
 	],
@@ -561,22 +580,6 @@
 				},
 				"required": [
 					"title"
-				]
-			},
-			"FavoriteChat": {
-				"type": "object",
-				"properties": {
-					"chatId": {
-						"type": "string",
-						"description": "Id chat"
-					},
-					"lastMessage": {
-						"$ref": "#/components/schemas/MessageEntity"
-					}
-				},
-				"required": [
-					"chatId",
-					"lastMessage"
 				]
 			},
 			"ChatDto": {
