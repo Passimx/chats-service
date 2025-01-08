@@ -227,7 +227,7 @@
 		},
 		"/chats/join": {
 			"post": {
-				"operationId": "ChatsController_favoritesChats",
+				"operationId": "ChatsController_joinChats",
 				"parameters": [
 					{
 						"name": "socket_id",
@@ -266,6 +266,79 @@
 													"type": "array",
 													"items": {
 														"$ref": "#/components/schemas/FavoriteChat"
+													}
+												}
+											},
+											"required": [
+												"success",
+												"data"
+											]
+										},
+										{
+											"type": "object",
+											"properties": {
+												"success": {
+													"type": "boolean",
+													"example": false
+												},
+												"data": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"success",
+												"data"
+											]
+										}
+									]
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/chats/leave": {
+			"post": {
+				"operationId": "ChatsController_leaveChats",
+				"parameters": [
+					{
+						"name": "socket_id",
+						"required": true,
+						"in": "header",
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/LeaveChatsDto"
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"type": "object",
+											"properties": {
+												"success": {
+													"type": "boolean",
+													"example": true
+												},
+												"data": {
+													"type": "array",
+													"items": {
+														"$ref": "#/components/schemas/LeaveChatsDto"
 													}
 												}
 											},
@@ -461,7 +534,7 @@
 	"tags": [],
 	"servers": [
 		{
-			"url": "http://localhost:8020",
+			"url": "http://localhost:6020",
 			"description": "development"
 		}
 	],
@@ -608,6 +681,21 @@
 				},
 				"required": [
 					"chats"
+				]
+			},
+			"LeaveChatsDto": {
+				"type": "object",
+				"properties": {
+					"chatIds": {
+						"description": "Id chat",
+						"type": "array",
+						"items": {
+							"type": "string"
+						}
+					}
+				},
+				"required": [
+					"chatIds"
 				]
 			},
 			"CreateMessageDto": {

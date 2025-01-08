@@ -157,4 +157,16 @@ export class ChatsService {
 
         return new DataResponse<FavoriteChat[]>(response);
     }
+
+    async leaveChats(chatIds: string[], socketId: string): Promise<DataResponse<string[]>> {
+        const filterLeaveChat = await this.chatRepository.find({
+            id: { $in: chatIds },
+        });
+
+        const chatIdsFound = filterLeaveChat.map((chat) => chat.id);
+        const response: DataResponse<string[]> = new DataResponse<string[]>(chatIdsFound);
+        this.queueService.sendMessage(TopicsEnum.LEAVE, socketId, EventsEnum.JOIN_CHAT, response);
+
+        return response;
+    }
 }

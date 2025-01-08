@@ -6,6 +6,7 @@ import { ChatEntity } from '../entities/chat.entity';
 import { DataResponse } from '../../../common/swagger/data-response.dto';
 import { ApiData } from '../../../common/swagger/api-data.decorator';
 import { FavoriteChat, FavoriteChatsDto } from '../dto/requests/post-favorites-chat.dto';
+import { LeaveChatsDto } from '../dto/requests/post-leave-chat.dto';
 
 @Controller('chats')
 export class ChatsController {
@@ -34,10 +35,19 @@ export class ChatsController {
 
     @ApiData(FavoriteChat, true)
     @Post('join')
-    async favoritesChats(
+    async joinChats(
         @Body() favoriteChatsDto: FavoriteChatsDto,
         @Headers('socket_id') socketId: string,
     ): Promise<DataResponse<string | FavoriteChat[]>> {
         return this.chatsService.favoriteChats(favoriteChatsDto.chats, socketId);
+    }
+
+    @ApiData(LeaveChatsDto, true)
+    @Post('leave')
+    async leaveChats(
+        @Body() leaveChatsDto: LeaveChatsDto,
+        @Headers('socket_id') socketId: string,
+    ): Promise<DataResponse<string[]>> {
+        return this.chatsService.leaveChats(leaveChatsDto.chatIds, socketId);
     }
 }
