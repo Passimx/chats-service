@@ -45,7 +45,7 @@ export class ChatsController {
     }
 
     @Post('leave')
-    async leave(@Body() leaveChatsDto: LeaveChatsDto, @Headers('socket_id') socketId: string) {
+    async leave(@Body() leaveChatsDto: LeaveChatsDto, @Headers('socket_id') socketId: string): Promise<void> {
         this.chatsService.leave(leaveChatsDto.chatIds, socketId);
     }
 }
