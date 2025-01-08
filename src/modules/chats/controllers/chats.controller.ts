@@ -44,12 +44,8 @@ export class ChatsController {
         return this.chatsService.join(favoriteChatsDto.chats, socketId);
     }
 
-    @ApiData(LeaveChatsDto, true)
     @Post('leave')
-    async leaveChats(
-        @Body() leaveChatsDto: LeaveChatsDto,
-        @Headers('socket_id') socketId: string,
-    ): Promise<DataResponse<string[]>> {
-        return this.chatsService.leaveChats(leaveChatsDto.chatIds, socketId);
+    async leave(@Body() leaveChatsDto: LeaveChatsDto, @Headers('socket_id') socketId: string) {
+        this.chatsService.leave(leaveChatsDto.chatIds, socketId);
     }
 }

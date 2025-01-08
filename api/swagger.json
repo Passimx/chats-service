@@ -312,7 +312,7 @@
 		},
 		"/chats/leave": {
 			"post": {
-				"operationId": "ChatsController_leaveChats",
+				"operationId": "ChatsController_leave",
 				"parameters": [
 					{
 						"name": "socket_id",
@@ -334,51 +334,8 @@
 					}
 				},
 				"responses": {
-					"200": {
-						"description": "",
-						"content": {
-							"application/json": {
-								"schema": {
-									"anyOf": [
-										{
-											"type": "object",
-											"properties": {
-												"success": {
-													"type": "boolean",
-													"example": true
-												},
-												"data": {
-													"type": "array",
-													"items": {
-														"$ref": "#/components/schemas/LeaveChatsDto"
-													}
-												}
-											},
-											"required": [
-												"success",
-												"data"
-											]
-										},
-										{
-											"type": "object",
-											"properties": {
-												"success": {
-													"type": "boolean",
-													"example": false
-												},
-												"data": {
-													"type": "string"
-												}
-											},
-											"required": [
-												"success",
-												"data"
-											]
-										}
-									]
-								}
-							}
-						}
+					"201": {
+						"description": ""
 					}
 				},
 				"tags": [
@@ -693,10 +650,11 @@
 				"type": "object",
 				"properties": {
 					"chatIds": {
-						"description": "Id chat",
 						"type": "array",
+						"description": "Id chat",
 						"items": {
-							"type": "string"
+							"type": "string",
+							"format": "uuid"
 						}
 					}
 				},

@@ -137,15 +137,13 @@ export class ChatsService {
         return new DataResponse<ChatEntity[]>(response);
     }
 
-    async leaveChats(chatIds: string[], socketId: string): Promise<DataResponse<string[]>> {
+    async leave(chatIds: string[], socketId: string) {
         const filterLeaveChat = await this.chatRepository.find({
             id: { $in: chatIds },
         });
 
         const chatIdsFound = filterLeaveChat.map((chat) => chat.id);
         const response: DataResponse<string[]> = new DataResponse<string[]>(chatIdsFound);
-        this.queueService.sendMessage(TopicsEnum.LEAVE, socketId, EventsEnum.JOIN_CHAT, response);
-
-        return response;
+        this.queueService.sendMessage(TopicsEnum.LEAVE, socketId, EventsEnum.LEAVE_CHAT, response);
     }
 }
