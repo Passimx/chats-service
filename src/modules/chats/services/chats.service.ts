@@ -11,7 +11,7 @@ import { SystemMessageLanguageEnum } from '../types/system-message-language.enum
 import { ChatTypeEnum } from '../types/chat-type.enum';
 import { TopicsEnum } from '../../queue/types/topics.enum';
 import { MessageEntity } from '../entities/message.entity';
-import { ChatsDto, FavoriteChat } from '../dto/requests/post-favorites-chat.dto';
+import { ChatsDto } from '../dto/requests/post-favorites-chat.dto';
 import { MessagesService } from './messages.service';
 
 @Injectable()
@@ -109,12 +109,15 @@ export class ChatsService {
         return new DataResponse(MessageErrorLanguageEnum.CHAT_WITH_ID_NOT_FOUND);
     }
 
-    async favoriteChats(chatsMap: ChatsDto[], socketId: string): Promise<DataResponse<string | FavoriteChat[]>> {
-        const response: FavoriteChat[] = [];
-        const responseChat: string[] = [];
-        const uniqueChatIds = new Set<string>();
+    async join(chats: ChatsDto[], socketId: string): Promise<DataResponse<string | ChatEntity[]>> {
+        const response: ChatEntity[] = [];
+        const chatIdsSet = new Set<string>();
 
-        const promises = chatsMap.map(async ({ chatId, lastMessage }) => {
+        const promises = chats.map(async ({ chatId, lastMessage }) => {
+            if (chatIdsSet.has(chatId)) return;
+
+            chatIdsSet.add(chatId);
+
             const chat = await this.chatRepository.findOne(
                 { id: chatId, type: ChatTypeEnum.IS_OPEN },
                 {
@@ -123,38 +126,14 @@ export class ChatsService {
                 },
             );
 
-            if (!chat) {
-                return;
-            }
-
-            responseChat.push(chatId);
-
-            if (chat.countMessages <= lastMessage) {
-                return;
-            }
-
-            const lastMessageEntity = chat.message;
-
-            if (lastMessageEntity && !uniqueChatIds.has(chatId)) {
-                uniqueChatIds.add(chatId);
-
-                return new FavoriteChat(chatId, lastMessageEntity);
-            }
-
-            return;
+            if (chat && chat.countMessages > lastMessage) response.push(chat);
         });
 
-        const results = await Promise.allSettled(promises);
+        await Promise.allSettled(promises);
 
-        results.forEach((result) => {
-            if (result.status === 'fulfilled' && result.value) {
-                response.push(result.value);
-            }
-        });
-
-        const responseChats = new DataResponse<string[]>(responseChat);
+        const responseChats = new DataResponse<string[]>(Array.from(chatIdsSet));
         this.queueService.sendMessage(TopicsEnum.JOIN, socketId, EventsEnum.JOIN_CHAT, responseChats);
 
-        return new DataResponse<FavoriteChat[]>(response);
+        return new DataResponse<ChatEntity[]>(response);
     }
 }
