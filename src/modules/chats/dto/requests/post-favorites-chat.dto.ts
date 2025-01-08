@@ -1,11 +1,11 @@
-import { IsArray, IsInt, IsNumber, IsString, ValidateNested } from 'class-validator';
+import { IsArray, IsInt, IsNumber, IsUUID, ValidateNested } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 
 export type ChatsDto = { chatId: string; lastMessage: number };
 
 class ChatDto {
-    @IsString()
+    @IsUUID()
     @ApiProperty({ description: 'Id chat' })
     readonly chatId!: string;
 
