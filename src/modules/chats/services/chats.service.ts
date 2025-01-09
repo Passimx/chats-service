@@ -137,7 +137,7 @@ export class ChatsService {
         return new DataResponse<ChatEntity[]>(response);
     }
 
-    async leave(chatIds: string[], socketId: string): Promise<void> {
+    async leave(chatIds: string[], socketId: string): Promise<DataResponse<object>> {
         const filterLeaveChat = await this.chatRepository.find({
             id: { $in: chatIds },
         });
@@ -145,5 +145,7 @@ export class ChatsService {
         const chatIdsFound = filterLeaveChat.map((chat) => chat.id);
         const response: DataResponse<string[]> = new DataResponse<string[]>(chatIdsFound);
         this.queueService.sendMessage(TopicsEnum.LEAVE, socketId, EventsEnum.LEAVE_CHAT, response);
+
+        return new DataResponse<object>({});
     }
 }

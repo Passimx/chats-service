@@ -8,6 +8,7 @@ import { DataResponse } from '../../../common/swagger/data-response.dto';
 import { ApiData } from '../../../common/swagger/api-data.decorator';
 import { FavoriteChatsDto } from '../dto/requests/post-favorites-chat.dto';
 import { LeaveChatsDto } from '../dto/requests/post-leave-chat.dto';
+import { ApiDataEmpty } from '../../../common/swagger/api-data-empty.decorator';
 
 @ApiTags('Chats')
 @Controller('chats')
@@ -25,19 +26,19 @@ export class ChatsController {
 
     @Get()
     @ApiData(ChatEntity, true)
-    async getChats(@Query() query: QueryGetChatsDto): Promise<DataResponse<ChatEntity[]>> {
-        return await this.chatsService.getOpenChats(query.title, query.offset, query.limit, query.notFavoriteChatIds);
+    getChats(@Query() query: QueryGetChatsDto): Promise<DataResponse<ChatEntity[]>> {
+        return this.chatsService.getOpenChats(query.title, query.offset, query.limit, query.notFavoriteChatIds);
     }
 
     @Get(':id')
     @ApiData(ChatEntity, true)
-    async getChat(@Param('id') id: string): Promise<DataResponse<string | ChatEntity>> {
+    getChat(@Param('id') id: string): Promise<DataResponse<string | ChatEntity>> {
         return this.chatsService.findChat(id);
     }
 
     @Post('join')
     @ApiData(ChatEntity, true)
-    async join(
+    join(
         @Body() favoriteChatsDto: FavoriteChatsDto,
         @Headers('socket_id') socketId: string,
     ): Promise<DataResponse<string | ChatEntity[]>> {
@@ -45,7 +46,8 @@ export class ChatsController {
     }
 
     @Post('leave')
-    async leave(@Body() leaveChatsDto: LeaveChatsDto, @Headers('socket_id') socketId: string): Promise<void> {
-        this.chatsService.leave(leaveChatsDto.chatIds, socketId);
+    @ApiDataEmpty()
+    leave(@Body() leaveChatsDto: LeaveChatsDto, @Headers('socket_id') socketId: string): Promise<DataResponse<object>> {
+        return this.chatsService.leave(leaveChatsDto.chatIds, socketId);
     }
 }
