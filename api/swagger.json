@@ -107,7 +107,7 @@
 						"schema": {
 							"type": "array",
 							"items": {
-								"type": "number"
+								"type": "string"
 							}
 						}
 					}
@@ -461,7 +461,7 @@
 	"tags": [],
 	"servers": [
 		{
-			"url": "http://localhost:8020",
+			"url": "http://localhost:6020",
 			"description": "development"
 		}
 	],
@@ -489,6 +489,9 @@
 					"type": {
 						"type": "string"
 					},
+					"maxUsersOnline": {
+						"type": "number"
+					},
 					"message": {
 						"type": "array",
 						"items": {
@@ -502,7 +505,8 @@
 					"title",
 					"countMessages",
 					"createdUserId",
-					"type"
+					"type",
+					"maxUsersOnline"
 				]
 			},
 			"MessageEntity": {

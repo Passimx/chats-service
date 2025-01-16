@@ -29,6 +29,12 @@ export class ChatEntity extends CreatedEntity {
         this.title = title;
     }
 
+    @ApiProperty()
+    @Property({
+        default: 0,
+    })
+    readonly maxUsersOnline!: number;
+
     @ApiPropertyOptional({ type: () => MessageEntity, isArray: true })
     @OneToOne(() => MessageEntity, (message) => message.chat)
     readonly message!: MessageEntity;

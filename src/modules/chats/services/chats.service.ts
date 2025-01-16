@@ -71,7 +71,10 @@ export class ChatsService {
                     limit,
                     offset: offset,
 
-                    orderBy: { title: 'ASC', message: { createdAt: 'DESC NULLS LAST' } },
+                    orderBy: {
+                        maxUsersOnline: 'DESC NULLS LAST',
+                        message: { createdAt: 'DESC NULLS LAST' },
+                    },
                     populate: ['message'],
                 },
             );
