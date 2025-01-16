@@ -68,7 +68,10 @@
 							}
 						}
 					}
-				}
+				},
+				"tags": [
+					"Chats"
+				]
 			},
 			"get": {
 				"operationId": "ChatsController_getChats",
@@ -159,7 +162,10 @@
 							}
 						}
 					}
-				}
+				},
+				"tags": [
+					"Chats"
+				]
 			}
 		},
 		"/chats/{id}": {
@@ -222,12 +228,15 @@
 							}
 						}
 					}
-				}
+				},
+				"tags": [
+					"Chats"
+				]
 			}
 		},
 		"/chats/join": {
 			"post": {
-				"operationId": "ChatsController_favoritesChats",
+				"operationId": "ChatsController_join",
 				"parameters": [
 					{
 						"name": "socket_id",
@@ -265,7 +274,7 @@
 												"data": {
 													"type": "array",
 													"items": {
-														"type": "number"
+														"$ref": "#/components/schemas/ChatEntity"
 													}
 												}
 											},
@@ -295,7 +304,83 @@
 							}
 						}
 					}
-				}
+				},
+				"tags": [
+					"Chats"
+				]
+			}
+		},
+		"/chats/leave": {
+			"post": {
+				"operationId": "ChatsController_leave",
+				"parameters": [
+					{
+						"name": "socket_id",
+						"required": true,
+						"in": "header",
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/LeaveChatsDto"
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"type": "object",
+											"properties": {
+												"success": {
+													"type": "boolean",
+													"example": true
+												},
+												"data": {
+													"type": "object"
+												}
+											},
+											"required": [
+												"success",
+												"data"
+											]
+										},
+										{
+											"type": "object",
+											"properties": {
+												"success": {
+													"type": "boolean",
+													"example": false
+												},
+												"data": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"success",
+												"data"
+											]
+										}
+									]
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Chats"
+				]
 			}
 		},
 		"/messages": {
@@ -356,7 +441,10 @@
 							}
 						}
 					}
-				}
+				},
+				"tags": [
+					"Messages"
+				]
 			},
 			"get": {
 				"operationId": "MessagesController_getMessages",
@@ -365,6 +453,7 @@
 						"name": "chatId",
 						"required": true,
 						"in": "query",
+						"description": "Chat id",
 						"schema": {
 							"type": "string"
 						}
@@ -444,7 +533,10 @@
 							}
 						}
 					}
-				}
+				},
+				"tags": [
+					"Messages"
+				]
 			}
 		}
 	},
@@ -567,18 +659,51 @@
 					"title"
 				]
 			},
+			"ChatDto": {
+				"type": "object",
+				"properties": {
+					"chatId": {
+						"type": "string",
+						"description": "Id chat"
+					},
+					"lastMessage": {
+						"type": "number",
+						"description": "Number last message"
+					}
+				},
+				"required": [
+					"chatId",
+					"lastMessage"
+				]
+			},
 			"FavoriteChatsDto": {
 				"type": "object",
 				"properties": {
-					"favoriteChatIds": {
+					"chats": {
 						"type": "array",
 						"items": {
-							"type": "number"
+							"$ref": "#/components/schemas/ChatDto"
 						}
 					}
 				},
 				"required": [
-					"favoriteChatIds"
+					"chats"
+				]
+			},
+			"LeaveChatsDto": {
+				"type": "object",
+				"properties": {
+					"chatIds": {
+						"type": "array",
+						"description": "Id chat",
+						"items": {
+							"type": "string",
+							"format": "uuid"
+						}
+					}
+				},
+				"required": [
+					"chatIds"
 				]
 			},
 			"CreateMessageDto": {

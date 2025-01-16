@@ -1,16 +1,8 @@
-import { applyDecorators, Type } from '@nestjs/common';
-import { ApiExtraModels, ApiOkResponse, getSchemaPath } from '@nestjs/swagger';
+import { applyDecorators } from '@nestjs/common';
+import { ApiOkResponse } from '@nestjs/swagger';
 
-export function ApiData(type: Type, isArray = false) {
-    const array = {
-        type: 'array',
-        items: { $ref: getSchemaPath(type) },
-    };
-
-    const notArray = { $ref: getSchemaPath(type) };
-
-    return applyDecorators(
-        ApiExtraModels(type),
+export const ApiDataEmpty = () =>
+    applyDecorators(
         ApiOkResponse({
             schema: {
                 anyOf: [
@@ -18,7 +10,7 @@ export function ApiData(type: Type, isArray = false) {
                         type: 'object',
                         properties: {
                             success: { type: 'boolean', example: true },
-                            data: isArray ? array : notArray,
+                            data: { type: 'object' },
                         },
                         required: ['success', 'data'],
                     },
@@ -38,4 +30,3 @@ export function ApiData(type: Type, isArray = false) {
             },
         }),
     );
-}

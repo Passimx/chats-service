@@ -1,5 +1,3 @@
-// @ts-ignore
-
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { EntityRepository } from '@mikro-orm/postgresql';
@@ -12,11 +10,15 @@ import { MessageErrorLanguageEnum } from '../types/message-error-language.enum';
 import { SystemMessageLanguageEnum } from '../types/system-message-language.enum';
 import { ChatTypeEnum } from '../types/chat-type.enum';
 import { TopicsEnum } from '../../queue/types/topics.enum';
+import { MessageEntity } from '../entities/message.entity';
+import { ChatsDto } from '../dto/requests/post-favorites-chat.dto';
 import { MessagesService } from './messages.service';
 
 @Injectable()
 export class ChatsService {
     constructor(
+        @InjectRepository(MessageEntity)
+        readonly messageRepository: EntityRepository<MessageEntity>,
         @InjectRepository(ChatEntity)
         private readonly chatRepository: EntityRepository<ChatEntity>, // chatRepository - это объект для запросов в бд
         private readonly queueService: QueueService,
@@ -110,20 +112,43 @@ export class ChatsService {
         return new DataResponse(MessageErrorLanguageEnum.CHAT_WITH_ID_NOT_FOUND);
     }
 
-    async favoriteChats(favoriteChatIds: string[], socketId: string): Promise<DataResponse<string | string[]>> {
-        const newFavoriteChats = await this.chatRepository.count({
-            id: { $in: favoriteChatIds },
-            type: ChatTypeEnum.IS_OPEN,
+    async join(chats: ChatsDto[], socketId: string): Promise<DataResponse<string | ChatEntity[]>> {
+        const response: ChatEntity[] = [];
+        const chatIdsSet = new Set<string>();
+
+        const promises = chats.map(async ({ chatId, lastMessage }) => {
+            if (chatIdsSet.has(chatId)) return;
+
+            chatIdsSet.add(chatId);
+
+            const chat = await this.chatRepository.findOne(
+                { id: chatId, type: ChatTypeEnum.IS_OPEN },
+                {
+                    orderBy: { message: { createdAt: 'DESC NULLS LAST' } },
+                    populate: ['message'],
+                },
+            );
+
+            if (chat && chat.countMessages > lastMessage) response.push(chat);
         });
 
-        const response: DataResponse<string[]> = new DataResponse<string[]>(favoriteChatIds);
+        await Promise.allSettled(promises);
 
-        if (favoriteChatIds.length !== newFavoriteChats) {
-            return new DataResponse<string>(MessageErrorLanguageEnum.SOME_CHATS_NOT_FOUND);
-        }
+        const responseChats = new DataResponse<string[]>(Array.from(chatIdsSet));
+        this.queueService.sendMessage(TopicsEnum.JOIN, socketId, EventsEnum.JOIN_CHAT, responseChats);
 
-        this.queueService.sendMessage(TopicsEnum.JOIN, socketId, EventsEnum.JOIN_CHAT, response);
+        return new DataResponse<ChatEntity[]>(response);
+    }
 
-        return response;
+    async leave(chatIds: string[], socketId: string): Promise<DataResponse<object>> {
+        const filterLeaveChat = await this.chatRepository.find({
+            id: { $in: chatIds },
+        });
+
+        const chatIdsFound = filterLeaveChat.map((chat) => chat.id);
+        const response: DataResponse<string[]> = new DataResponse<string[]>(chatIdsFound);
+        this.queueService.sendMessage(TopicsEnum.LEAVE, socketId, EventsEnum.LEAVE_CHAT, response);
+
+        return new DataResponse<object>({});
     }
 }
