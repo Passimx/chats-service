@@ -1,5 +1,6 @@
 import { Body, Controller, Get, Headers, Param, Post, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
+import { MessagePattern } from '@nestjs/microservices';
 import { ChatsService } from '../services/chats.service';
 import { CreateOpenChatDto } from '../dto/requests/create-open-chat.dto';
 import { QueryGetChatsDto } from '../dto/requests/query-get-chats.dto';
@@ -9,6 +10,7 @@ import { ApiData } from '../../../common/swagger/api-data.decorator';
 import { FavoriteChatsDto } from '../dto/requests/post-favorites-chat.dto';
 import { LeaveChatsDto } from '../dto/requests/post-leave-chat.dto';
 import { ApiDataEmpty } from '../../../common/swagger/api-data-empty.decorator';
+import { TopicsEnum } from '../../queue/types/topics.enum';
 
 @ApiTags('Chats')
 @Controller('chats')
@@ -50,4 +52,7 @@ export class ChatsController {
     leave(@Body() leaveChatsDto: LeaveChatsDto, @Headers('socket_id') socketId: string): Promise<DataResponse<object>> {
         return this.chatsService.leave(leaveChatsDto.chatIds, socketId);
     }
+
+    @MessagePattern(TopicsEnum.ONLINE)
+    onlineCountUsers() {}
 }
