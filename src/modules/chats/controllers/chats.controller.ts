@@ -11,6 +11,7 @@ import { FavoriteChatsDto } from '../dto/requests/post-favorites-chat.dto';
 import { LeaveChatsDto } from '../dto/requests/post-leave-chat.dto';
 import { ApiDataEmpty } from '../../../common/swagger/api-data-empty.decorator';
 import { TopicsEnum } from '../../queue/types/topics.enum';
+import { OnlineCountUsers } from '../types/max-online-users';
 
 @ApiTags('Chats')
 @Controller('chats')
@@ -54,5 +55,8 @@ export class ChatsController {
     }
 
     @MessagePattern(TopicsEnum.ONLINE)
-    onlineCountUsers() {}
+    onlineCountUsers(message: OnlineCountUsers) {
+        const { roomName, onlineUsers } = message.data;
+        this.chatsService.updateMaxUsersOnline(roomName, onlineUsers);
+    }
 }
