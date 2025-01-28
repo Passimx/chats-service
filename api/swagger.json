@@ -581,6 +581,9 @@
 					"type": {
 						"type": "string"
 					},
+					"maxUsersOnline": {
+						"type": "number"
+					},
 					"message": {
 						"type": "array",
 						"items": {
@@ -594,7 +597,8 @@
 					"title",
 					"countMessages",
 					"createdUserId",
-					"type"
+					"type",
+					"maxUsersOnline"
 				]
 			},
 			"MessageEntity": {

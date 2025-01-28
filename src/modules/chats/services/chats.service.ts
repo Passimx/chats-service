@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@mikro-orm/nestjs';
-import { EntityRepository } from '@mikro-orm/postgresql';
+import { EntityRepository, QueryOrder } from '@mikro-orm/postgresql';
 import { ChatEntity } from '../entities/chat.entity';
 import { DataResponse } from '../../../common/swagger/data-response.dto';
 import { EventsEnum } from '../../queue/types/events.enum';
@@ -73,7 +73,10 @@ export class ChatsService {
                     limit,
                     offset: offset,
 
-                    orderBy: { title: 'ASC', message: { createdAt: 'DESC NULLS LAST' } },
+                    orderBy: {
+                        maxUsersOnline: QueryOrder.DESC_NULLS_LAST,
+                        message: { createdAt: QueryOrder.DESC_NULLS_LAST },
+                    },
                     populate: ['message'],
                 },
             );
@@ -147,5 +150,15 @@ export class ChatsService {
         this.queueService.sendMessage(TopicsEnum.LEAVE, socketId, EventsEnum.LEAVE_CHAT, response);
 
         return new DataResponse<object>({});
+    }
+
+    updateMaxUsersOnline(chatId: string, maxOnline: number): Promise<number> {
+        return this.chatRepository.nativeUpdate(
+            {
+                id: chatId,
+                maxUsersOnline: { $lt: maxOnline },
+            },
+            { maxUsersOnline: maxOnline },
+        );
     }
 }

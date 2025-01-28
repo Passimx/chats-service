@@ -7,6 +7,7 @@ import { Envs } from './common/envs/env';
 import { MigrationService } from './common/config/mikro-orm/migration.service';
 import { logger } from './common/logger/logger';
 import { useSwagger } from './common/swagger/swagger';
+import { useKafka } from './common/config/kafka/use-kafka';
 
 export class App {
     private readonly ADDRESS: string;
@@ -44,6 +45,8 @@ export class App {
         );
 
         if (Envs.swagger.isWriteConfig) useSwagger(app);
+
+        await useKafka(app);
 
         await app.listen(this.PORT, this.ADDRESS);
 

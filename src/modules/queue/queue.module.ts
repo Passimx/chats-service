@@ -13,14 +13,19 @@ import { InjectEnum } from './types/inject.enum';
                 options: {
                     client: {
                         brokers: [`${Envs.kafka.host}:${Envs.kafka.port}`],
-                        sasl: { username: Envs.kafka.user, password: Envs.kafka.password, mechanism: 'plain' },
+                        sasl: {
+                            username: Envs.kafka.user,
+                            password: Envs.kafka.password,
+                            mechanism: 'plain',
+                        },
                     },
-                    producerOnlyMode: true,
+                    consumer: {
+                        groupId: 'chat-service-group',
+                    },
                 },
             },
         ]),
     ],
-
     providers: [QueueService],
     exports: [QueueService],
 })

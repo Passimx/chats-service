@@ -7,12 +7,6 @@ import { MessageEntity } from './message.entity';
 @Entity({ tableName: 'chats' })
 @Index({ type: 'GIN', properties: 'title' })
 export class ChatEntity extends CreatedEntity {
-    constructor(title: string) {
-        super();
-
-        this.title = title;
-    }
-
     @ApiProperty()
     @Property()
     readonly title: string;
@@ -28,6 +22,18 @@ export class ChatEntity extends CreatedEntity {
     @ApiProperty()
     @Enum({ default: ChatTypeEnum.IS_OPEN, items: () => ChatTypeEnum, nativeEnumName: 'chat_type_enum' })
     readonly type!: ChatTypeEnum;
+
+    constructor(title: string) {
+        super();
+
+        this.title = title;
+    }
+
+    @ApiProperty()
+    @Property({
+        default: 0,
+    })
+    maxUsersOnline!: number;
 
     @ApiPropertyOptional({ type: () => MessageEntity, isArray: true })
     @OneToOne(() => MessageEntity, (message) => message.chat)
