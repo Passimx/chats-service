@@ -2,9 +2,10 @@ import { Entity, Enum, Index, OneToOne, Property } from '@mikro-orm/core';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { CreatedEntity } from '../../../common/entities/created.entity';
 import { ChatTypeEnum } from '../types/chat-type.enum';
+import { ChatsRepository } from '../repositories/chats.repository';
 import { MessageEntity } from './message.entity';
 
-@Entity({ tableName: 'chats' })
+@Entity({ tableName: 'chats', repository: () => ChatsRepository })
 @Index({ type: 'GIN', properties: 'title' })
 export class ChatEntity extends CreatedEntity {
     @ApiProperty()
@@ -13,7 +14,7 @@ export class ChatEntity extends CreatedEntity {
 
     @ApiProperty()
     @Property({ default: 0 })
-    countMessages!: number;
+    readonly countMessages!: number;
 
     @ApiProperty()
     @Property({ nullable: true })
@@ -31,9 +32,9 @@ export class ChatEntity extends CreatedEntity {
 
     @ApiProperty()
     @Property({
-        default: 0,
+        default: 1,
     })
-    maxUsersOnline!: number;
+    readonly maxUsersOnline!: number;
 
     @ApiPropertyOptional({ type: () => MessageEntity, isArray: true })
     @OneToOne(() => MessageEntity, (message) => message.chat)
