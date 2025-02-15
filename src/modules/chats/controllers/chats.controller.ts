@@ -24,13 +24,13 @@ export class ChatsController {
         @Body() body: CreateOpenChatDto,
         @Headers('socket_id') socketId: string,
     ): Promise<DataResponse<string | ChatEntity>> {
-        return this.chatsService.createOpenChat(body.title, socketId);
+        return this.chatsService.createOpenChat(socketId, body);
     }
 
     @Get()
     @ApiData(ChatEntity, true)
     getChats(@Query() query: QueryGetChatsDto): Promise<DataResponse<ChatEntity[]>> {
-        return this.chatsService.getOpenChats(query.title, query.offset, query.limit, query.notFavoriteChatIds);
+        return this.chatsService.getOpenChats(query);
     }
 
     @Get(':id')

@@ -53,7 +53,6 @@ export class MessagesService {
             message,
             parentMessageId,
         );
-        messageEntity.chat = chat;
 
         await this.messageRepository.insert(messageEntity);
 

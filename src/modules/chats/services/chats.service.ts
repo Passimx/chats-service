@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@mikro-orm/nestjs';
-import { EntityRepository, QueryOrder } from '@mikro-orm/postgresql';
+import { EntityRepository } from '@mikro-orm/postgresql';
 import { ChatEntity } from '../entities/chat.entity';
 import { DataResponse } from '../../../common/swagger/data-response.dto';
 import { EventsEnum } from '../../queue/types/events.enum';
@@ -12,6 +12,9 @@ import { ChatTypeEnum } from '../types/chat-type.enum';
 import { TopicsEnum } from '../../queue/types/topics.enum';
 import { MessageEntity } from '../entities/message.entity';
 import { ChatsDto } from '../dto/requests/post-favorites-chat.dto';
+import { ChatsRepository } from '../repositories/chats.repository';
+import { QueryGetChatsDto } from '../dto/requests/query-get-chats.dto';
+import { CreateOpenChatDto } from '../dto/requests/create-open-chat.dto';
 import { MessagesService } from './messages.service';
 
 @Injectable()
@@ -19,16 +22,15 @@ export class ChatsService {
     constructor(
         @InjectRepository(MessageEntity)
         readonly messageRepository: EntityRepository<MessageEntity>,
-        @InjectRepository(ChatEntity)
-        private readonly chatRepository: EntityRepository<ChatEntity>, // chatRepository - это объект для запросов в бд
         private readonly queueService: QueueService,
         private readonly messagesService: MessagesService,
+        readonly chatsRepository: ChatsRepository,
     ) {}
 
-    async createOpenChat(title: string, socketId: string): Promise<DataResponse<ChatEntity>> {
+    async createOpenChat(socketId: string, { title }: CreateOpenChatDto): Promise<DataResponse<ChatEntity>> {
         const chatEntity = new ChatEntity(title);
 
-        await this.chatRepository.insert(chatEntity);
+        await this.chatsRepository.insert(chatEntity);
 
         await this.messagesService.createMessage(
             chatEntity.id,
@@ -37,7 +39,7 @@ export class ChatsService {
             SystemMessageLanguageEnum.create_chat,
             undefined,
         );
-        const createChat = await this.chatRepository.findOne({ id: chatEntity.id }, { populate: ['message'] });
+        const createChat = await this.chatsRepository.findOne({ id: chatEntity.id }, { populate: ['message'] });
 
         const response = new DataResponse<ChatEntity>(createChat!);
         this.queueService.sendMessage(TopicsEnum.EMIT, socketId, EventsEnum.CREATE_CHAT, response);
@@ -53,63 +55,18 @@ export class ChatsService {
         return response;
     }
 
-    async getOpenChats(
-        title: string,
-        offset: number,
-        limit?: number,
-        notFavoriteChatIds?: string[],
-    ): Promise<DataResponse<ChatEntity[]>> {
-        if (title) {
-            const queryWords = title.toLowerCase().split(' ');
-            const arrayWords = queryWords.map((word) => ({
-                $or: [{ title: { $ilike: `${word}%` } }, { title: { $ilike: `% ${word}%` } }],
-            }));
-            const getChatTitle = await this.chatRepository.find(
-                {
-                    $and: arrayWords,
-                    id: { $nin: notFavoriteChatIds },
-                },
-                {
-                    limit,
-                    offset: offset,
+    async getOpenChats(query: QueryGetChatsDto): Promise<DataResponse<ChatEntity[]>> {
+        const chats = await this.chatsRepository.findChats(query);
 
-                    orderBy: {
-                        maxUsersOnline: QueryOrder.DESC_NULLS_LAST,
-                        message: { createdAt: QueryOrder.DESC_NULLS_LAST },
-                    },
-                    populate: ['message'],
-                },
-            );
-
-            return new DataResponse(getChatTitle);
-        } else {
-            const getChatNotTitle = await this.chatRepository.find(
-                { id: { $nin: notFavoriteChatIds } },
-                {
-                    limit,
-                    offset: offset,
-                    orderBy: { message: { createdAt: 'DESC NULLS LAST' } },
-                    populate: ['message'],
-                },
-            );
-
-            return new DataResponse(getChatNotTitle);
-        }
+        return new DataResponse(chats);
     }
 
     async findChat(id: string): Promise<DataResponse<string | ChatEntity>> {
-        const chat = await this.chatRepository.findOne(id, {
-            orderBy: {
-                message: { createdAt: 'DESC NULLS LAST' },
-            },
-            populate: ['message'],
-        });
+        const chat = await this.chatsRepository.findChatById(id);
 
-        if (chat) {
-            return new DataResponse(chat);
-        }
+        if (!chat) return new DataResponse(MessageErrorLanguageEnum.CHAT_WITH_ID_NOT_FOUND);
 
-        return new DataResponse(MessageErrorLanguageEnum.CHAT_WITH_ID_NOT_FOUND);
+        return new DataResponse(chat);
     }
 
     async join(chats: ChatsDto[], socketId: string): Promise<DataResponse<string | ChatEntity[]>> {
@@ -121,7 +78,7 @@ export class ChatsService {
 
             chatIdsSet.add(chatId);
 
-            const chat = await this.chatRepository.findOne(
+            const chat = await this.chatsRepository.findOne(
                 { id: chatId, type: ChatTypeEnum.IS_OPEN },
                 {
                     orderBy: { message: { createdAt: 'DESC NULLS LAST' } },
@@ -141,7 +98,7 @@ export class ChatsService {
     }
 
     async leave(chatIds: string[], socketId: string): Promise<DataResponse<object>> {
-        const filterLeaveChat = await this.chatRepository.find({
+        const filterLeaveChat = await this.chatsRepository.find({
             id: { $in: chatIds },
         });
 
@@ -153,7 +110,7 @@ export class ChatsService {
     }
 
     updateMaxUsersOnline(chatId: string, maxOnline: number): Promise<number> {
-        return this.chatRepository.nativeUpdate(
+        return this.chatsRepository.nativeUpdate(
             {
                 id: chatId,
                 maxUsersOnline: { $lt: maxOnline },
