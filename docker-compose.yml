@@ -8,12 +8,26 @@ services:
       POSTGRES_USER: ${PG_USERNAME}
       POSTGRES_PASSWORD: ${PG_PASSWORD}
     command: -p ${PG_PORT}
-    #    volumes:
-    #      - ./data/pg_data:/var/lib/postgresql/data
+    volumes:
+      - ./data/pg_data:/var/lib/postgresql/data
     expose:
       - ${PG_PORT}
     ports:
       - ${PG_PORT}:${PG_PORT}
+
+  nodejs:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: chat_service
+    container_name: chat_service
+    restart: unless-stopped
+    env_file: .env
+    #    environment:
+    #      - PG_HOST=postgres
+    #      - KAFKA_HOST=kafka
+    ports:
+      - ${APP_PORT}:${APP_PORT}
 
   kafka:
     image: 'bitnami/kafka:latest'
