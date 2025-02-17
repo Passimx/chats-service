@@ -28,8 +28,9 @@ export class App {
         }
 
         app.enableCors({
-            origin: ['tons-chat.ru', 'http://tons-chat.ru', 'localhost', 'http://localhost'],
-            credentials: true,
+            origin: 'https://tons-chat.ru', // Разрешаем запросы только с этого домена
+            methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+            credentials: true, // Разрешаем использование кук и токенов
         });
 
         app.useGlobalPipes(
