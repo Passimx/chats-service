@@ -27,7 +27,7 @@ export class App {
             if (Envs.postgres.migrationsRun) await migrationService.migrate();
         }
 
-        app.enableCors({ origin: true, credentials: true });
+        app.enableCors({ origin: 'tons-chat.ru', credentials: true });
 
         app.useGlobalPipes(
             new ValidationPipe({
