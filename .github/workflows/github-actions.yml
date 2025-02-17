@@ -17,3 +17,14 @@ jobs:
         run: |
           docker login -u titproger -p ${{secrets.DOCKER_HUB_TOKEN}}
            docker push titproger/chat_service:latest
+
+  сonnect_vps:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Execute deploy script on VPS
+        run: |
+          ssh -o StrictHostKeyChecking=no -i ${{ secrets.VPS_SSH_KEY }} ${{ secrets.VPS_USER }}@${{ secrets.VPS_IP }} 'cd /home/tit/pasim && ./deploy.sh'
+
