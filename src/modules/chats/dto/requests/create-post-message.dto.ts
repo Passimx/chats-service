@@ -22,9 +22,9 @@ export class CreateMessageDto {
         description: 'Message',
 
         minLength: 1,
-        maxLength: 1024,
+        maxLength: 4096,
     })
-    @Length(1, 1024)
+    @Length(1, 4096)
     @IsOptional()
     readonly message?: string;
 
