@@ -1,0 +1,19 @@
+name: Build and Publish image to Docker Hub
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  publish_images:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+      - name: build image
+        run: |
+          docker build . -t titproger/chat_service:latest
+      - name: push image to docker hub
+        run: |
+          docker login -u titproger -p ${{}}
+           docker push titproger/chat_service:latest
