@@ -1,5 +1,4 @@
 name: Build and Publish image to Docker Hub
-
 on:
   push:
     branches:
@@ -9,16 +8,15 @@ jobs:
   publish_images:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: checkout
         uses: actions/checkout@v3
-
-      - name: Build image
-        run: docker build . -t titproger/chat_service:latest
-
-      - name: Push image to Docker Hub
+      - name: build image
         run: |
-          echo "${{ secrets.DOCKER_HUB_TOKEN }}" | docker login -u titproger --password-stdin
-          docker push titproger/chat_service:latest
+          docker build . -t titproger/chat_service:latest
+      - name: push image to docker hub
+        run: |
+          docker login -u titproger -p ${{secrets.DOCKER_HUB_TOKEN}}
+           docker push titproger/chat_service:latest
 
   connect_vps:
     runs-on: ubuntu-latest
@@ -28,12 +26,9 @@ jobs:
 
       - name: Setup SSH and Deploy
         run: |
-          # Создаём .ssh папку и задаём корректные права
           mkdir -p ~/.ssh
           echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          # Добавляем хост в known_hosts, чтобы избежать предупреждений
           ssh-keyscan -H ${{ secrets.VPS_IP }} >> ~/.ssh/known_hosts 
-          
-          # Подключаемся к VPS и запускаем deploy.sh
+
           ssh ${{ secrets.VPS_USER }}@${{ secrets.VPS_IP }} 'cd /home/tit/pasim && ./deploy.sh'
