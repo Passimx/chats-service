@@ -21,7 +21,7 @@ export class MessageEntity extends CreatedEntity {
 
     @Index()
     @ApiProperty()
-    @Property({ nullable: true })
+    @Property({ length: 4096, nullable: true })
     readonly message?: string; //используется только для openChat, в остальных частах используется encryptMessage
 
     @ApiProperty()
