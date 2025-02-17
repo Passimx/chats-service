@@ -27,7 +27,11 @@ export class App {
             if (Envs.postgres.migrationsRun) await migrationService.migrate();
         }
 
-        app.enableCors({ origin: 'tons-chat.ru', credentials: true });
+        app.enableCors({
+            origin: 'https://tons-chat.ru', // Разрешаем запросы только с этого домена
+            methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+            credentials: true, // Разрешаем использование кук и токенов
+        });
 
         app.useGlobalPipes(
             new ValidationPipe({
