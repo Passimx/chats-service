@@ -15,5 +15,5 @@ jobs:
           docker build . -t titproger/chat_service:latest
       - name: push image to docker hub
         run: |
-          docker login -u titproger -p ${{}}
+          docker login -u titproger -p ${{secrets.DOCKER_HUB_TOKEN}}
            docker push titproger/chat_service:latest
