@@ -723,7 +723,7 @@
 						"type": "string",
 						"description": "Message",
 						"minLength": 1,
-						"maxLength": 1024
+						"maxLength": 4096
 					},
 					"parentMessageId": {
 						"type": "string",
