@@ -7,11 +7,6 @@ export async function useKafka(app: NestFastifyApplication) {
         app.connectMicroservice({
             name: 'CLIENT_KAFKA',
             transport: Transport.KAFKA,
-            connectionTimeout: 10000, // Увеличиваем таймаут до 10 сек
-            retry: {
-                initialRetryTime: 300, // Первый повтор через 300ms
-                retries: 10, // Увеличиваем количество попыток
-            },
             options: {
                 client: {
                     brokers: [`${Envs.kafka.host}:${Envs.kafka.port}`],
