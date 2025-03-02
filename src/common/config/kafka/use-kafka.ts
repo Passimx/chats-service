@@ -17,7 +17,7 @@ export async function useKafka(app: NestFastifyApplication) {
                     },
                 },
                 consumer: {
-                    groupId: 'consumer-group-id',
+                    groupId: 'tit-chat-service',
                 },
             },
         });
