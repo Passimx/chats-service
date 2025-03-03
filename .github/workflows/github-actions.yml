@@ -1,9 +1,5 @@
 name: CI/CD Pipeline
 
-permissions:
-  contents: read
-  actions: read
-
 on:
   push:
     branches:
