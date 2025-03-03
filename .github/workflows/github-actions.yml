@@ -9,7 +9,10 @@ jobs:
   build:
     uses: Passimx/ci-cd-workflows/.github/workflows/build.yml@main
     with:
-      image_name: ${{ vars.IMAGE_NAME }}
+      ORGANIZATION_NAME: ${{ vars.ORGANIZATION_NAME }}
+      IMAGE_NAME: ${{ vars.IMAGE_NAME }}
+    secrets:
+      DOCKER_TOKEN: ${{ secrets.DOCKER_HUB_TOKEN }}
 
 #name: CI/CD Pipeline
 #on:
