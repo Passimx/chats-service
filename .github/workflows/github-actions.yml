@@ -12,8 +12,17 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
 
+      - name: Read version from package.json
+        id: package-version
+        run: echo "VERSION=$(jq -r .version package.json)" >> "$GITHUB_ENV"
+
       - name: Log in to Docker Hub
         run: echo "${{ secrets.DOCKER_HUB_TOKEN }}" | docker login -u "${{ vars.ORGANIZATION_NAME }}" --password-stdin
+
+      - name: Build and Push Docker Image
+        run: |
+          docker build --pull -t ${{ vars.ORGANIZATION_NAME }}/${{ vars.CHAT_SERVICE_IMAGE_NAME }}:${{ github.run_id }} .
+          docker push ${{ secrets.REGISTRY_USER }}/${{ vars.CHAT_SERVICE_IMAGE_NAME }}:$VERSION
 
 #      - name: Build and Push Docker Image
 #        run: |
