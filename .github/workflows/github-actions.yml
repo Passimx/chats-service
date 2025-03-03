@@ -21,13 +21,8 @@ jobs:
 
       - name: Build and Push Docker Image
         run: |
-          docker build --pull -t ${{ vars.ORGANIZATION_NAME }}/${{ vars.CHAT_SERVICE_IMAGE_NAME }}:$VERSION .
-          docker push ${{ secrets.REGISTRY_USER }}/${{ vars.CHAT_SERVICE_IMAGE_NAME }}:$VERSION
-
-#      - name: Build and Push Docker Image
-#        run: |
-#          docker build --pull -t ${{ secrets.REGISTRY_USER }}/${{ github.event.repository.name }}:${{ github.run_id }} .
-#          docker push ${{ secrets.REGISTRY_USER }}/${{ github.event.repository.name }}:${{ github.run_id }}
+          docker build --pull -t ${{ vars.ORGANIZATION_NAME }}/${{ vars.CHAT_SERVICE_IMAGE_NAME }}:0-0-1 .
+          docker push ${{ secrets.REGISTRY_USER }}/${{ vars.CHAT_SERVICE_IMAGE_NAME }}:0-0-1
 
 #
 #  publish_images:
