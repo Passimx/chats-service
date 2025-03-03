@@ -21,8 +21,8 @@ jobs:
 
       - name: Build and Push Docker Image
         run: |
-          docker build . -t ${{ vars.ORGANIZATION_NAME }}/${{ vars.CHAT_SERVICE_IMAGE_NAME }}:$VERSION --pull 
-          docker push ${{ vars.ORGANIZATION_NAME }}/${{ vars.CHAT_SERVICE_IMAGE_NAME }}:$VERSION
+          docker build . -t ${{ vars.ORGANIZATION_NAME }}/${{ vars.IMAGE_NAME }}:$VERSION --pull 
+          docker push ${{ vars.ORGANIZATION_NAME }}/${{ vars.IMAGE_NAME }}:$VERSION
 
   release:
     name: Release Docker Image
@@ -41,9 +41,9 @@ jobs:
 
       - name: Pull, Tag, and Push Latest Image
         run: |
-          docker pull ${{ vars.ORGANIZATION_NAME }}/${{ vars.CHAT_SERVICE_IMAGE_NAME }}:$VERSION
-          docker tag ${{ vars.ORGANIZATION_NAME }}/${{ vars.CHAT_SERVICE_IMAGE_NAME }}:$VERSION ${{ vars.ORGANIZATION_NAME }}/${{ vars.CHAT_SERVICE_IMAGE_NAME }}:latest
-          docker push ${{ vars.ORGANIZATION_NAME  }}/${{ vars.CHAT_SERVICE_IMAGE_NAME }}:latest
+          docker pull ${{ vars.ORGANIZATION_NAME }}/${{ vars.IMAGE_NAME }}:$VERSION
+          docker tag ${{ vars.ORGANIZATION_NAME }}/${{ vars.IMAGE_NAME }}:$VERSION ${{ vars.ORGANIZATION_NAME }}/${{ vars.IMAGE_NAME }}:latest
+          docker push ${{ vars.ORGANIZATION_NAME  }}/${{ vars.IMAGE_NAME }}:latest
 
   deploy:
     name: Deploy via SSH
@@ -61,29 +61,3 @@ jobs:
 #
 #      - name: Deploy via SSH
 #        run: ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "${{ secrets.DEPLOY_SCRIPT }}"
-
-#  publish_images:
-#      - name: Setup SSH
-#        run: |
-#          mkdir -p ~/.ssh
-#          echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/id_rsa
-#          chmod 600 ~/.ssh/id_rsa
-#          ssh-keyscan -H 217.114.15.68 >> ~/.ssh/known_hosts
-#
-#      - name: Execute deploy script
-#        run: ssh tit@217.114.15.68 'cd /home/tit/pasim && ./deploy.sh'
-
-#  connect_vps:
-#    runs-on: ubuntu-latest
-#    steps:
-#      - name: Checkout
-#        uses: actions/checkout@v3
-#
-#      - name: Setup SSH and Deploy
-#        run: |
-#          mkdir -p ~/.ssh
-#          echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/id_rsa
-#          chmod 600 ~/.ssh/id_rsa
-#          ssh-keyscan -H ${{ secrets.VPS_IP }} >> ~/.ssh/known_hosts
-#
-#          ssh ${{ secrets.VPS_USER }}@${{ secrets.VPS_IP }} 'cd /home/tit/pasim && ./deploy.sh'
