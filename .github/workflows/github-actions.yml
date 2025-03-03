@@ -5,28 +5,44 @@ on:
       - main
 
 jobs:
-  publish_images:
+  build:
+    name: Build Docker Image
     runs-on: ubuntu-latest
     steps:
-      - name: checkout
+      - name: Checkout Code
         uses: actions/checkout@v3
-      - name: build image
-        run: |
-          docker build . -t titproger/chat_service:latest
-      - name: push image to docker hub
-        run: |
-          docker login -u titproger -p ${{secrets.DOCKER_HUB_TOKEN}}
-           docker push titproger/chat_service:latest
 
-      - name: Setup SSH
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H 217.114.15.68 >> ~/.ssh/known_hosts
+      - name: Log in to Docker Hub
+        run: echo "${{ secrets.DOCKER_HUB_TOKEN }}" | docker login -u "${{ variables.ORGANIZATION_NAME} }}" --password-stdin
 
-      - name: Execute deploy script
-        run: ssh tit@217.114.15.68 'cd /home/tit/pasim && ./deploy.sh'
+#      - name: Build and Push Docker Image
+#        run: |
+#          docker build --pull -t ${{ secrets.REGISTRY_USER }}/${{ github.event.repository.name }}:${{ github.run_id }} .
+#          docker push ${{ secrets.REGISTRY_USER }}/${{ github.event.repository.name }}:${{ github.run_id }}
+
+#
+#  publish_images:
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: checkout
+#        uses: actions/checkout@v3
+#      - name: build image
+#        run: |
+#          docker build . -t ${{variables.ORGANIZATION_NAME}}/${{variables.CHAT_SERVICE_IMAGE_NAME}}:latest
+#      - name: push image to docker hub
+#        run: |
+#          docker login -u ${{variables.ORGANIZATION_NAME}} -p ${{secrets.DOCKER_HUB_TOKEN}}
+#           docker push ${{variables.ORGANIZATION_NAME}}/${{variables.CHAT_SERVICE_IMAGE_NAME}}:latest
+#
+#      - name: Setup SSH
+#        run: |
+#          mkdir -p ~/.ssh
+#          echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/id_rsa
+#          chmod 600 ~/.ssh/id_rsa
+#          ssh-keyscan -H 217.114.15.68 >> ~/.ssh/known_hosts
+#
+#      - name: Execute deploy script
+#        run: ssh tit@217.114.15.68 'cd /home/tit/pasim && ./deploy.sh'
 
 #  connect_vps:
 #    runs-on: ubuntu-latest
