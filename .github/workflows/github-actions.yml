@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    uses: Passimx/ci-cd-workflows/.github/workflows/build.yml@main
+    uses: Passimx/ci-cd-workflows/blob/main/.github/workflows/build.yml
     with:
       image_name: ${{ vars.IMAGE_NAME }}
 
