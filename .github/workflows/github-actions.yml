@@ -23,7 +23,6 @@ jobs:
     secrets:
       DOCKER_TOKEN: ${{ secrets.DOCKER_HUB_TOKEN }}
 
-
   deploy:
     needs: release
     uses: Passimx/ci-cd-workflows/.github/workflows/deploy.yml@main
