@@ -1,4 +1,5 @@
 name: CI/CD Pipeline
+
 on:
   push:
     branches:
@@ -6,58 +7,70 @@ on:
 
 jobs:
   build:
-    name: Build Docker Image
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
+    uses: Passimx/ci-cd-workflows/.github/workflows/build.yml@main
+    with:
+      image_name: ${{ vars.IMAGE_NAME }}
 
-      - name: Read version from package.json
-        id: package-version
-        run: echo "VERSION=$(jq -r .version package.json)" >> "$GITHUB_ENV"
-
-      - name: Log in to Docker Hub
-        run: echo "${{ secrets.DOCKER_HUB_TOKEN }}" | docker login -u "${{ vars.ORGANIZATION_NAME }}" --password-stdin
-
-      - name: Build and Push Docker Image
-        run: |
-          docker build . -t ${{ vars.ORGANIZATION_NAME }}/${{ vars.IMAGE_NAME }}:$VERSION --pull 
-          docker push ${{ vars.ORGANIZATION_NAME }}/${{ vars.IMAGE_NAME }}:$VERSION
-
-  release:
-    name: Release Docker Image
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
-
-      - name: Read version from package.json
-        id: package-version
-        run: echo "VERSION=$(jq -r .version package.json)" >> "$GITHUB_ENV"
-
-      - name: Log in to Docker Hub
-        run: echo "${{ secrets.DOCKER_HUB_TOKEN }}" | docker login -u "${{ vars.ORGANIZATION_NAME }}" --password-stdin
-
-      - name: Pull, Tag, and Push Latest Image
-        run: |
-          docker pull ${{ vars.ORGANIZATION_NAME }}/${{ vars.IMAGE_NAME }}:$VERSION
-          docker tag ${{ vars.ORGANIZATION_NAME }}/${{ vars.IMAGE_NAME }}:$VERSION ${{ vars.ORGANIZATION_NAME }}/${{ vars.IMAGE_NAME }}:latest
-          docker push ${{ vars.ORGANIZATION_NAME  }}/${{ vars.IMAGE_NAME }}:latest
-
-  deploy:
-    name: Deploy via SSH
-    runs-on: ubuntu-latest
-    needs: release
-    steps:
-      - name: Install SSH Client
-        run: sudo apt-get install -y openssh-client
-#      - name: Set up SSH Key
-#        run: |
-#          mkdir -p ~/.ssh
-#          echo "${{ secrets.SSH_PRIVATE_KEY }}" | tr -d '\r' > ~/.ssh/id_rsa
-#          chmod 600 ~/.ssh/id_rsa
-#          ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+#name: CI/CD Pipeline
+#on:
+#  push:
+#    branches:
+#      - main
 #
-#      - name: Deploy via SSH
-#        run: ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "${{ secrets.DEPLOY_SCRIPT }}"
+#jobs:
+#  build:
+#    name: Build Docker Image
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: Checkout Code
+#        uses: actions/checkout@v3
+#
+#      - name: Read version from package.json
+#        id: package-version
+#        run: echo "VERSION=$(jq -r .version package.json)" >> "$GITHUB_ENV"
+#
+#      - name: Log in to Docker Hub
+#        run: echo "${{ secrets.DOCKER_HUB_TOKEN }}" | docker login -u "${{ vars.ORGANIZATION_NAME }}" --password-stdin
+#
+#      - name: Build and Push Docker Image
+#        run: |
+#          docker build . -t ${{ vars.ORGANIZATION_NAME }}/${{ vars.IMAGE_NAME }}:$VERSION --pull
+#          docker push ${{ vars.ORGANIZATION_NAME }}/${{ vars.IMAGE_NAME }}:$VERSION
+#
+#  release:
+#    name: Release Docker Image
+#    runs-on: ubuntu-latest
+#    needs: build
+#    steps:
+#      - name: Checkout Code
+#        uses: actions/checkout@v3
+#
+#      - name: Read version from package.json
+#        id: package-version
+#        run: echo "VERSION=$(jq -r .version package.json)" >> "$GITHUB_ENV"
+#
+#      - name: Log in to Docker Hub
+#        run: echo "${{ secrets.DOCKER_HUB_TOKEN }}" | docker login -u "${{ vars.ORGANIZATION_NAME }}" --password-stdin
+#
+#      - name: Pull, Tag, and Push Latest Image
+#        run: |
+#          docker pull ${{ vars.ORGANIZATION_NAME }}/${{ vars.IMAGE_NAME }}:$VERSION
+#          docker tag ${{ vars.ORGANIZATION_NAME }}/${{ vars.IMAGE_NAME }}:$VERSION ${{ vars.ORGANIZATION_NAME }}/${{ vars.IMAGE_NAME }}:latest
+#          docker push ${{ vars.ORGANIZATION_NAME  }}/${{ vars.IMAGE_NAME }}:latest
+#
+#  deploy:
+#    name: Deploy via SSH
+#    runs-on: ubuntu-latest
+#    needs: release
+#    steps:
+#      - name: Install SSH Client
+#        run: sudo apt-get install -y openssh-client
+##      - name: Set up SSH Key
+##        run: |
+##          mkdir -p ~/.ssh
+##          echo "${{ secrets.SSH_PRIVATE_KEY }}" | tr -d '\r' > ~/.ssh/id_rsa
+##          chmod 600 ~/.ssh/id_rsa
+##          ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+##
+##      - name: Deploy via SSH
+##        run: ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "${{ secrets.DEPLOY_SCRIPT }}"
