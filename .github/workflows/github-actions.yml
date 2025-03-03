@@ -21,10 +21,8 @@ jobs:
 
       - name: Build and Push Docker Image
         run: |
-          docker build . -t ${{ vars.ORGANIZATION_NAME }}/${{ vars.CHAT_SERVICE_IMAGE_NAME }}:latest
-           docker push ${{variables.ORGANIZATION_NAME}}/${{variables.CHAT_SERVICE_IMAGE_NAME}}:latest
-#          docker build . -t ${{ vars.ORGANIZATION_NAME }}/${{ vars.CHAT_SERVICE_IMAGE_NAME }}:$VERSION
-#           docker push ${{variables.ORGANIZATION_NAME}}/${{variables.CHAT_SERVICE_IMAGE_NAME}}:latest
+          docker build . -t ${{ vars.ORGANIZATION_NAME }}/${{ vars.CHAT_SERVICE_IMAGE_NAME }}:$VERSION
+          docker push ${{ vars.ORGANIZATION_NAME }}/${{ vars.CHAT_SERVICE_IMAGE_NAME }}:$VERSION
 #          docker build --pull -t ${{ vars.ORGANIZATION_NAME }}/${{ vars.CHAT_SERVICE_IMAGE_NAME }}:$VERSION .
 #          docker push ${{ secrets.REGISTRY_USER }}/${{ vars.CHAT_SERVICE_IMAGE_NAME }}:$VERSION
 
