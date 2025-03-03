@@ -23,12 +23,11 @@ jobs:
     secrets:
       DOCKER_TOKEN: ${{ secrets.DOCKER_HUB_TOKEN }}
 
-
   deploy:
     needs: release
     uses: Passimx/ci-cd-workflows/.github/workflows/deploy.yml@main
     secrets:
       SSH_USER: ${{ secrets.SSH_USER }}
       SSH_HOST: ${{ secrets.SSH_HOST }}
-      DEPLOY_SCRIPT: "/home/tit/pasim/chats-service-deploy.sh"
+      DEPLOY_SCRIPT: ${{ secrets.DEPLOY_SCRIPT }}
       SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
