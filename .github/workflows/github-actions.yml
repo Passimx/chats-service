@@ -14,32 +14,15 @@ jobs:
     secrets:
       DOCKER_TOKEN: ${{ secrets.DOCKER_HUB_TOKEN }}
 
-#name: CI/CD Pipeline
-#on:
-#  push:
-#    branches:
-#      - main
-#
-#jobs:
-#  build:
-#    name: Build Docker Image
-#    runs-on: ubuntu-latest
-#    steps:
-#      - name: Checkout Code
-#        uses: actions/checkout@v3
-#
-#      - name: Read version from package.json
-#        id: package-version
-#        run: echo "VERSION=$(jq -r .version package.json)" >> "$GITHUB_ENV"
-#
-#      - name: Log in to Docker Hub
-#        run: echo "${{ secrets.DOCKER_HUB_TOKEN }}" | docker login -u "${{ vars.ORGANIZATION_NAME }}" --password-stdin
-#
-#      - name: Build and Push Docker Image
-#        run: |
-#          docker build . -t ${{ vars.ORGANIZATION_NAME }}/${{ vars.IMAGE_NAME }}:$VERSION --pull
-#          docker push ${{ vars.ORGANIZATION_NAME }}/${{ vars.IMAGE_NAME }}:$VERSION
-#
+  release:
+    needs: build
+    uses: Passimx/ci-cd-workflows/.github/workflows/release.yml@main
+    with:
+      ORGANIZATION_NAME: ${{ vars.ORGANIZATION_NAME }}
+      IMAGE_NAME: ${{ vars.IMAGE_NAME }}
+    secrets:
+      DOCKER_TOKEN: ${{ secrets.DOCKER_HUB_TOKEN }}
+
 #  release:
 #    name: Release Docker Image
 #    runs-on: ubuntu-latest
