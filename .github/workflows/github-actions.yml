@@ -9,7 +9,7 @@ jobs:
   build:
     uses: Passimx/ci-cd-workflows/.github/workflows/build.yml@main
     with:
-      image_name: ${{ vars.IMAGE_NAME }}
+      image_name: ${{ vars.IMAGE_NAME }
 
 #name: CI/CD Pipeline
 #on:
