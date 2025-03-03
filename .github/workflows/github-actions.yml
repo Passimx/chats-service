@@ -25,7 +25,7 @@ jobs:
 
   deploy:
     needs: release
-    uses: your-org/github-actions-workflows/.github/workflows/deploy.yml@main
+    uses: Passimx/ci-cd-workflows/.github/workflows/deploy.yml@main
     with:
       SSH_USER: "ubuntu"
       SSH_HOST: "your-server-ip"
