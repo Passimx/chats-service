@@ -1,4 +1,4 @@
-name: Build and Publish image to Docker Hub
+name: CI/CD Pipeline
 on:
   push:
     branches:
@@ -44,6 +44,23 @@ jobs:
           docker pull ${{ vars.ORGANIZATION_NAME }}/${{ vars.CHAT_SERVICE_IMAGE_NAME }}:$VERSION
           docker tag ${{ vars.ORGANIZATION_NAME }}/${{ vars.CHAT_SERVICE_IMAGE_NAME }}:$VERSION ${{ vars.ORGANIZATION_NAME }}/${{ vars.CHAT_SERVICE_IMAGE_NAME }}:latest
           docker push ${{ vars.ORGANIZATION_NAME  }}/${{ vars.CHAT_SERVICE_IMAGE_NAME }}:latest
+
+  deploy:
+    name: Deploy via SSH
+    runs-on: ubuntu-latest
+    needs: release
+    steps:
+      - name: Install SSH Client
+        run: sudo apt-get install -y openssh-client
+#      - name: Set up SSH Key
+#        run: |
+#          mkdir -p ~/.ssh
+#          echo "${{ secrets.SSH_PRIVATE_KEY }}" | tr -d '\r' > ~/.ssh/id_rsa
+#          chmod 600 ~/.ssh/id_rsa
+#          ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+#
+#      - name: Deploy via SSH
+#        run: ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "${{ secrets.DEPLOY_SCRIPT }}"
 
 #  publish_images:
 #      - name: Setup SSH
