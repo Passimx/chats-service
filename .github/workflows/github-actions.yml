@@ -22,7 +22,7 @@ jobs:
       - name: Build and Push Docker Image
         run: |
           docker build . -t ${{ vars.ORGANIZATION_NAME }}/${{ vars.CHAT_SERVICE_IMAGE_NAME }}:$VERSION --pull 
-          docker push ${{ vars.ORGANIZATION_NAME }}/${{ vars.CHAT_SERVICE_IMAGE_NAME }}
+          docker push ${{ vars.ORGANIZATION_NAME }}/${{ vars.CHAT_SERVICE_IMAGE_NAME }}:$VERSION
 
   release:
     name: Release Docker Image
