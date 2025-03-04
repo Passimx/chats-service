@@ -28,11 +28,23 @@ export class App {
             if (Envs.postgres.migrationsRun) await migrationService.migrate();
         }
 
+        // ✅ Регистрируем CORS правильно
         await app.register(cors, {
-            origin: ['https://tons-chat.ru', 'http://localhost:3006'], // Разрешённые источники
-            methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'], // Разрешённые методы
-            allowedHeaders: ['Content-Type', 'Authorization'], // Разрешённые заголовки
-            credentials: true, // Разрешаем отправку кук и заголовков с токенами
+            origin: (origin, callback) => {
+                // ⚠ Разрешаем только определённые домены
+                const allowedOrigins = ['https://tons-chat.ru', 'http://localhost:3006'];
+
+                if (!origin || allowedOrigins.includes(origin)) {
+                    callback(null, true);  // ✅ Разрешено
+                } else {
+                    callback(new Error('CORS not allowed'), false);  // ❌ Блокируем
+                }
+            },
+            methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE'], // ⚠ Добавил HEAD (может быть нужен)
+            allowedHeaders: ['Content-Type', 'Authorization'],
+            credentials: true, // ✅ Нужно, если используете куки или авторизацию
+            preflightContinue: false, // ✅ Fastify сам отправит preflight-ответ
+            optionsSuccessStatus: 204, // ✅ Должно быть 204, иначе браузер жалуется
         });
 
         app.useGlobalPipes(
