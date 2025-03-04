@@ -8,6 +8,7 @@ import { MigrationService } from './common/config/mikro-orm/migration.service';
 import { logger } from './common/logger/logger';
 import { useSwagger } from './common/swagger/swagger';
 import { useKafka } from './common/config/kafka/use-kafka';
+import cors from '@fastify/cors';
 
 export class App {
     private readonly ADDRESS: string;
@@ -27,10 +28,11 @@ export class App {
             if (Envs.postgres.migrationsRun) await migrationService.migrate();
         }
 
-        app.enableCors({
-            origin: ['https://tons-chat.ru', 'http://localhost:3006'], // Разрешаем запросы только с этого домена
-            methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-            credentials: true, // Разрешаем использование кук и токенов
+        await app.register(cors, {
+            origin: ['https://tons-chat.ru', 'http://localhost:3006'], // Разрешённые источники
+            methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'], // Разрешённые методы
+            allowedHeaders: ['Content-Type', 'Authorization'], // Разрешённые заголовки
+            credentials: true, // Разрешаем отправку кук и заголовков с токенами
         });
 
         app.useGlobalPipes(
