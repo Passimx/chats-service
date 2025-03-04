@@ -8,7 +8,6 @@ import { MigrationService } from './common/config/mikro-orm/migration.service';
 import { logger } from './common/logger/logger';
 import { useSwagger } from './common/swagger/swagger';
 import { useKafka } from './common/config/kafka/use-kafka';
-import cors from '@fastify/cors';
 
 export class App {
     private readonly ADDRESS: string;
@@ -28,23 +27,10 @@ export class App {
             if (Envs.postgres.migrationsRun) await migrationService.migrate();
         }
 
-        // ✅ Регистрируем CORS правильно
-        await app.register(cors, {
-            origin: (origin, callback) => {
-                // ⚠ Разрешаем только определённые домены
-                const allowedOrigins = ['https://tons-chat.ru', 'http://localhost:3006'];
-
-                if (!origin || allowedOrigins.includes(origin)) {
-                    callback(null, true);  // ✅ Разрешено
-                } else {
-                    callback(new Error('CORS not allowed'), false);  // ❌ Блокируем
-                }
-            },
-            methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE'], // ⚠ Добавил HEAD (может быть нужен)
-            allowedHeaders: ['Content-Type', 'Authorization'],
-            credentials: true, // ✅ Нужно, если используете куки или авторизацию
-            preflightContinue: false, // ✅ Fastify сам отправит preflight-ответ
-            optionsSuccessStatus: 204, // ✅ Должно быть 204, иначе браузер жалуется
+        app.enableCors({
+            origin: ['https://tons-chat.ru', 'http://localhost:3006'], // Разрешаем запросы только с этого домена
+            methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+            credentials: true, // Разрешаем использование кук и токенов
         });
 
         app.useGlobalPipes(
