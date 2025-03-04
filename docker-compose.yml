@@ -3,6 +3,7 @@ services:
   postgres:
     image: postgres:17-alpine
     restart: always
+    container_name: postgres
     environment:
       POSTGRES_DB: ${PG_DATABASE}
       POSTGRES_USER: ${PG_USERNAME}
@@ -15,27 +16,23 @@ services:
     ports:
       - ${PG_PORT}:${PG_PORT}
 
-  nodejs:
+  chats-service:
     build:
       context: .
       dockerfile: Dockerfile
-    image: chat_service
-    container_name: chat_service
+    image: chats-service
+    container_name: chats-service
     restart: unless-stopped
     env_file: .env
-    #    environment:
-    #      - PG_HOST=postgres
-    #      - KAFKA_HOST=kafka
     ports:
       - ${APP_PORT}:${APP_PORT}
 
   kafka:
     image: 'bitnami/kafka:latest'
+    container_name: kafka
     ports:
       - ${KAFKA_CLIENT_PORT}:${KAFKA_CLIENT_PORT}
       - ${KAFKA_EXTERNAL_PORT}:${KAFKA_EXTERNAL_PORT}
-    #    volumes:
-    #      - ./mq_data_kafka:/bitnami/kafka
     environment:
       - KAFKA_ENABLE_KRAFT=yes
       - KAFKA_BROKER_ID=1

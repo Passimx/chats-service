@@ -13,4 +13,5 @@ COPY --from=build /app/*.json ./
 COPY --from=build /app/dist ./dist
 COPY --from=build /app/api ./api
 EXPOSE 6020
+RUN npm run migration:up
 CMD ["node","dist/src/main"]
