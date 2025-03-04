@@ -13,7 +13,6 @@ services:
       - ${APP_PORT_NOTIFICATION}:${APP_PORT_NOTIFICATION}
       - ${SOCKET_PORT_NOTIFICATION}:${SOCKET_PORT_NOTIFICATION}
 
-
   chats-service:
     image: passimx/chats-service
     container_name: passimx-chats-service
