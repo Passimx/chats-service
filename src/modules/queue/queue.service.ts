@@ -3,6 +3,7 @@ import { Kafka, Producer } from 'kafkajs';
 import { ClientKafka } from '@nestjs/microservices';
 import { DataResponse } from '../../common/swagger/data-response.dto';
 import { Envs } from '../../common/envs/env';
+import { logger } from '../../common/logger/logger';
 import { InjectEnum } from './types/inject.enum';
 import { EventsEnum } from './types/events.enum';
 import { MessageDto } from './dto/message.dto';
@@ -29,10 +30,13 @@ export class QueueService {
         event: EventsEnum,
         data: DataResponse<unknown>,
     ): void {
+        logger.debug([Envs.kafka.kafkaIsConnect, this.isConnected, to].toString());
+
         if (!Envs.kafka.kafkaIsConnect || !this.isConnected || !to) return;
 
         const message = new MessageDto(to, event, data);
 
+        logger.debug('send');
         this.producer.send({ topic, messages: [{ value: JSON.stringify(message) }] });
     }
 }
