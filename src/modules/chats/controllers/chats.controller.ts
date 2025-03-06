@@ -23,10 +23,9 @@ export class ChatsController {
     @ApiData(ChatEntity)
     createChat(
         @Body() body: CreateOpenChatDto,
-        @Headers('socket_id') socketId: string,
-        @Headers('Socket_id') SocketId: string,
+        @Headers('x-socket-id') socketId: string,
     ): Promise<DataResponse<string | ChatEntity>> {
-        logger.debug([socketId, SocketId]);
+        logger.debug(socketId);
 
         return this.chatsService.createOpenChat(socketId, body);
     }
@@ -47,17 +46,19 @@ export class ChatsController {
     @ApiData(ChatEntity, true)
     join(
         @Body() favoriteChatsDto: FavoriteChatsDto,
-        @Headers('socket_id') socketId: string,
-        @Headers('Socket_id') SocketId: string,
+        @Headers('x-socket-id') socketId: string,
     ): Promise<DataResponse<string | ChatEntity[]>> {
-        logger.debug([socketId, SocketId]);
+        logger.debug(socketId);
 
         return this.chatsService.join(favoriteChatsDto.chats, socketId);
     }
 
     @Post('leave')
     @ApiDataEmpty()
-    leave(@Body() leaveChatsDto: LeaveChatsDto, @Headers('socket_id') socketId: string): Promise<DataResponse<object>> {
+    leave(
+        @Body() leaveChatsDto: LeaveChatsDto,
+        @Headers('x-socket_id') socketId: string,
+    ): Promise<DataResponse<object>> {
         return this.chatsService.leave(leaveChatsDto.chatIds, socketId);
     }
 
