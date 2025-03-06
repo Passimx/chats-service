@@ -30,7 +30,7 @@ export class QueueService {
         event: EventsEnum,
         data: DataResponse<unknown>,
     ): void {
-        logger.debug([Envs.kafka.kafkaIsConnect, this.isConnected, to].toString());
+        logger.debug(to);
 
         if (!Envs.kafka.kafkaIsConnect || !this.isConnected || !to) return;
 
