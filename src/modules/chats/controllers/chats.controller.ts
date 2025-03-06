@@ -12,7 +12,6 @@ import { LeaveChatsDto } from '../dto/requests/post-leave-chat.dto';
 import { ApiDataEmpty } from '../../../common/swagger/api-data-empty.decorator';
 import { TopicsEnum } from '../../queue/types/topics.enum';
 import { OnlineCountUsers } from '../types/max-online-users';
-import { logger } from '../../../common/logger/logger';
 
 @ApiTags('Chats')
 @Controller('chats')
@@ -25,8 +24,6 @@ export class ChatsController {
         @Body() body: CreateOpenChatDto,
         @Headers('x-socket-id') socketId: string,
     ): Promise<DataResponse<string | ChatEntity>> {
-        logger.debug(socketId);
-
         return this.chatsService.createOpenChat(socketId, body);
     }
 
@@ -48,8 +45,6 @@ export class ChatsController {
         @Body() favoriteChatsDto: FavoriteChatsDto,
         @Headers('x-socket-id') socketId: string,
     ): Promise<DataResponse<string | ChatEntity[]>> {
-        logger.debug(socketId);
-
         return this.chatsService.join(favoriteChatsDto.chats, socketId);
     }
 
