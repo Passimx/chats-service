@@ -30,8 +30,6 @@ export class QueueService {
         event: EventsEnum,
         data: DataResponse<unknown>,
     ): void {
-        logger.debug(to);
-
         if (!Envs.kafka.kafkaIsConnect || !this.isConnected || !to) return;
 
         const message = new MessageDto(to, event, data);
