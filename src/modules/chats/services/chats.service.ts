@@ -118,4 +118,10 @@ export class ChatsService {
             { maxUsersOnline: maxOnline },
         );
     }
+
+    async getSystemChat(chatId: string): Promise<DataResponse<ChatEntity | null>> {
+        const systemChat = await this.chatsRepository.findOne({ id: chatId, type: ChatTypeEnum.IS_SYSTEM });
+
+        return new DataResponse(systemChat);
+    }
 }

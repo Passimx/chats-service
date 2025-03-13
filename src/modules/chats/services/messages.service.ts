@@ -10,6 +10,7 @@ import { EventsEnum } from '../../queue/types/events.enum';
 import { MessageTypeEnum } from '../types/message-type.enum';
 import { MessageErrorLanguageEnum } from '../types/message-error-language.enum';
 import { TopicsEnum } from '../../queue/types/topics.enum';
+import { ChatTypeEnum } from '../types/chat-type.enum';
 
 @Injectable()
 export class MessagesService {
@@ -39,7 +40,7 @@ export class MessagesService {
         const chat = await this.chatRepository
             .createQueryBuilder('chats')
             .update({ countMessages: raw('count_messages + 1') })
-            .where({ id: chatId })
+            .where('id = ? AND type != ?', [chatId, ChatTypeEnum.IS_SYSTEM])
             .returning('*')
             .getSingleResult();
 
