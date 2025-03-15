@@ -6,7 +6,7 @@
 				"operationId": "ChatsController_createChat",
 				"parameters": [
 					{
-						"name": "socket_id",
+						"name": "x-socket-id",
 						"required": true,
 						"in": "header",
 						"schema": {
@@ -239,7 +239,7 @@
 				"operationId": "ChatsController_join",
 				"parameters": [
 					{
-						"name": "socket_id",
+						"name": "x-socket-id",
 						"required": true,
 						"in": "header",
 						"schema": {
@@ -315,7 +315,7 @@
 				"operationId": "ChatsController_leave",
 				"parameters": [
 					{
-						"name": "socket_id",
+						"name": "x-socket_id",
 						"required": true,
 						"in": "header",
 						"schema": {
@@ -349,6 +349,60 @@
 												},
 												"data": {
 													"type": "object"
+												}
+											},
+											"required": [
+												"success",
+												"data"
+											]
+										},
+										{
+											"type": "object",
+											"properties": {
+												"success": {
+													"type": "boolean",
+													"example": false
+												},
+												"data": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"success",
+												"data"
+											]
+										}
+									]
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Chats"
+				]
+			}
+		},
+		"/chats/chat-system": {
+			"get": {
+				"operationId": "ChatsController_getSystemChat",
+				"parameters": [],
+				"responses": {
+					"200": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"type": "object",
+											"properties": {
+												"success": {
+													"type": "boolean",
+													"example": true
+												},
+												"data": {
+													"$ref": "#/components/schemas/ChatEntity"
 												}
 											},
 											"required": [

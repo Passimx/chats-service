@@ -62,4 +62,10 @@ export class ChatsController {
         const { roomName, onlineUsers } = message.data;
         this.chatsService.updateMaxUsersOnline(roomName, onlineUsers);
     }
+
+    @Get('chat-system')
+    @ApiData(ChatEntity)
+    getSystemChat() {
+        return this.chatsService.getSystemChat();
+    }
 }
