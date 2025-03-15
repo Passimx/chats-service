@@ -387,16 +387,6 @@
 			"get": {
 				"operationId": "ChatsController_getSystemChat",
 				"parameters": [],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"type": "string"
-							}
-						}
-					}
-				},
 				"responses": {
 					"200": {
 						"description": "",

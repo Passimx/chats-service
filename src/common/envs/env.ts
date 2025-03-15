@@ -35,4 +35,8 @@ export const Envs = {
         password: String(process.env.KAFKA_USER_PASSWORD),
         kafkaIsConnect: BooleanUtils.strToBoolWithDefault(process.env.KAFKA_IS_CONNECT, false),
     },
+
+    title: {
+        exam: process.env.FORBIDDEN_TITLES,
+    },
 };

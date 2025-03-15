@@ -65,7 +65,7 @@ export class ChatsController {
 
     @Get('chat-system')
     @ApiData(ChatEntity)
-    getSystemChat(@Body() chatId: string) {
-        return this.chatsService.getSystemChat(chatId);
+    getSystemChat() {
+        return this.chatsService.getSystemChat();
     }
 }
