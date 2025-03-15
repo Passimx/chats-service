@@ -40,7 +40,8 @@ export class MessagesService {
         const chat = await this.chatRepository
             .createQueryBuilder('chats')
             .update({ countMessages: raw('count_messages + 1') })
-            .where('id = ? AND type != ?', [chatId, ChatTypeEnum.IS_SYSTEM])
+            .where('id = ?', [chatId])
+            .andWhere('type != ?', [ChatTypeEnum.IS_SYSTEM])
             .returning('*')
             .getSingleResult();
 

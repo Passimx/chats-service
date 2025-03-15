@@ -9,9 +9,10 @@ import { Envs } from '../../../../common/envs/env';
 @ValidatorConstraint({ async: false })
 export class IsNotForbiddenTitleConstraint implements ValidatorConstraintInterface {
     validate(title: string) {
-        const forbiddenTitles = Envs.title.exam ? Envs.title.exam.split(',').map((t) => t.trim()) : [];
+        const lowerCaseTitle = title.toLowerCase();
+        const forbiddenTitles = Envs.main.blackListTitles?.split(',').map((t) => t.trim().toLowerCase()) || [];
 
-        return !forbiddenTitles.includes(title);
+        return !forbiddenTitles.includes(lowerCaseTitle);
     }
 
     defaultMessage() {

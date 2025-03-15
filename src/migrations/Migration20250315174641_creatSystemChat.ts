@@ -4,7 +4,7 @@ export class Migration20250315174641_creatSystemChat extends Migration {
     up(): void {
         this.addSql(`
             INSERT INTO "chats" (title, type)
-            VALUES ('PassimX', 'is_system') RETURNING id;
+            VALUES ('PassimX', 'is_system');
         `);
 
         this.addSql(`

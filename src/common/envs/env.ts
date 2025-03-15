@@ -9,6 +9,7 @@ export const Envs = {
     main: {
         host: process.env.APP_HOST || '0.0.0.0',
         appPort: NumbersUtils.toNumberOrDefault(process.env.APP_PORT, 3000),
+        blackListTitles: process.env.FORBIDDEN_TITLES,
     },
 
     postgres: {
@@ -34,9 +35,5 @@ export const Envs = {
         user: String(process.env.KAFKA_CLIENT_USERS),
         password: String(process.env.KAFKA_USER_PASSWORD),
         kafkaIsConnect: BooleanUtils.strToBoolWithDefault(process.env.KAFKA_IS_CONNECT, false),
-    },
-
-    title: {
-        exam: process.env.FORBIDDEN_TITLES,
     },
 };
