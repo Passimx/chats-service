@@ -120,7 +120,10 @@ export class ChatsService {
     }
 
     async getSystemChat(): Promise<DataResponse<string | ChatEntity>> {
-        const systemChat = await this.chatsRepository.findOne({ type: ChatTypeEnum.IS_SYSTEM });
+        const systemChat = await this.chatsRepository.findOne(
+            { type: ChatTypeEnum.IS_SYSTEM },
+            { populate: ['message'] },
+        );
 
         if (!systemChat) return new DataResponse(MessageErrorLanguageEnum.CHAT_WITH_ID_NOT_FOUND);
 
