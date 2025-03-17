@@ -3,8 +3,8 @@ import { Migration } from '@mikro-orm/migrations';
 export class Migration20250315174641_creatSystemChat extends Migration {
     up(): void {
         this.addSql(`
-            INSERT INTO "chats" (title, type)
-            VALUES ('PassimX', 'is_system');
+            INSERT INTO "chats" (title, count_messages, type, max_users_online)
+            VALUES ('PassimX', 1, 'is_system', 1);
         `);
 
         this.addSql(`
