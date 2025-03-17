@@ -119,8 +119,10 @@ export class ChatsService {
         );
     }
 
-    async getSystemChat(): Promise<DataResponse<ChatEntity | null>> {
+    async getSystemChat(): Promise<DataResponse<string | ChatEntity>> {
         const systemChat = await this.chatsRepository.findOne({ type: ChatTypeEnum.IS_SYSTEM });
+
+        if (!systemChat) return new DataResponse(MessageErrorLanguageEnum.CHAT_WITH_ID_NOT_FOUND);
 
         return new DataResponse(systemChat);
     }
