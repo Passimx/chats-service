@@ -11,9 +11,9 @@ export class Migration20250315174641_creatSystemChat extends Migration {
             INSERT INTO "messages" (chat_id, number, type, encrypt_message, message, parent_message_id)
             VALUES ((SELECT id FROM "chats" WHERE title = 'PassimX' AND type = 'is_system'),
                     1,
-                    'IS_SYSTEM',
+                    'IS_OPEN',
                     NULL,
-                    'Hello PassimX',
+                    'message_hello',
                     NULL);
         `);
     }
@@ -24,8 +24,8 @@ export class Migration20250315174641_creatSystemChat extends Migration {
             FROM "messages"
             WHERE chat_id = (SELECT id FROM "chats" WHERE title = 'PassimX' AND type = 'is_system')
               AND number = 1
-              AND type = 'IS_SYSTEM'
-              AND message = 'Hello PassimX';
+              AND type = 'IS_OPEN'
+              AND message = 'message_hello';
         `);
 
         this.addSql(`
