@@ -34,7 +34,7 @@ export class ChatsService {
 
         await this.messagesService.createMessage(
             chatEntity.id,
-            MessageTypeEnum.IS_SYSTEM,
+            MessageTypeEnum.IS_CREATED_CHAT,
             undefined,
             SystemMessageLanguageEnum.create_chat,
             undefined,

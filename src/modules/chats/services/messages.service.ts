@@ -37,15 +37,18 @@ export class MessagesService {
             }
         }
 
-        const chat = await this.chatRepository
+        const chat = await this.chatRepository.findOne(chatId);
+
+        if (!chat || chat.type === ChatTypeEnum.IS_SYSTEM) {
+            return new DataResponse(MessageErrorLanguageEnum.CHAT_NOT_FOUND);
+        }
+
+        await this.chatRepository
             .createQueryBuilder('chats')
             .update({ countMessages: raw('count_messages + 1') })
-            .where('id = ?', [chatId])
-            .andWhere('type != ?', [ChatTypeEnum.IS_SYSTEM])
+            .where({ id: chatId })
             .returning('*')
             .getSingleResult();
-
-        if (!chat) return new DataResponse(MessageErrorLanguageEnum.CHAT_NOT_FOUND);
 
         const messageEntity = new MessageEntity(
             chatId,

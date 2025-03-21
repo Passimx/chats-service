@@ -3,17 +3,17 @@ import { Migration } from '@mikro-orm/migrations';
 export class Migration20250315174641_creatSystemChat extends Migration {
     up(): void {
         this.addSql(`
-            INSERT INTO "chats" (title, type)
-            VALUES ('PassimX', 'is_system');
+            INSERT INTO "chats" (title, count_messages, type, max_users_online)
+            VALUES ('PassimX', 1, 'is_system', 1);
         `);
 
         this.addSql(`
             INSERT INTO "messages" (chat_id, number, type, encrypt_message, message, parent_message_id)
             VALUES ((SELECT id FROM "chats" WHERE title = 'PassimX' AND type = 'is_system'),
                     1,
-                    'IS_SYSTEM',
+                    'IS_USER',
                     NULL,
-                    'Hello PassimX',
+                    'message_hello',
                     NULL);
         `);
     }
@@ -24,8 +24,8 @@ export class Migration20250315174641_creatSystemChat extends Migration {
             FROM "messages"
             WHERE chat_id = (SELECT id FROM "chats" WHERE title = 'PassimX' AND type = 'is_system')
               AND number = 1
-              AND type = 'IS_SYSTEM'
-              AND message = 'Hello PassimX';
+              AND type = 'IS_USER'
+              AND message = 'message_hello';
         `);
 
         this.addSql(`
