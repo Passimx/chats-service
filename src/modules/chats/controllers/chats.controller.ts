@@ -52,7 +52,7 @@ export class ChatsController {
     @ApiDataEmpty()
     leave(
         @Body() leaveChatsDto: LeaveChatsDto,
-        @Headers('x-socket_id') socketId: string,
+        @Headers('x-socket-id') socketId: string,
     ): Promise<DataResponse<object>> {
         return this.chatsService.leave(leaveChatsDto.chatIds, socketId);
     }

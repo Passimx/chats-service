@@ -78,7 +78,7 @@
 				"parameters": [
 					{
 						"name": "title",
-						"required": false,
+						"required": true,
 						"in": "query",
 						"description": "Chat name",
 						"schema": {
@@ -315,7 +315,7 @@
 				"operationId": "ChatsController_leave",
 				"parameters": [
 					{
-						"name": "x-socket_id",
+						"name": "x-socket-id",
 						"required": true,
 						"in": "header",
 						"schema": {
