@@ -17,10 +17,6 @@ export class ChatEntity extends CreatedEntity {
     readonly countMessages!: number;
 
     @ApiProperty()
-    @Property({ nullable: true })
-    readonly createdUserId!: number;
-
-    @ApiProperty()
     @Enum({ default: ChatTypeEnum.IS_OPEN, items: () => ChatTypeEnum, nativeEnumName: 'chat_type_enum' })
     readonly type!: ChatTypeEnum;
 

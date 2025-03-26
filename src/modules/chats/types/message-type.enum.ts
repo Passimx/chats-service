@@ -1,5 +1,5 @@
 export enum MessageTypeEnum {
-    IS_SYSTEM = 'IS_SYSTEM',
-    IS_USER = 'IS_USER',
-    IS_CREATED_CHAT = 'IS_CREATED_CHAT',
+    IS_SYSTEM = 'is_system',
+    IS_USER = 'is_user',
+    IS_CREATED_CHAT = 'is_created_chat',
 }
