@@ -11,10 +11,10 @@ import { SystemMessageLanguageEnum } from '../types/system-message-language.enum
 import { ChatTypeEnum } from '../types/chat-type.enum';
 import { TopicsEnum } from '../../queue/types/topics.enum';
 import { MessageEntity } from '../entities/message.entity';
-import { ChatsDto } from '../dto/requests/post-favorites-chat.dto';
 import { ChatsRepository } from '../repositories/chats.repository';
 import { QueryGetChatsDto } from '../dto/requests/query-get-chats.dto';
 import { CreateOpenChatDto } from '../dto/requests/create-open-chat.dto';
+import { ChatDto } from '../dto/requests/post-favorites-chat.dto';
 import { MessagesService } from './messages.service';
 
 @Injectable()
@@ -69,24 +69,24 @@ export class ChatsService {
         return new DataResponse(chat);
     }
 
-    async join(chats: ChatsDto[], socketId: string): Promise<DataResponse<string | ChatEntity[]>> {
+    async join(chats: ChatDto[], socketId: string): Promise<DataResponse<string | ChatEntity[]>> {
         const response: ChatEntity[] = [];
         const chatIdsSet = new Set<string>();
 
-        const promises = chats.map(async ({ chatId, lastMessage }) => {
+        const promises = chats.map(async ({ chatId, lastMessage, maxUsersOnline }) => {
             if (chatIdsSet.has(chatId)) return;
 
             chatIdsSet.add(chatId);
 
             const chat = await this.chatsRepository.findOne(
-                { id: chatId, type: ChatTypeEnum.IS_OPEN },
+                { id: chatId },
                 {
                     orderBy: { message: { createdAt: 'DESC NULLS LAST' } },
                     populate: ['message'],
                 },
             );
 
-            if (chat && chat.countMessages > lastMessage) response.push(chat);
+            if (chat && (chat.countMessages > lastMessage || chat.maxUsersOnline > maxUsersOnline)) response.push(chat);
         });
 
         await Promise.allSettled(promises);

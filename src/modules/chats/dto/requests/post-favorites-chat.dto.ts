@@ -2,9 +2,7 @@ import { IsArray, IsInt, IsNumber, IsUUID, ValidateNested } from 'class-validato
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 
-export type ChatsDto = { chatId: string; lastMessage: number };
-
-class ChatDto {
+export class ChatDto {
     @IsUUID()
     @ApiProperty({ description: 'Id chat' })
     readonly chatId!: string;
@@ -13,6 +11,11 @@ class ChatDto {
     @IsInt()
     @ApiProperty({ description: 'Number last message' })
     readonly lastMessage!: number;
+
+    @ApiProperty({ description: 'MaxUsersOnline message' })
+    @IsNumber()
+    @IsInt()
+    readonly maxUsersOnline!: number;
 }
 
 export class FavoriteChatsDto {
