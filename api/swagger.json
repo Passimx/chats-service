@@ -629,9 +629,6 @@
 					"countMessages": {
 						"type": "number"
 					},
-					"createdUserId": {
-						"type": "number"
-					},
 					"type": {
 						"type": "string"
 					},
@@ -650,7 +647,6 @@
 					"createdAt",
 					"title",
 					"countMessages",
-					"createdUserId",
 					"type",
 					"maxUsersOnline"
 				]
@@ -723,11 +719,16 @@
 					"lastMessage": {
 						"type": "number",
 						"description": "Number last message"
+					},
+					"maxUsersOnline": {
+						"type": "number",
+						"description": "MaxUsersOnline message"
 					}
 				},
 				"required": [
 					"chatId",
-					"lastMessage"
+					"lastMessage",
+					"maxUsersOnline"
 				]
 			},
 			"FavoriteChatsDto": {
