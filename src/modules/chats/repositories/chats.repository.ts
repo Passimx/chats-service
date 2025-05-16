@@ -6,6 +6,7 @@ export class ChatsRepository extends SqlEntityRepository<ChatEntity> {
     public findChats({ title, limit, offset, notFavoriteChatIds }: QueryGetChatsDto): Promise<ChatEntity[]> {
         const qb = this.createQueryBuilder('chats')
             .leftJoinAndSelect('chats.message', 'message')
+            .leftJoinAndSelect('message.parentMessage', 'parentMessage')
             .where('chats.count_messages = message.number')
             .andWhere({ id: { $nin: notFavoriteChatIds } })
             .orderBy({
@@ -30,6 +31,7 @@ export class ChatsRepository extends SqlEntityRepository<ChatEntity> {
     findChatById(id: string): Promise<ChatEntity | null> {
         return this.createQueryBuilder('chats')
             .leftJoinAndSelect('chats.message', 'message')
+            .leftJoinAndSelect('message.parentMessage', 'parentMessage')
             .where('chats.count_messages = message.number')
             .andWhere('chats.id = ?', [id])
             .getSingleResult();
