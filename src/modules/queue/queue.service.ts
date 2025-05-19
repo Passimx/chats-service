@@ -29,7 +29,7 @@ export class QueueService {
         event: EventsEnum,
         data: DataResponse<unknown>,
     ): void {
-        if (!Envs.kafka.kafkaIsConnect || !this.isConnected || !to) return;
+        if (!Envs.kafka.kafkaIsConnect || !this.isConnected) return;
 
         const message = new MessageDto(to, event, data);
 

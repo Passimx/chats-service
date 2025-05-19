@@ -119,14 +119,25 @@ export class ChatsService {
         );
     }
 
-    async getSystemChat(): Promise<DataResponse<string | ChatEntity>> {
-        const systemChat = await this.chatsRepository.findOne(
+    async getSystemChats(): Promise<DataResponse<string | ChatEntity[]>> {
+        const systemChats = await this.chatsRepository.find(
             { type: ChatTypeEnum.IS_SYSTEM },
             { populate: ['message'] },
         );
 
-        if (!systemChat) return new DataResponse(MessageErrorLanguageEnum.CHAT_WITH_ID_NOT_FOUND);
+        if (!systemChats) return new DataResponse(MessageErrorLanguageEnum.CHAT_WITH_ID_NOT_FOUND);
 
-        return new DataResponse(systemChat);
+        return new DataResponse(systemChats);
+    }
+
+    async putSystemcChats() {
+        const response = await this.getSystemChats();
+        const chatIds = response.data instanceof Array ? response.data.map((chat) => chat.id) : [response.data];
+        this.queueService.sendMessage(
+            TopicsEnum.SYSTEM_CHATS,
+            undefined,
+            EventsEnum.GET_SYSTEM_CHAT,
+            new DataResponse(chatIds),
+        );
     }
 }

@@ -56,9 +56,20 @@ export class MessagesService {
             parentMessageId,
         );
 
+        await this.messageRepository.populate(messageEntity, ['parentMessage']);
+
         await this.messageRepository.insert(messageEntity);
 
-        const response = new DataResponse<MessageEntity>(messageEntity);
+        const newMessageEntity: MessageEntity | null = await this.messageRepository.findOne(
+            { id: messageEntity.id },
+            { populate: ['parentMessage'] },
+        );
+
+        if (!newMessageEntity) {
+            return new DataResponse(MessageErrorLanguageEnum.MESSAGE_NOT_FOUND);
+        }
+
+        const response = new DataResponse<MessageEntity | string>(newMessageEntity);
 
         this.queueService.sendMessage(TopicsEnum.EMIT, String(chatId), EventsEnum.CREATE_MESSAGE, response);
 

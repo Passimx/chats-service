@@ -385,7 +385,7 @@
 		},
 		"/chats/chat-system": {
 			"get": {
-				"operationId": "ChatsController_getSystemChat",
+				"operationId": "ChatsController_getSystemChats",
 				"parameters": [],
 				"responses": {
 					"200": {

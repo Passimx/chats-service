@@ -63,9 +63,14 @@ export class ChatsController {
         this.chatsService.updateMaxUsersOnline(roomName, onlineUsers);
     }
 
+    @MessagePattern(TopicsEnum.PUT_SYSTEM_CHATS)
+    putSystemChats() {
+        this.chatsService.putSystemcChats();
+    }
+
     @Get('chat-system')
     @ApiData(ChatEntity)
-    getSystemChat(): Promise<DataResponse<string | ChatEntity>> {
-        return this.chatsService.getSystemChat();
+    getSystemChats(): Promise<DataResponse<string | ChatEntity[]>> {
+        return this.chatsService.getSystemChats();
     }
 }
