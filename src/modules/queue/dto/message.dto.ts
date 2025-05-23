@@ -7,7 +7,7 @@ export class MessageDto {
     @IsString()
     @ApiProperty()
     @IsNotEmpty()
-    readonly to: string | undefined;
+    readonly to?: string;
 
     @ApiProperty({ enum: EventsEnum })
     @IsEnum(EventsEnum)

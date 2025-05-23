@@ -68,8 +68,8 @@ export class ChatsController {
         this.chatsService.putSystemcChats();
     }
 
-    @Get('chat-system')
-    @ApiData(ChatEntity)
+    @Get('system_chats')
+    @ApiData(ChatEntity, true)
     getSystemChats(): Promise<DataResponse<string | ChatEntity[]>> {
         return this.chatsService.getSystemChats();
     }
