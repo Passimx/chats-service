@@ -383,9 +383,9 @@
 				]
 			}
 		},
-		"/chats/chat-system": {
+		"/chats/system_chats": {
 			"get": {
-				"operationId": "ChatsController_getSystemChat",
+				"operationId": "ChatsController_getSystemChats",
 				"parameters": [],
 				"responses": {
 					"200": {
@@ -402,7 +402,10 @@
 													"example": true
 												},
 												"data": {
-													"$ref": "#/components/schemas/ChatEntity"
+													"type": "array",
+													"items": {
+														"$ref": "#/components/schemas/ChatEntity"
+													}
 												}
 											},
 											"required": [

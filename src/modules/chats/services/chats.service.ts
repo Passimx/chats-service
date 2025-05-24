@@ -8,7 +8,6 @@ import { QueueService } from '../../queue/queue.service';
 import { MessageTypeEnum } from '../types/message-type.enum';
 import { MessageErrorLanguageEnum } from '../types/message-error-language.enum';
 import { SystemMessageLanguageEnum } from '../types/system-message-language.enum';
-import { ChatTypeEnum } from '../types/chat-type.enum';
 import { TopicsEnum } from '../../queue/types/topics.enum';
 import { MessageEntity } from '../entities/message.entity';
 import { ChatsRepository } from '../repositories/chats.repository';
@@ -119,14 +118,27 @@ export class ChatsService {
         );
     }
 
-    async getSystemChat(): Promise<DataResponse<string | ChatEntity>> {
-        const systemChat = await this.chatsRepository.findOne(
-            { type: ChatTypeEnum.IS_SYSTEM },
-            { populate: ['message'] },
+    async getSystemChats(): Promise<DataResponse<string | ChatEntity[]>> {
+        const systemChats = await this.chatsRepository.getSystemChats();
+
+        if (!systemChats) return new DataResponse(MessageErrorLanguageEnum.CHAT_WITH_ID_NOT_FOUND);
+
+        return new DataResponse(systemChats);
+    }
+
+    async putSystemcChats() {
+        const response = await this.getSystemChats();
+
+        if (typeof response.data === 'string') {
+            return;
+        }
+
+        const chatIds = response.data.map((chat) => chat.id);
+        this.queueService.sendMessage(
+            TopicsEnum.SYSTEM_CHATS,
+            undefined,
+            EventsEnum.GET_SYSTEM_CHAT,
+            new DataResponse(chatIds),
         );
-
-        if (!systemChat) return new DataResponse(MessageErrorLanguageEnum.CHAT_WITH_ID_NOT_FOUND);
-
-        return new DataResponse(systemChat);
     }
 }

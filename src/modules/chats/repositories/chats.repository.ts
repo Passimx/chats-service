@@ -1,6 +1,7 @@
 import { QueryOrder, SqlEntityRepository } from '@mikro-orm/postgresql';
 import { ChatEntity } from '../entities/chat.entity';
 import { QueryGetChatsDto } from '../dto/requests/query-get-chats.dto';
+import { ChatTypeEnum } from '../types/chat-type.enum';
 
 export class ChatsRepository extends SqlEntityRepository<ChatEntity> {
     public findChats({ title, limit, offset, notFavoriteChatIds }: QueryGetChatsDto): Promise<ChatEntity[]> {
@@ -35,5 +36,14 @@ export class ChatsRepository extends SqlEntityRepository<ChatEntity> {
             .where('chats.count_messages = message.number')
             .andWhere('chats.id = ?', [id])
             .getSingleResult();
+    }
+
+    async getSystemChats(): Promise<string | ChatEntity[]> {
+        return await this.createQueryBuilder('chats')
+            .leftJoinAndSelect('chats.message', 'message')
+            .leftJoinAndSelect('message.parentMessage', 'parentMessage')
+            .where({ type: ChatTypeEnum.IS_SYSTEM })
+            .andWhere('chats.count_messages = message.number')
+            .getResult();
     }
 }
