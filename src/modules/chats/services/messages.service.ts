@@ -93,7 +93,7 @@ export class MessagesService {
 
         const getMessageNotSearch = await this.messageRepository.find(
             { chatId },
-            { limit: limit, offset: offset, orderBy: { createdAt: 'DESC' }, populate: ['parentMessage'] },
+            { limit: limit, offset: offset, orderBy: { number: 'DESC' }, populate: ['parentMessage'] },
         );
 
         return new DataResponse(getMessageNotSearch);

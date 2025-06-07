@@ -106,6 +106,36 @@ services:
     ports:
       - ${KAFKA_UI_PORT}:${KAFKA_UI_PORT}
 
+  mariadb:
+    image: mariadb:10.11
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: example_root_password
+      MYSQL_DATABASE: nextcloud
+      MYSQL_USER: nextclouduser
+      MYSQL_PASSWORD: example_password
+    networks:
+      - main
+    volumes:
+      - ./db_data:/var/lib/mysql
+
+  nextcloud:
+    image: nextcloud:stable
+    ports:
+      - 8080:80
+    restart: always
+    links:
+      - mariadb
+    environment:
+      MYSQL_HOST: mariadb
+      MYSQL_DATABASE: nextcloud
+      MYSQL_USER: nextclouduser
+      MYSQL_PASSWORD: example_password
+    networks:
+      - main
+    volumes:
+      - ./nextcloud_data:/var/www/html/data
+
 networks:
   main:
     driver: bridge

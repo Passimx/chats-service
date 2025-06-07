@@ -123,7 +123,7 @@ export class ChatsService {
 
         if (!systemChats) return new DataResponse(MessageErrorLanguageEnum.CHAT_WITH_ID_NOT_FOUND);
 
-        return new DataResponse(systemChats);
+        return new DataResponse<ChatEntity[]>(systemChats);
     }
 
     async putSystemcChats() {
