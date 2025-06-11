@@ -595,6 +595,60 @@
 					"Messages"
 				]
 			}
+		},
+		"/files/upload": {
+			"post": {
+				"operationId": "FilesController_upload",
+				"parameters": [],
+				"responses": {
+					"200": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"type": "object",
+											"properties": {
+												"success": {
+													"type": "boolean",
+													"example": true
+												},
+												"data": {
+													"$ref": "#/components/schemas/FilesEntity"
+												}
+											},
+											"required": [
+												"success",
+												"data"
+											]
+										},
+										{
+											"type": "object",
+											"properties": {
+												"success": {
+													"type": "boolean",
+													"example": false
+												},
+												"data": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"success",
+												"data"
+											]
+										}
+									]
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Files"
+				]
+			}
 		}
 	},
 	"info": {
@@ -790,6 +844,34 @@
 				},
 				"required": [
 					"chatId"
+				]
+			},
+			"FilesEntity": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"createdAt": {
+						"format": "date-time",
+						"type": "string"
+					},
+					"originalName": {
+						"type": "string"
+					},
+					"size": {
+						"type": "number"
+					},
+					"mimeType": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"id",
+					"createdAt",
+					"originalName",
+					"size",
+					"mimeType"
 				]
 			}
 		}
