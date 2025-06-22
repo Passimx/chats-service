@@ -22,6 +22,7 @@ export class MessagesController {
             message.encryptMessage,
             message.message,
             message.parentMessageId,
+            message.fileIds,
         );
     }
 

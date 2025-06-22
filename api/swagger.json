@@ -615,7 +615,7 @@
 													"example": true
 												},
 												"data": {
-													"$ref": "#/components/schemas/FilesEntity"
+													"$ref": "#/components/schemas/FileEntity"
 												}
 											},
 											"required": [
@@ -643,6 +643,29 @@
 								}
 							}
 						}
+					}
+				},
+				"tags": [
+					"Files"
+				]
+			}
+		},
+		"/files/{id}": {
+			"get": {
+				"operationId": "FilesController_downFile",
+				"parameters": [
+					{
+						"name": "id",
+						"required": true,
+						"in": "path",
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": ""
 					}
 				},
 				"tags": [
@@ -740,6 +763,9 @@
 						"$ref": "#/components/schemas/ChatEntity"
 					},
 					"parentMessage": {
+						"$ref": "#/components/schemas/MessageEntity"
+					},
+					"files": {
 						"$ref": "#/components/schemas/MessageEntity"
 					}
 				},
@@ -840,13 +866,19 @@
 					"parentMessageId": {
 						"type": "string",
 						"description": "Message id"
+					},
+					"fileIds": {
+						"type": "array",
+						"items": {
+							"type": "string"
+						}
 					}
 				},
 				"required": [
 					"chatId"
 				]
 			},
-			"FilesEntity": {
+			"FileEntity": {
 				"type": "object",
 				"properties": {
 					"id": {
@@ -864,6 +896,15 @@
 					},
 					"mimeType": {
 						"type": "string"
+					},
+					"messageId": {
+						"type": "string"
+					},
+					"message": {
+						"type": "array",
+						"items": {
+							"$ref": "#/components/schemas/FileEntity"
+						}
 					}
 				},
 				"required": [
@@ -871,7 +912,8 @@
 					"createdAt",
 					"originalName",
 					"size",
-					"mimeType"
+					"mimeType",
+					"messageId"
 				]
 			}
 		}

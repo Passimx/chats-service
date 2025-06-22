@@ -3,7 +3,7 @@ import { InjectWebDAV, WebDAV } from 'nestjs-webdav';
 import { File } from '@nest-lab/fastify-multer';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { EntityRepository } from '@mikro-orm/postgresql';
-import { FilesEntity } from '../entity/files.entity';
+import { FileEntity } from '../entity/file.entity';
 
 @Injectable()
 export class FilesService {
@@ -11,16 +11,43 @@ export class FilesService {
         // @ts-ignore
         @InjectWebDAV()
         private readonly webDav: WebDAV,
-        @InjectRepository(FilesEntity)
-        private readonly fileRepository: EntityRepository<FilesEntity>,
+        @InjectRepository(FileEntity)
+        private readonly fileRepository: EntityRepository<FileEntity>,
     ) {}
 
-    async uploadFile(file: File): Promise<FilesEntity> {
-        const fileEntity = new FilesEntity(file.originalname, file.mimetype, file.size);
+    async uploadFiles(files: Array<File>): Promise<string[]> {
+        const arrayFiles = await Promise.all(files.map((file) => this.uploadFile(file)));
+
+        return arrayFiles.map((fileEntity) => fileEntity.id);
+    }
+
+    async uploadFile(file: File): Promise<FileEntity> {
+        const fileEntity = new FileEntity(file.originalname, file.mimetype, file.size);
         await this.fileRepository.insert(fileEntity);
         const filePath = fileEntity.id;
         await this.webDav.putFileContents(filePath, file.buffer);
 
         return fileEntity;
+    }
+
+    async getFileData(id: string): Promise<{
+        info: FileEntity;
+        buffer: Buffer;
+    }> {
+        const fileInfo = await this.fileRepository.findOne(id);
+
+        const buffer = (await this.webDav.getFileContents(id)) as Buffer;
+
+        return {
+            info: fileInfo as FileEntity,
+            buffer,
+        };
+    }
+
+    encodeRFC5987ValueChars(str: string): string {
+        return encodeURIComponent(str)
+            .replace(/['()]/g, escape)
+            .replace(/\*/g, '%2A')
+            .replace(/%(?:7C|60|5E)/g, unescape);
     }
 }

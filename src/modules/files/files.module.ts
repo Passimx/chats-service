@@ -5,11 +5,11 @@ import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { Envs } from '../../common/envs/env';
 import { FilesService } from './services/files.service';
 import { FilesController } from './controllers/files.controller';
-import { FilesEntity } from './entity/files.entity';
+import { FileEntity } from './entity/file.entity';
 
 @Module({
     imports: [
-        MikroOrmModule.forFeature([FilesEntity]),
+        MikroOrmModule.forFeature([FileEntity]),
         FastifyMulterModule,
         WebDAVModule.forRootAsync({
             useFactory: () => {
@@ -25,5 +25,6 @@ import { FilesEntity } from './entity/files.entity';
     ],
     controllers: [FilesController],
     providers: [FilesService],
+    exports: [MikroOrmModule],
 })
 export class FilesModule {}
