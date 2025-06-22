@@ -4,6 +4,7 @@ import { File } from '@nest-lab/fastify-multer';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { EntityRepository } from '@mikro-orm/postgresql';
 import { FileEntity } from '../entity/file.entity';
+import { DataResponse } from '../../../common/swagger/data-response.dto';
 
 @Injectable()
 export class FilesService {
@@ -15,10 +16,10 @@ export class FilesService {
         private readonly fileRepository: EntityRepository<FileEntity>,
     ) {}
 
-    async uploadFiles(files: Array<File>): Promise<string[]> {
+    async uploadFiles(files: Array<File>): Promise<DataResponse<string[]>> {
         const arrayFiles = await Promise.all(files.map((file) => this.uploadFile(file)));
 
-        return arrayFiles.map((fileEntity) => fileEntity.id);
+        return new DataResponse(arrayFiles.map((fileEntity) => fileEntity.id));
     }
 
     async uploadFile(file: File): Promise<FileEntity> {

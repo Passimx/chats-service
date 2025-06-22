@@ -5,6 +5,7 @@ import { FastifyReply } from 'fastify';
 import { FilesService } from '../services/files.service';
 import { FileEntity } from '../entity/file.entity';
 import { ApiData } from '../../../common/swagger/api-data.decorator';
+import { DataResponse } from '../../../common/swagger/data-response.dto';
 
 @ApiTags('Files')
 @Controller('files')
@@ -14,7 +15,7 @@ export class FilesController {
     @Post('upload')
     @ApiData(FileEntity)
     @UseInterceptors(FilesInterceptor('files'))
-    async upload(@UploadedFiles() files: Array<File>): Promise<string[]> {
+    async upload(@UploadedFiles() files: Array<File>): Promise<DataResponse<string[]>> {
         return await this.filesService.uploadFiles(files);
     }
 

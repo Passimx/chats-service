@@ -102,7 +102,11 @@ export class MessagesService {
         if (search) {
             const getMessageSearch = await this.messageRepository.find(
                 { chatId, message: { $ilike: `%${search}%` }, number: { $gt: offset } },
-                { limit: limit, orderBy: { number: 'DESC' }, populate: ['parentMessage'] },
+                {
+                    limit: limit,
+                    orderBy: { number: 'DESC' },
+                    populate: ['parentMessage', 'files', 'parentMessage.files'],
+                },
             );
 
             return new DataResponse(getMessageSearch);
@@ -110,7 +114,12 @@ export class MessagesService {
 
         const getMessageNotSearch = await this.messageRepository.find(
             { chatId },
-            { limit: limit, offset: offset, orderBy: { number: 'DESC' }, populate: ['parentMessage'] },
+            {
+                limit: limit,
+                offset: offset,
+                orderBy: { number: 'DESC' },
+                populate: ['parentMessage', 'files', 'parentMessage.files'],
+            },
         );
 
         return new DataResponse(getMessageNotSearch);
