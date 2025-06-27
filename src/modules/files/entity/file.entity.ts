@@ -32,6 +32,7 @@ export class FileEntity extends CreatedEntity {
     @ApiPropertyOptional({ type: () => FileEntity, isArray: true })
     @ManyToOne(() => MessageEntity, {
         nullable: true,
+        hidden: true,
         joinColumn: 'message_id',
         referenceColumnName: 'id',
     })
