@@ -595,6 +595,92 @@
 					"Messages"
 				]
 			}
+		},
+		"/files/upload": {
+			"post": {
+				"operationId": "FilesController_upload",
+				"parameters": [],
+				"responses": {
+					"200": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"type": "object",
+											"properties": {
+												"success": {
+													"type": "boolean",
+													"example": true
+												},
+												"data": {
+													"$ref": "#/components/schemas/FileEntity"
+												}
+											},
+											"required": [
+												"success",
+												"data"
+											]
+										},
+										{
+											"type": "object",
+											"properties": {
+												"success": {
+													"type": "boolean",
+													"example": false
+												},
+												"data": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"success",
+												"data"
+											]
+										}
+									]
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Files"
+				]
+			}
+		},
+		"/files/{id}": {
+			"get": {
+				"operationId": "FilesController_downFile",
+				"parameters": [
+					{
+						"name": "id",
+						"required": true,
+						"in": "path",
+						"description": "File ID",
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Returns the file as Buffer",
+						"content": {
+							"application/octet-stream": {
+								"schema": {
+									"type": "string",
+									"format": "binary"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Files"
+				]
+			}
 		}
 	},
 	"info": {
@@ -654,6 +740,44 @@
 					"maxUsersOnline"
 				]
 			},
+			"FileEntity": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"createdAt": {
+						"format": "date-time",
+						"type": "string"
+					},
+					"originalName": {
+						"type": "string"
+					},
+					"size": {
+						"type": "number"
+					},
+					"mimeType": {
+						"type": "string"
+					},
+					"messageId": {
+						"type": "string"
+					},
+					"message": {
+						"type": "array",
+						"items": {
+							"$ref": "#/components/schemas/FileEntity"
+						}
+					}
+				},
+				"required": [
+					"id",
+					"createdAt",
+					"originalName",
+					"size",
+					"mimeType",
+					"messageId"
+				]
+			},
 			"MessageEntity": {
 				"type": "object",
 				"properties": {
@@ -687,6 +811,12 @@
 					},
 					"parentMessage": {
 						"$ref": "#/components/schemas/MessageEntity"
+					},
+					"files": {
+						"type": "array",
+						"items": {
+							"$ref": "#/components/schemas/FileEntity"
+						}
 					}
 				},
 				"required": [
@@ -786,6 +916,12 @@
 					"parentMessageId": {
 						"type": "string",
 						"description": "Message id"
+					},
+					"fileIds": {
+						"type": "array",
+						"items": {
+							"type": "string"
+						}
 					}
 				},
 				"required": [

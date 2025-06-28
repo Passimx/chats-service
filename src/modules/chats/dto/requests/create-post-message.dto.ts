@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsOptional, IsString, IsUUID, Length } from 'class-validator';
+import { IsArray, IsNotEmpty, IsOptional, IsString, IsUUID, Length } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateMessageDto {
@@ -32,4 +32,9 @@ export class CreateMessageDto {
     @IsOptional()
     @IsUUID('4')
     readonly parentMessageId?: string;
+
+    @ApiPropertyOptional()
+    @IsArray()
+    @IsUUID('all', { each: true })
+    readonly fileIds?: string[];
 }

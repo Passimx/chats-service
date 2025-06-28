@@ -11,6 +11,7 @@ import { MessageTypeEnum } from '../types/message-type.enum';
 import { MessageErrorLanguageEnum } from '../types/message-error-language.enum';
 import { TopicsEnum } from '../../queue/types/topics.enum';
 import { ChatTypeEnum } from '../types/chat-type.enum';
+import { FileEntity } from '../../files/entity/file.entity';
 
 @Injectable()
 export class MessagesService {
@@ -20,6 +21,8 @@ export class MessagesService {
         @InjectRepository(ChatEntity)
         private readonly chatRepository: EntityRepository<ChatEntity>,
         private readonly queueService: QueueService,
+        @InjectRepository(FileEntity)
+        private readonly fileRepository: EntityRepository<FileEntity>,
     ) {}
 
     async createMessage(
@@ -28,9 +31,12 @@ export class MessagesService {
         encryptMessage?: string,
         message?: string,
         parentMessageId?: string,
+        fileIds?: string[],
     ): Promise<DataResponse<MessageEntity | string>> {
+        let parentMessage: MessageEntity | null = null;
+
         if (parentMessageId) {
-            const parentMessage = await this.messageRepository.findOne({ id: parentMessageId });
+            parentMessage = await this.messageRepository.findOne({ id: parentMessageId, chatId });
 
             if (!parentMessage) {
                 return new DataResponse(MessageErrorLanguageEnum.PARENT_MESSAGE_NOT_FOUND);
@@ -51,18 +57,29 @@ export class MessagesService {
             chatId,
             chat.countMessages,
             type,
+            chat,
+            parentMessage,
             encryptMessage,
             message,
-            parentMessageId,
         );
 
         await this.messageRepository.populate(messageEntity, ['parentMessage']);
 
         await this.messageRepository.insert(messageEntity);
 
+        if (fileIds) {
+            await this.fileRepository.nativeUpdate(
+                {
+                    id: { $in: fileIds },
+                    messageId: null,
+                },
+                { messageId: messageEntity.id },
+            );
+        }
+
         const newMessageEntity: MessageEntity | null = await this.messageRepository.findOne(
             { id: messageEntity.id },
-            { populate: ['parentMessage'] },
+            { populate: ['parentMessage', 'files', 'parentMessage.files'] },
         );
 
         if (!newMessageEntity) {
@@ -85,7 +102,11 @@ export class MessagesService {
         if (search) {
             const getMessageSearch = await this.messageRepository.find(
                 { chatId, message: { $ilike: `%${search}%` }, number: { $gt: offset } },
-                { limit: limit, orderBy: { number: 'DESC' }, populate: ['parentMessage'] },
+                {
+                    limit: limit,
+                    orderBy: { number: 'DESC' },
+                    populate: ['parentMessage', 'files', 'parentMessage.files'],
+                },
             );
 
             return new DataResponse(getMessageSearch);
@@ -93,7 +114,12 @@ export class MessagesService {
 
         const getMessageNotSearch = await this.messageRepository.find(
             { chatId },
-            { limit: limit, offset: offset, orderBy: { createdAt: 'DESC' }, populate: ['parentMessage'] },
+            {
+                limit: limit,
+                offset: offset,
+                orderBy: { number: 'DESC' },
+                populate: ['parentMessage', 'files', 'parentMessage.files'],
+            },
         );
 
         return new DataResponse(getMessageNotSearch);

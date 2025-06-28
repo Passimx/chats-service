@@ -1,7 +1,8 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Entity, Enum, Index, OneToOne, Property } from '@mikro-orm/core';
+import { Collection, Entity, Enum, Index, OneToMany, OneToOne, Property } from '@mikro-orm/core';
 import { CreatedEntity } from '../../../common/entities/created.entity';
 import { MessageTypeEnum } from '../types/message-type.enum';
+import { FileEntity } from '../../files/entity/file.entity';
 import { ChatEntity } from './chat.entity';
 
 @Entity({ tableName: 'messages' })
@@ -12,7 +13,7 @@ export class MessageEntity extends CreatedEntity {
     readonly encryptMessage?: string;
 
     @ApiProperty()
-    @Property({ type: 'uuid' })
+    @Property({ persist: false })
     readonly chatId!: string;
 
     @ApiProperty()
@@ -25,7 +26,7 @@ export class MessageEntity extends CreatedEntity {
     readonly message?: string; //используется только для openChat, в остальных частах используется encryptMessage
 
     @ApiProperty()
-    @Property({ type: 'uuid', nullable: true })
+    @Property({ persist: false })
     readonly parentMessageId?: string;
 
     @ApiProperty()
@@ -36,28 +37,34 @@ export class MessageEntity extends CreatedEntity {
         chatId: string,
         number: number,
         type: MessageTypeEnum,
+        chat: ChatEntity,
+        parentMessage: MessageEntity | null,
         encryptMessage?: string,
         message?: string,
-        parentMessageId?: string,
     ) {
         super();
         this.chatId = chatId;
         this.number = number;
+        this.chat = chat;
 
         if (encryptMessage) this.encryptMessage = encryptMessage;
 
         if (message) this.message = message;
 
-        if (parentMessageId) this.parentMessageId = parentMessageId;
+        if (parentMessage) this.parentMessage = parentMessage;
 
         if (type) this.type = type;
     }
 
     @ApiPropertyOptional({ type: () => ChatEntity, isArray: false })
-    @OneToOne(() => ChatEntity, { persist: false })
+    @OneToOne(() => ChatEntity, { type: 'uuid', unique: false })
     readonly chat!: ChatEntity;
 
     @ApiPropertyOptional({ type: () => MessageEntity, isArray: false })
-    @OneToOne(() => MessageEntity, { persist: false })
+    @OneToOne(() => MessageEntity, { type: 'uuid', nullable: true, unique: false })
     readonly parentMessage!: MessageEntity;
+
+    @ApiPropertyOptional({ type: () => FileEntity, isArray: true })
+    @OneToMany(() => FileEntity, (files) => files.message)
+    readonly files = new Collection<FileEntity>(this);
 }
