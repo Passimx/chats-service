@@ -1,6 +1,6 @@
 import { Controller, Get, Param, Post, Res, UploadedFiles, UseInterceptors } from '@nestjs/common';
 import { File, FilesInterceptor } from '@nest-lab/fastify-multer';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { FastifyReply } from 'fastify';
 import { FilesService } from '../services/files.service';
 import { FileEntity } from '../entity/file.entity';
@@ -19,6 +19,19 @@ export class FilesController {
         return await this.filesService.uploadFiles(files);
     }
 
+    @ApiParam({ name: 'id', type: String, description: 'File ID' })
+    @ApiResponse({
+        status: 200,
+        description: 'Returns the file as Buffer',
+        content: {
+            'application/octet-stream': {
+                schema: {
+                    type: 'string',
+                    format: 'binary',
+                },
+            },
+        },
+    })
     @Get(':id')
     async downFile(@Param('id') id: string, @Res() reply: FastifyReply) {
         const { info, buffer } = await this.filesService.getFileData(id);

@@ -658,6 +658,7 @@
 						"name": "id",
 						"required": true,
 						"in": "path",
+						"description": "File ID",
 						"schema": {
 							"type": "string"
 						}
@@ -665,7 +666,15 @@
 				],
 				"responses": {
 					"200": {
-						"description": ""
+						"description": "Returns the file as Buffer",
+						"content": {
+							"application/octet-stream": {
+								"schema": {
+									"type": "string",
+									"format": "binary"
+								}
+							}
+						}
 					}
 				},
 				"tags": [
@@ -731,6 +740,44 @@
 					"maxUsersOnline"
 				]
 			},
+			"FileEntity": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"createdAt": {
+						"format": "date-time",
+						"type": "string"
+					},
+					"originalName": {
+						"type": "string"
+					},
+					"size": {
+						"type": "number"
+					},
+					"mimeType": {
+						"type": "string"
+					},
+					"messageId": {
+						"type": "string"
+					},
+					"message": {
+						"type": "array",
+						"items": {
+							"$ref": "#/components/schemas/FileEntity"
+						}
+					}
+				},
+				"required": [
+					"id",
+					"createdAt",
+					"originalName",
+					"size",
+					"mimeType",
+					"messageId"
+				]
+			},
 			"MessageEntity": {
 				"type": "object",
 				"properties": {
@@ -766,7 +813,10 @@
 						"$ref": "#/components/schemas/MessageEntity"
 					},
 					"files": {
-						"$ref": "#/components/schemas/MessageEntity"
+						"type": "array",
+						"items": {
+							"$ref": "#/components/schemas/FileEntity"
+						}
 					}
 				},
 				"required": [
@@ -876,44 +926,6 @@
 				},
 				"required": [
 					"chatId"
-				]
-			},
-			"FileEntity": {
-				"type": "object",
-				"properties": {
-					"id": {
-						"type": "string"
-					},
-					"createdAt": {
-						"format": "date-time",
-						"type": "string"
-					},
-					"originalName": {
-						"type": "string"
-					},
-					"size": {
-						"type": "number"
-					},
-					"mimeType": {
-						"type": "string"
-					},
-					"messageId": {
-						"type": "string"
-					},
-					"message": {
-						"type": "array",
-						"items": {
-							"$ref": "#/components/schemas/FileEntity"
-						}
-					}
-				},
-				"required": [
-					"id",
-					"createdAt",
-					"originalName",
-					"size",
-					"mimeType",
-					"messageId"
 				]
 			}
 		}

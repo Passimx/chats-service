@@ -64,7 +64,7 @@ export class MessageEntity extends CreatedEntity {
     @OneToOne(() => MessageEntity, { type: 'uuid', nullable: true, unique: false })
     readonly parentMessage!: MessageEntity;
 
-    @ApiPropertyOptional({ type: () => MessageEntity, isArray: false })
+    @ApiPropertyOptional({ type: () => FileEntity, isArray: true })
     @OneToMany(() => FileEntity, (files) => files.message)
     readonly files = new Collection<FileEntity>(this);
 }
