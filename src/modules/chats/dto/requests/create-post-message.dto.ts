@@ -33,8 +33,13 @@ export class CreateMessageDto {
     @IsUUID('4')
     readonly parentMessageId?: string;
 
-    @ApiPropertyOptional()
+    @ApiPropertyOptional({
+        type: [String],
+        description: 'Array of file IDs',
+        required: false,
+    })
+    @IsOptional()
     @IsArray()
-    @IsUUID('all', { each: true })
+    @IsUUID('4', { each: true })
     readonly fileIds?: string[];
 }

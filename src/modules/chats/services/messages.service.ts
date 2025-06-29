@@ -113,7 +113,7 @@ export class MessagesService {
         }
 
         const getMessageNotSearch = await this.messageRepository.find(
-            { chatId },
+            { chat: chatId },
             {
                 limit: limit,
                 offset: offset,
