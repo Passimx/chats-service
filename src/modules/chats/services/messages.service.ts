@@ -93,30 +93,11 @@ export class MessagesService {
         return response;
     }
 
-    async getMessages(
-        chatId: string,
-        limit: number,
-        offset: number,
-        search?: string,
-    ): Promise<DataResponse<MessageEntity[]>> {
-        if (search) {
-            const getMessageSearch = await this.messageRepository.find(
-                { chatId, message: { $ilike: `%${search}%` }, number: { $gt: offset } },
-                {
-                    limit: limit,
-                    orderBy: { number: 'DESC' },
-                    populate: ['parentMessage', 'files', 'parentMessage.files'],
-                },
-            );
-
-            return new DataResponse(getMessageSearch);
-        }
-
+    async getMessages(chatId: string, limit: number, offset: number): Promise<DataResponse<MessageEntity[]>> {
         const getMessageNotSearch = await this.messageRepository.find(
-            { chatId },
+            { chat: chatId, number: { $gt: offset ?? undefined } },
             {
                 limit: limit,
-                offset: offset,
                 orderBy: { number: 'DESC' },
                 populate: ['parentMessage', 'files', 'parentMessage.files'],
             },

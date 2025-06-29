@@ -918,6 +918,7 @@
 						"description": "Message id"
 					},
 					"fileIds": {
+						"description": "Array of file IDs",
 						"type": "array",
 						"items": {
 							"type": "string"

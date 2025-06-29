@@ -29,6 +29,6 @@ export class MessagesController {
     @Get()
     @ApiData(MessageEntity, true)
     getMessages(@Query() query: QueryGetMessagesDto): Promise<DataResponse<MessageEntity[]>> {
-        return this.messagesService.getMessages(query.chatId, query.limit, query.offset, query.search);
+        return this.messagesService.getMessages(query.chatId, query.limit, query.offset);
     }
 }
