@@ -1,11 +1,11 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsNotEmpty, IsOptional, IsString, IsUUID } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsUUID } from 'class-validator';
 import { IsInteger } from '../../decorators/is-integer.decorator';
 
 export class QueryGetMessagesDto {
     @ApiProperty({ description: 'Chat id' })
     @IsNotEmpty()
-    @IsUUID('4')
+    @IsUUID('all')
     readonly chatId!: string;
 
     @ApiPropertyOptional({ description: 'Limit message' })
@@ -17,9 +17,4 @@ export class QueryGetMessagesDto {
     @IsOptional()
     @IsInteger()
     readonly offset!: number;
-
-    @IsString()
-    @ApiPropertyOptional({ description: 'Search message' })
-    @IsOptional()
-    readonly search!: string;
 }

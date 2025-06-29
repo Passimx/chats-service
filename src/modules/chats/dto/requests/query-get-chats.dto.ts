@@ -19,7 +19,7 @@ export class QueryGetChatsDto {
     @IsOptional()
     readonly offset?: number;
 
-    @IsUUID('4', { each: true })
+    @IsUUID('all', { each: true })
     @IsArray()
     @IsOptional()
     @Transform(({ value }: { value: string }) => value.split(','))

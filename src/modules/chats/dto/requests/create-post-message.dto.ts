@@ -13,7 +13,7 @@ export class CreateMessageDto {
     readonly encryptMessage?: string;
 
     @IsNotEmpty()
-    @IsUUID('4')
+    @IsUUID('all')
     @ApiProperty({ description: 'Chat id' })
     readonly chatId!: string;
 
@@ -30,7 +30,7 @@ export class CreateMessageDto {
 
     @ApiPropertyOptional({ description: 'Message id' })
     @IsOptional()
-    @IsUUID('4')
+    @IsUUID('all')
     readonly parentMessageId?: string;
 
     @ApiPropertyOptional({
@@ -40,6 +40,6 @@ export class CreateMessageDto {
     })
     @IsOptional()
     @IsArray()
-    @IsUUID('4', { each: true })
+    @IsUUID('all', { each: true })
     readonly fileIds?: string[];
 }

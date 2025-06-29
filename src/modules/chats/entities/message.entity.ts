@@ -57,7 +57,7 @@ export class MessageEntity extends CreatedEntity {
     }
 
     @ApiPropertyOptional({ type: () => ChatEntity, isArray: false })
-    @OneToOne(() => ChatEntity, { type: 'uuid', unique: false })
+    @OneToOne(() => ChatEntity, { type: 'uuid', unique: false, hidden: true })
     readonly chat!: ChatEntity;
 
     @ApiPropertyOptional({ type: () => MessageEntity, isArray: false })
