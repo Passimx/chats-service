@@ -15,7 +15,7 @@ import { FileEntity } from './entity/file.entity';
             useFactory: () => {
                 return {
                     config: {
-                        endpoint: `http://${Envs.webdev.host}:${Envs.webdev.port}`,
+                        endpoint: `${Envs.webdev.host}:${Envs.webdev.port}`,
                         username: Envs.webdev.user,
                         password: Envs.webdev.password,
                     },
