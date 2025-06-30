@@ -532,15 +532,6 @@
 						"schema": {
 							"type": "number"
 						}
-					},
-					{
-						"name": "search",
-						"required": false,
-						"in": "query",
-						"description": "Search message",
-						"schema": {
-							"type": "string"
-						}
 					}
 				],
 				"responses": {
