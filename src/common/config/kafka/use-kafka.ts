@@ -8,6 +8,7 @@ export async function useKafka(app: NestFastifyApplication) {
             name: 'CLIENT_KAFKA',
             transport: Transport.KAFKA,
             options: {
+                createTopics: true,
                 client: {
                     brokers: [`${Envs.kafka.host}:${Envs.kafka.port}`],
                     sasl: {
