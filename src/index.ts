@@ -28,7 +28,7 @@ export class App {
         }
 
         app.enableCors({
-            origin: ['https://tons-chat.ru', 'http://localhost:3006'], // Разрешаем запросы только с этого домена
+            origin: ['https://tons-chat.ru', 'http://localhost:3006', 'https://passimx.ru'], // Разрешаем запросы только с этого домена
             methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
             credentials: true, // Разрешаем использование кук и токенов
         });
