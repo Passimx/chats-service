@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { EntityRepository, raw } from '@mikro-orm/postgresql';
+import { EntityManager } from '@mikro-orm/core';
 import { MessageEntity } from '../entities/message.entity';
 import { ChatEntity } from '../entities/chat.entity';
 import { DataResponse } from '../../../common/swagger/data-response.dto';
@@ -11,7 +12,6 @@ import { MessageErrorLanguageEnum } from '../types/message-error-language.enum';
 import { TopicsEnum } from '../../queue/types/topics.enum';
 import { ChatTypeEnum } from '../types/chat-type.enum';
 import { FileEntity } from '../../files/entity/file.entity';
-import { EntityManager } from '@mikro-orm/core';
 import { logger } from '../../../common/logger/logger';
 
 @Injectable()
