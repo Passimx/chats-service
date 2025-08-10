@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Post, Res, UploadedFiles, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Res, UploadedFiles, UseInterceptors } from '@nestjs/common';
 import { File, FilesInterceptor } from '@nest-lab/fastify-multer';
 import { ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { FastifyReply } from 'fastify';
@@ -6,6 +6,7 @@ import { FilesService } from '../services/files.service';
 import { FileEntity } from '../entity/file.entity';
 import { ApiData } from '../../../common/swagger/api-data.decorator';
 import { DataResponse } from '../../../common/swagger/data-response.dto';
+import { UploadFileDto } from '../dto/upload-file.dto';
 
 @ApiTags('Files')
 @Controller('files')
@@ -15,8 +16,8 @@ export class FilesController {
     @Post('upload')
     @ApiData(FileEntity)
     @UseInterceptors(FilesInterceptor('files'))
-    async upload(@UploadedFiles() files: Array<File>): Promise<DataResponse<string[]>> {
-        return await this.filesService.uploadFiles(files);
+    async upload(@UploadedFiles() files: Array<File>, @Body() body: UploadFileDto): Promise<DataResponse<string[]>> {
+        return await this.filesService.uploadFiles(files, body.fileType);
     }
 
     @ApiParam({ name: 'id', type: String, description: 'File ID' })
