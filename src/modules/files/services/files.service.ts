@@ -3,8 +3,11 @@ import { InjectWebDAV, WebDAV } from 'nestjs-webdav';
 import { File } from '@nest-lab/fastify-multer';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { EntityRepository } from '@mikro-orm/postgresql';
+import { EntityManager } from '@mikro-orm/core';
 import { FileEntity } from '../entity/file.entity';
 import { DataResponse } from '../../../common/swagger/data-response.dto';
+import { FileEnum } from '../types/file.enum';
+import { logger } from '../../../common/logger/logger';
 
 @Injectable()
 export class FilesService {
@@ -14,21 +17,36 @@ export class FilesService {
         private readonly webDav: WebDAV,
         @InjectRepository(FileEntity)
         private readonly fileRepository: EntityRepository<FileEntity>,
+        private readonly em: EntityManager,
     ) {}
 
-    async uploadFiles(files: Array<File>): Promise<DataResponse<string[]>> {
-        const arrayFiles = await Promise.all(files.map((file) => this.uploadFile(file)));
+    async uploadFiles(files: Array<File>, fileType: FileEnum): Promise<DataResponse<string[]>> {
+        const arrayFiles: (FileEntity | undefined)[] = await Promise.all(
+            files.map((file) => this.uploadFile(file, fileType)),
+        );
+        const filteredFiles: FileEntity[] = arrayFiles.filter((file) => !!file) as FileEntity[];
 
-        return new DataResponse(arrayFiles.map((fileEntity) => fileEntity.id));
+        return new DataResponse(filteredFiles.map((fileEntity) => fileEntity.id));
     }
 
-    async uploadFile(file: File): Promise<FileEntity> {
-        const fileEntity = new FileEntity(file.originalname, file.mimetype, file.size);
-        await this.fileRepository.insert(fileEntity);
-        const filePath = fileEntity.id;
-        await this.webDav.putFileContents(filePath, file.buffer);
+    async uploadFile(file: File, fileType: FileEnum): Promise<FileEntity | undefined> {
+        const fork = this.em.fork(); // отдельный EM для транзакции
+        await fork.begin();
 
-        return fileEntity;
+        try {
+            const fileEntity = new FileEntity(file.originalname, file.mimetype, fileType, file.size);
+            await fork.insert(FileEntity, fileEntity);
+            const filePath = fileEntity.id;
+
+            await this.webDav.putFileContents(filePath, file.buffer);
+
+            await fork.commit();
+
+            return fileEntity;
+        } catch (e) {
+            logger.error(`Error to upload file '${file.originalname}' with size '${file.size} bytes'.`);
+            await fork.rollback();
+        }
     }
 
     async getFileData(id: string): Promise<{

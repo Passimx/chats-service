@@ -1,7 +1,8 @@
-import { Entity, Index, ManyToOne, Property } from '@mikro-orm/core';
+import { Entity, Enum, Index, ManyToOne, Property } from '@mikro-orm/core';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { CreatedEntity } from '../../../common/entities/created.entity';
 import { MessageEntity } from '../../chats/entities/message.entity';
+import { FileEnum } from '../types/file.enum';
 
 @Entity({ tableName: 'files' })
 @Index({ properties: ['id'], type: 'HASH' })
@@ -19,13 +20,18 @@ export class FileEntity extends CreatedEntity {
     readonly mimeType: string;
 
     @ApiProperty()
+    @Enum({ items: () => FileEnum, nativeEnumName: 'file_type_enum', nullable: true })
+    readonly fileType: FileEnum;
+
+    @ApiProperty()
     @Property({ persist: false })
     readonly messageId?: string;
 
-    constructor(originalName: string, mimeType: string, size?: number) {
+    constructor(originalName: string, mimeType: string, fileType: FileEnum, size?: number) {
         super();
         this.originalName = originalName;
         this.mimeType = mimeType;
+        this.fileType = fileType;
         this.size = size;
     }
 
