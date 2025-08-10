@@ -11,6 +11,8 @@ import { MessageErrorLanguageEnum } from '../types/message-error-language.enum';
 import { TopicsEnum } from '../../queue/types/topics.enum';
 import { ChatTypeEnum } from '../types/chat-type.enum';
 import { FileEntity } from '../../files/entity/file.entity';
+import { EntityManager } from '@mikro-orm/core';
+import { logger } from '../../../common/logger/logger';
 
 @Injectable()
 export class MessagesService {
@@ -20,8 +22,9 @@ export class MessagesService {
         @InjectRepository(ChatEntity)
         private readonly chatRepository: EntityRepository<ChatEntity>,
         private readonly queueService: QueueService,
-        @InjectRepository(FileEntity)
-        private readonly fileRepository: EntityRepository<FileEntity>,
+        // @InjectRepository(FileEntity)
+        // private readonly fileRepository: EntityRepository<FileEntity>,
+        private readonly em: EntityManager,
     ) {}
 
     async createMessage(
@@ -32,64 +35,83 @@ export class MessagesService {
         parentMessageId?: string,
         fileIds?: string[],
     ): Promise<DataResponse<MessageEntity | string>> {
-        let parentMessage: MessageEntity | null = null;
+        const fork = this.em.fork();
+        await fork.begin();
 
-        if (parentMessageId) {
-            parentMessage = await this.messageRepository.findOne({ id: parentMessageId, chatId });
+        try {
+            let parentMessage: MessageEntity | null = null;
 
-            if (!parentMessage) {
-                return new DataResponse(MessageErrorLanguageEnum.PARENT_MESSAGE_NOT_FOUND);
+            if (parentMessageId) {
+                parentMessage = await this.messageRepository.findOne({ id: parentMessageId, chatId });
+
+                if (!parentMessage) {
+                    await fork.begin();
+
+                    return new DataResponse(MessageErrorLanguageEnum.PARENT_MESSAGE_NOT_FOUND);
+                }
             }
-        }
 
-        const chat = await this.chatRepository
-            .createQueryBuilder('chats')
-            .update({ countMessages: raw('count_messages + 1') })
-            .where({ id: chatId })
-            .andWhere('chats.type != ?', [ChatTypeEnum.IS_SYSTEM])
-            .returning('*')
-            .getSingleResult();
+            const chat = await this.chatRepository
+                .createQueryBuilder('chats')
+                .update({ countMessages: raw('count_messages + 1') })
+                .where({ id: chatId })
+                .andWhere('chats.type != ?', [ChatTypeEnum.IS_SYSTEM])
+                .returning('*')
+                .getSingleResult();
 
-        if (!chat) return new DataResponse(MessageErrorLanguageEnum.CHAT_NOT_FOUND);
+            if (!chat) {
+                await fork.begin();
 
-        const messageEntity = new MessageEntity(
-            chatId,
-            chat.countMessages,
-            type,
-            chat,
-            parentMessage,
-            encryptMessage,
-            message,
-        );
+                return new DataResponse(MessageErrorLanguageEnum.CHAT_NOT_FOUND);
+            }
 
-        await this.messageRepository.populate(messageEntity, ['parentMessage']);
-
-        await this.messageRepository.insert(messageEntity);
-
-        if (fileIds) {
-            await this.fileRepository.nativeUpdate(
-                {
-                    id: { $in: fileIds },
-                    messageId: null,
-                },
-                { messageId: messageEntity.id },
+            const messageEntity = new MessageEntity(
+                chatId,
+                chat.countMessages,
+                type,
+                chat,
+                parentMessage,
+                encryptMessage,
+                message,
             );
-        }
 
-        const newMessageEntity: MessageEntity | null = await this.messageRepository.findOne(
-            { id: messageEntity.id },
-            { populate: ['parentMessage', 'files', 'parentMessage.files'] },
-        );
+            await this.messageRepository.populate(messageEntity, ['parentMessage']);
 
-        if (!newMessageEntity) {
+            await fork.insert(MessageEntity, messageEntity);
+
+            if (fileIds) {
+                await fork.nativeUpdate(
+                    FileEntity,
+                    {
+                        id: { $in: fileIds },
+                        messageId: null,
+                    },
+                    { messageId: messageEntity.id },
+                );
+            }
+
+            await fork.commit();
+
+            const newMessageEntity: MessageEntity | null = await this.messageRepository.findOne(
+                { id: messageEntity.id },
+                { populate: ['parentMessage', 'files', 'parentMessage.files'] },
+            );
+
+            if (!newMessageEntity) {
+                return new DataResponse(MessageErrorLanguageEnum.MESSAGE_NOT_FOUND);
+            }
+
+            const response = new DataResponse<MessageEntity | string>(newMessageEntity);
+
+            this.queueService.sendMessage(TopicsEnum.EMIT, String(chatId), EventsEnum.CREATE_MESSAGE, response);
+
+            return response;
+        } catch (e) {
+            logger.error(e);
+            await fork.rollback();
+
             return new DataResponse(MessageErrorLanguageEnum.MESSAGE_NOT_FOUND);
         }
-
-        const response = new DataResponse<MessageEntity | string>(newMessageEntity);
-
-        this.queueService.sendMessage(TopicsEnum.EMIT, String(chatId), EventsEnum.CREATE_MESSAGE, response);
-
-        return response;
     }
 
     async getMessages(chatId: string, limit: number, offset: number): Promise<DataResponse<MessageEntity[]>> {
