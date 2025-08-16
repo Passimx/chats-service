@@ -45,7 +45,7 @@ export class MessagesService {
                 parentMessage = await this.messageRepository.findOne({ id: parentMessageId, chatId });
 
                 if (!parentMessage) {
-                    await fork.begin();
+                    await fork.rollback();
 
                     return new DataResponse(MessageErrorLanguageEnum.PARENT_MESSAGE_NOT_FOUND);
                 }
@@ -60,7 +60,7 @@ export class MessagesService {
                 .getSingleResult();
 
             if (!chat) {
-                await fork.begin();
+                await fork.rollback();
 
                 return new DataResponse(MessageErrorLanguageEnum.CHAT_NOT_FOUND);
             }
@@ -98,6 +98,8 @@ export class MessagesService {
             );
 
             if (!newMessageEntity) {
+                await fork.rollback();
+
                 return new DataResponse(MessageErrorLanguageEnum.MESSAGE_NOT_FOUND);
             }
 
