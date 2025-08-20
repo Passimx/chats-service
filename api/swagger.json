@@ -532,15 +532,6 @@
 						"schema": {
 							"type": "number"
 						}
-					},
-					{
-						"name": "search",
-						"required": false,
-						"in": "query",
-						"description": "Search message",
-						"schema": {
-							"type": "string"
-						}
 					}
 				],
 				"responses": {
@@ -600,6 +591,16 @@
 			"post": {
 				"operationId": "FilesController_upload",
 				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/UploadFileDto"
+							}
+						}
+					}
+				},
 				"responses": {
 					"200": {
 						"description": "",
@@ -759,6 +760,9 @@
 					"mimeType": {
 						"type": "string"
 					},
+					"fileType": {
+						"type": "string"
+					},
 					"messageId": {
 						"type": "string"
 					},
@@ -775,6 +779,7 @@
 					"originalName",
 					"size",
 					"mimeType",
+					"fileType",
 					"messageId"
 				]
 			},
@@ -927,6 +932,21 @@
 				},
 				"required": [
 					"chatId"
+				]
+			},
+			"UploadFileDto": {
+				"type": "object",
+				"properties": {
+					"fileType": {
+						"type": "string",
+						"enum": [
+							"is_voice",
+							"is_media"
+						]
+					}
+				},
+				"required": [
+					"fileType"
 				]
 			}
 		}

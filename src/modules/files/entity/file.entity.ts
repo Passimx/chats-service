@@ -20,7 +20,7 @@ export class FileEntity extends CreatedEntity {
     readonly mimeType: string;
 
     @ApiProperty()
-    @Enum({ items: () => FileEnum, nativeEnumName: 'file_type_enum', nullable: true })
+    @Enum({ items: () => FileEnum, nativeEnumName: 'file_type_enum' })
     readonly fileType: FileEnum;
 
     @ApiProperty()
