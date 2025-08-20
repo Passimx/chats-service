@@ -22,8 +22,6 @@ export class MessagesService {
         @InjectRepository(ChatEntity)
         private readonly chatRepository: EntityRepository<ChatEntity>,
         private readonly queueService: QueueService,
-        // @InjectRepository(FileEntity)
-        // private readonly fileRepository: EntityRepository<FileEntity>,
         private readonly em: EntityManager,
     ) {}
 
@@ -42,7 +40,7 @@ export class MessagesService {
             let parentMessage: MessageEntity | null = null;
 
             if (parentMessageId) {
-                parentMessage = await this.messageRepository.findOne({ id: parentMessageId, chatId });
+                parentMessage = await fork.findOne(MessageEntity, { id: parentMessageId, chatId });
 
                 if (!parentMessage) {
                     await fork.rollback();
@@ -75,7 +73,7 @@ export class MessagesService {
                 message,
             );
 
-            await this.messageRepository.populate(messageEntity, ['parentMessage']);
+            await fork.populate(messageEntity, ['parentMessage', 'files']);
 
             await fork.insert(MessageEntity, messageEntity);
 
