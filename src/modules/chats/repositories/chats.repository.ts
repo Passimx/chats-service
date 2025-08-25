@@ -8,6 +8,7 @@ export class ChatsRepository extends SqlEntityRepository<ChatEntity> {
         const qb = this.createQueryBuilder('chats')
             .leftJoinAndSelect('chats.message', 'message')
             .leftJoinAndSelect('message.parentMessage', 'parentMessage')
+            .leftJoinAndSelect('message.files', 'files')
             .where('chats.count_messages = message.number')
             .andWhere({ id: { $nin: notFavoriteChatIds } })
             .orderBy({
@@ -33,6 +34,7 @@ export class ChatsRepository extends SqlEntityRepository<ChatEntity> {
         return this.createQueryBuilder('chats')
             .leftJoinAndSelect('chats.message', 'message')
             .leftJoinAndSelect('message.parentMessage', 'parentMessage')
+            .leftJoinAndSelect('message.files', 'files')
             .where('chats.count_messages = message.number')
             .andWhere('chats.id = ?', [id])
             .getSingleResult();
@@ -42,6 +44,7 @@ export class ChatsRepository extends SqlEntityRepository<ChatEntity> {
         return await this.createQueryBuilder('chats')
             .leftJoinAndSelect('chats.message', 'message')
             .leftJoinAndSelect('message.parentMessage', 'parentMessage')
+            .leftJoinAndSelect('message.files', 'files')
             .where({ type: ChatTypeEnum.IS_SYSTEM })
             .andWhere('chats.count_messages = message.number')
             .getResult();
