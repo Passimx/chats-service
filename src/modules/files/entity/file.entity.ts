@@ -27,6 +27,14 @@ export class FileEntity extends CreatedEntity {
     @Property({ persist: false })
     readonly messageId?: string;
 
+    @ApiProperty()
+    @Property({ nullable: true })
+    duration?: number;
+
+    @ApiProperty()
+    @Property({ type: 'jsonb', nullable: true })
+    loudnessData?: number[];
+
     constructor(originalName: string, mimeType: string, fileType: FileEnum, size?: number) {
         super();
         this.originalName = originalName;

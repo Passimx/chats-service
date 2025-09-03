@@ -43,4 +43,9 @@ export const Envs = {
         user: String(process.env.USER_NAME_WEBDAV),
         password: String(process.env.PASSWORD_WEBDAV),
     },
+
+    redis: {
+        host: process.env.REDIS_HOST,
+        port: Number(process.env.REDIS_PORT),
+    },
 };

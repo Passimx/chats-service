@@ -766,6 +766,15 @@
 					"messageId": {
 						"type": "string"
 					},
+					"duration": {
+						"type": "number"
+					},
+					"loudnessData": {
+						"type": "array",
+						"items": {
+							"type": "string"
+						}
+					},
 					"message": {
 						"type": "array",
 						"items": {
@@ -780,7 +789,9 @@
 					"size",
 					"mimeType",
 					"fileType",
-					"messageId"
+					"messageId",
+					"duration",
+					"loudnessData"
 				]
 			},
 			"MessageEntity": {
