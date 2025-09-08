@@ -66,7 +66,6 @@ export class FilesService {
 
     async getFileData(id: string): Promise<{
         info: FileEntity;
-
         buffer: Buffer;
     }> {
         const fileInfo = await this.fileRepository.findOne(id);
@@ -75,7 +74,6 @@ export class FilesService {
 
         return {
             info: fileInfo as FileEntity,
-
             buffer,
         };
     }

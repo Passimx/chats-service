@@ -1,5 +1,5 @@
 // audio.processor.ts
-import { exec } from 'child_process';
+import { exec, spawn } from 'child_process';
 import { promisify } from 'util';
 import * as fs from 'fs/promises';
 import * as path from 'node:path';
@@ -94,22 +94,70 @@ export class AudioProcessor extends WorkerHost {
     }
 
     private async getLoudnessData(filePath: string): Promise<number[]> {
-        const { stderr } = await execAsync(
-            `ffmpeg -i "${filePath}" -af "astats=metadata=1:reset=1:length=0.1" -f null -`,
-        );
-        const lines = stderr.split('\n');
-        const loudnessData: number[] = [];
-
-        const regex = /RMS level dB:\s*(-?\d+\.\d+)/;
-
-        lines.forEach((line) => {
-            const match = line.match(regex);
-
-            if (match) {
-                loudnessData.push(parseFloat(match[1]));
-            }
+        const args = [
+            '-i',
+            filePath,
+            '-vn',
+            '-ac',
+            '1',
+            '-ar',
+            '16000',
+            '-acodec',
+            'pcm_s16le',
+            '-f',
+            's16le',
+            'pipe:1',
+        ];
+        const chunks: Buffer[] = [];
+        await new Promise<void>((resolve, reject) => {
+            const ff = spawn('ffmpeg', args);
+            ff.stdout.on('data', (c: Buffer) => chunks.push(c));
+            ff.stderr.on('data', () => {});
+            ff.on('error', reject);
+            ff.on('close', (code) => (code === 0 ? resolve() : reject(new Error(`ffmpeg exited ${code}`))));
         });
+        const pcm = Buffer.concat(chunks);
+        const samplesLen = (pcm.length / 2) | 0;
+        const samples = new Array<number>(samplesLen);
 
-        return loudnessData;
+        for (let i = 0; i < samplesLen; i++) samples[i] = pcm.readInt16LE(i * 2);
+
+        const windowSize = 160;
+
+        const windows = Math.max(1, (samplesLen / windowSize) | 0);
+        const db = new Array<number>(windows);
+
+        for (let w = 0; w < windows; w++) {
+            let sumSquares = 0;
+            const start = w * windowSize;
+
+            for (let i = 0; i < windowSize; i++) {
+                const s = (samples[start + i] ?? 0) / 32768;
+                sumSquares += s * s;
+            }
+
+            const rms = Math.sqrt(sumSquares / windowSize) || 0;
+            const dbVal = rms > 0 ? 20 * Math.log10(rms) : -100;
+            db[w] = Math.max(-100, Math.min(0, dbVal));
+        }
+
+        const target = 50;
+
+        if (db.length === 0) return new Array<number>(target).fill(-100);
+
+        if (db.length === target) return db.slice();
+
+        const out = new Array<number>(target).fill(0);
+        const cnt = new Array<number>(target).fill(0);
+
+        for (let i = 0; i < db.length; i++) {
+            const b = Math.min(target - 1, ((i / db.length) * target) | 0);
+            out[b] += db[i];
+            cnt[b] += 1;
+        }
+
+        for (let i = 0; i < target; i++) out[i] = cnt[i] ? out[i] / cnt[i] : -100;
+
+        return out;
     }
 }
