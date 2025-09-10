@@ -5,4 +5,5 @@ export enum TopicsEnum {
     ONLINE = 'online',
     SYSTEM_CHATS = 'system_chats',
     PUT_SYSTEM_CHATS = 'put_system_chats',
+    AUDIO_ANALYSIS = 'audio_analysis',
 }

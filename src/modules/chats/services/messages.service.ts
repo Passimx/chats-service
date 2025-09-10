@@ -5,7 +5,7 @@ import { EntityManager } from '@mikro-orm/core';
 import { MessageEntity } from '../entities/message.entity';
 import { ChatEntity } from '../entities/chat.entity';
 import { DataResponse } from '../../../common/swagger/data-response.dto';
-import { QueueService } from '../../queue/queue.service';
+import { QueueService } from '../../queue/services/queue.service';
 import { EventsEnum } from '../../queue/types/events.enum';
 import { MessageTypeEnum } from '../types/message-type.enum';
 import { MessageErrorLanguageEnum } from '../types/message-error-language.enum';

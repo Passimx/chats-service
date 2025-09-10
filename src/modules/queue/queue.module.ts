@@ -1,11 +1,18 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { ClientsModule, Transport } from '@nestjs/microservices';
+
 import { Envs } from '../../common/envs/env';
-import { QueueService } from './queue.service';
+import { QueueService } from './services/queue.service';
+import { AudioAnalysisServer } from './services/audio-analysis.server';
 import { InjectEnum } from './types/inject.enum';
+import { MikroOrmModule } from '@mikro-orm/nestjs';
+import { FilesModule } from '../files/files.module';
+import { FileEntity } from '../files/entity/file.entity';
 
 @Module({
     imports: [
+        forwardRef(() => FilesModule),
+        MikroOrmModule.forFeature([FileEntity]),
         ClientsModule.register([
             {
                 name: InjectEnum.NOTIFICATIONS_MICROSERVICE,
@@ -26,6 +33,7 @@ import { InjectEnum } from './types/inject.enum';
             },
         ]),
     ],
+    controllers: [AudioAnalysisServer],
     providers: [QueueService],
     exports: [QueueService],
 })

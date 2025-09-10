@@ -61,11 +61,13 @@ services:
       - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=CLIENT
       - KAFKA_CFG_SASL_MECHANISM_INTER_BROKER_PROTOCOL=PLAIN
       - KAFKA_CFG_SASL_ENABLED_MECHANISMS=PLAIN
+      - KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE=true
       - KAFKA_CLIENT_USERS=${KAFKA_CLIENT_USERS}
       - KAFKA_CLIENT_PASSWORDS=${KAFKA_USER_PASSWORD}
       - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=INTERNAL
       - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=1@127.0.0.1:9093
       - ALLOW_PLAINTEXT_LISTENER=yes
+      - PRE_CREATE_TOPICS=${PRE_CREATE_TOPICS}
     ports:
       - ${KAFKA_CLIENT_PORT}:${KAFKA_CLIENT_PORT}
       - ${KAFKA_EXTERNAL_PORT}:${KAFKA_EXTERNAL_PORT}
@@ -77,7 +79,7 @@ services:
           IFS="," read -ra TOPICS <<< "$$PRE_CREATE_TOPICS";
           for T in "$${TOPICS[@]}"; do
             /opt/bitnami/kafka/bin/kafka-topics.sh \
-              --bootstrap-server kafka:9094 \
+              --bootstrap-server kafka:9092 \
               --create --topic "$$T" --if-not-exists &&
             echo "Created $$T" ||
             echo "Failed to create $$T";
@@ -94,6 +96,7 @@ services:
       - main
     env_file: .env
     environment:
+      - SERVER_SERVLET_CONTEXT_PATH=${SERVER_SERVLET_CONTEXT_PATH}
       - KAFKA_CLUSTERS_0_NAME=${KAFKA_UI_HOST}
       - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=${KAFKA_HOST}:${KAFKA_CLIENT_PORT}
       - KAFKA_CLUSTERS_0_PROPERTIES_SECURITY_PROTOCOL=SASL_PLAINTEXT

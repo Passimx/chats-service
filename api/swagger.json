@@ -959,6 +959,48 @@
 				"required": [
 					"fileType"
 				]
+			},
+			"DataResponse": {
+				"type": "object",
+				"properties": {
+					"success": {
+						"type": "boolean"
+					},
+					"data": {
+						"type": "object"
+					}
+				},
+				"required": [
+					"success",
+					"data"
+				]
+			},
+			"MessageDto": {
+				"type": "object",
+				"properties": {
+					"to": {
+						"type": "string"
+					},
+					"event": {
+						"type": "string",
+						"enum": [
+							"create_chat",
+							"create_message",
+							"join_chat",
+							"leave_chat",
+							"get_system_chat",
+							"analyze_audio"
+						]
+					},
+					"data": {
+						"$ref": "#/components/schemas/DataResponse"
+					}
+				},
+				"required": [
+					"to",
+					"event",
+					"data"
+				]
 			}
 		}
 	}

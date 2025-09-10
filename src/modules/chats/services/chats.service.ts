@@ -4,7 +4,7 @@ import { EntityRepository } from '@mikro-orm/postgresql';
 import { ChatEntity } from '../entities/chat.entity';
 import { DataResponse } from '../../../common/swagger/data-response.dto';
 import { EventsEnum } from '../../queue/types/events.enum';
-import { QueueService } from '../../queue/queue.service';
+import { QueueService } from '../../queue/services/queue.service';
 import { MessageTypeEnum } from '../types/message-type.enum';
 import { MessageErrorLanguageEnum } from '../types/message-error-language.enum';
 import { SystemMessageLanguageEnum } from '../types/system-message-language.enum';

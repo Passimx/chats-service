@@ -4,12 +4,13 @@ import { File } from '@nest-lab/fastify-multer';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { EntityRepository } from '@mikro-orm/postgresql';
 import { EntityManager } from '@mikro-orm/core';
-import { InjectQueue } from '@nestjs/bullmq';
-import { Queue } from 'bullmq';
 import { FileEntity } from '../entity/file.entity';
 import { DataResponse } from '../../../common/swagger/data-response.dto';
 import { FileEnum } from '../types/file.enum';
 import { logger } from '../../../common/logger/logger';
+import { QueueService } from '../../queue/services/queue.service';
+import { TopicsEnum } from '../../queue/types/topics.enum';
+import { EventsEnum } from '../../queue/types/events.enum';
 
 @Injectable()
 export class FilesService {
@@ -21,7 +22,7 @@ export class FilesService {
         @InjectRepository(FileEntity)
         private readonly fileRepository: EntityRepository<FileEntity>,
         private readonly em: EntityManager,
-        @InjectQueue('audio_analysis_queue') private readonly audioQueue: Queue,
+        private readonly queue: QueueService,
     ) {}
 
     async uploadFiles(files: Array<File>, fileType: FileEnum): Promise<DataResponse<string[]>> {
@@ -32,8 +33,10 @@ export class FilesService {
         const filteredFiles: FileEntity[] = arrayFiles.filter((file) => !!file) as FileEntity[];
 
         for (const fileEntity of filteredFiles) {
+            const response = new DataResponse({ fileId: fileEntity.id });
+
             if (fileEntity.mimeType.startsWith('audio/')) {
-                await this.audioQueue.add('analyze_audio', { fileId: fileEntity.id });
+                this.queue.sendMessage(TopicsEnum.AUDIO_ANALYSIS, fileEntity.id, EventsEnum.ANALYZE_AUDIO, response);
             }
         }
 

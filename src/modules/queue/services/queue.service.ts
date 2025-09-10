@@ -1,12 +1,12 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { Kafka, Producer } from 'kafkajs';
 import { ClientKafka } from '@nestjs/microservices';
-import { DataResponse } from '../../common/swagger/data-response.dto';
-import { Envs } from '../../common/envs/env';
-import { InjectEnum } from './types/inject.enum';
-import { EventsEnum } from './types/events.enum';
-import { MessageDto } from './dto/message.dto';
-import { TopicsEnum } from './types/topics.enum';
+import { DataResponse } from '../../../common/swagger/data-response.dto';
+import { Envs } from '../../../common/envs/env';
+import { InjectEnum } from '../types/inject.enum';
+import { EventsEnum } from '../types/events.enum';
+import { MessageDto } from '../dto/message.dto';
+import { TopicsEnum } from '../types/topics.enum';
 
 @Injectable()
 export class QueueService {
