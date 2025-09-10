@@ -1,13 +1,13 @@
 import { forwardRef, Module } from '@nestjs/common';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 
+import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { Envs } from '../../common/envs/env';
+import { FilesModule } from '../files/files.module';
+import { FileEntity } from '../files/entity/file.entity';
 import { QueueService } from './services/queue.service';
 import { AudioAnalysisServer } from './services/audio-analysis.server';
 import { InjectEnum } from './types/inject.enum';
-import { MikroOrmModule } from '@mikro-orm/nestjs';
-import { FilesModule } from '../files/files.module';
-import { FileEntity } from '../files/entity/file.entity';
 
 @Module({
     imports: [

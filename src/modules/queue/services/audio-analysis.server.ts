@@ -1,3 +1,8 @@
+import { exec, spawn } from 'child_process';
+import { promisify } from 'util';
+import * as os from 'os';
+import * as path from 'node:path';
+import * as fs from 'fs/promises';
 import { Controller } from '@nestjs/common';
 import { EventPattern, Payload } from '@nestjs/microservices';
 import { InjectRepository } from '@mikro-orm/nestjs';
@@ -6,11 +11,6 @@ import { EntityRepository } from '@mikro-orm/postgresql';
 import { FileEntity } from '../../files/entity/file.entity';
 import { FilesService } from '../../files/services/files.service';
 import { TopicsEnum } from '../types/topics.enum';
-import { exec, spawn } from 'child_process';
-import { promisify } from 'util';
-import * as os from 'os';
-import * as path from 'node:path';
-import * as fs from 'fs/promises';
 import { MessageDto } from '../dto/message.dto';
 
 const execAsync = promisify(exec);

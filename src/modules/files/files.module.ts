@@ -1,10 +1,10 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { FastifyMulterModule } from '@nest-lab/fastify-multer';
 import { WebDAVModule } from 'nestjs-webdav';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { Envs } from '../../common/envs/env';
 import { QueueModule } from '../queue/queue.module';
-import { forwardRef } from '@nestjs/common';
+
 import { FilesService } from './services/files.service';
 import { FilesController } from './controllers/files.controller';
 import { FileEntity } from './entity/file.entity';
