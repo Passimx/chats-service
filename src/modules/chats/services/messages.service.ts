@@ -11,8 +11,9 @@ import { MessageTypeEnum } from '../types/message-type.enum';
 import { MessageErrorLanguageEnum } from '../types/message-error-language.enum';
 import { TopicsEnum } from '../../queue/types/topics.enum';
 import { ChatTypeEnum } from '../types/chat-type.enum';
-import { FileEntity } from '../../files/entity/file.entity';
+import { FileEntity } from '../entities/file.entity';
 import { logger } from '../../../common/logger/logger';
+import { FileEnum } from '../types/file.enum';
 
 @Injectable()
 export class MessagesService {
@@ -31,7 +32,13 @@ export class MessagesService {
         encryptMessage?: string,
         message?: string,
         parentMessageId?: string,
-        fileIds?: string[],
+        fileId?: string,
+        fileType?: FileEnum,
+        duration?: number,
+        loudnessData?: number[],
+        size?: number,
+        mimetype?: string,
+        originalName?: string,
     ): Promise<DataResponse<MessageEntity | string>> {
         const fork = this.em.fork();
         await fork.begin();
@@ -63,6 +70,12 @@ export class MessagesService {
                 return new DataResponse(MessageErrorLanguageEnum.CHAT_NOT_FOUND);
             }
 
+            if (fileId) {
+                const fileEntity = new FileEntity(originalName, mimetype, fileType, size, duration, loudnessData);
+
+                await fork.insert(FileEntity, fileEntity);
+            }
+
             const messageEntity = new MessageEntity(
                 chatId,
                 chat.countMessages,
@@ -77,16 +90,16 @@ export class MessagesService {
 
             await fork.insert(MessageEntity, messageEntity);
 
-            if (fileIds) {
-                await fork.nativeUpdate(
-                    FileEntity,
-                    {
-                        id: { $in: fileIds },
-                        messageId: null,
-                    },
-                    { messageId: messageEntity.id },
-                );
-            }
+            // if (fileId) {
+            //     await fork.nativeUpdate(
+            //         FileEntity,
+            //         {
+            //             id: { $in: fileId },
+            //             messageId: null,
+            //         },
+            //         { messageId: messageEntity.id },
+            //     );
+            // }
 
             await fork.commit();
 

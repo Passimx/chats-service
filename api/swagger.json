@@ -586,102 +586,6 @@
 					"Messages"
 				]
 			}
-		},
-		"/files/upload": {
-			"post": {
-				"operationId": "FilesController_upload",
-				"parameters": [],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"$ref": "#/components/schemas/UploadFileDto"
-							}
-						}
-					}
-				},
-				"responses": {
-					"200": {
-						"description": "",
-						"content": {
-							"application/json": {
-								"schema": {
-									"anyOf": [
-										{
-											"type": "object",
-											"properties": {
-												"success": {
-													"type": "boolean",
-													"example": true
-												},
-												"data": {
-													"$ref": "#/components/schemas/FileEntity"
-												}
-											},
-											"required": [
-												"success",
-												"data"
-											]
-										},
-										{
-											"type": "object",
-											"properties": {
-												"success": {
-													"type": "boolean",
-													"example": false
-												},
-												"data": {
-													"type": "string"
-												}
-											},
-											"required": [
-												"success",
-												"data"
-											]
-										}
-									]
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Files"
-				]
-			}
-		},
-		"/files/{id}": {
-			"get": {
-				"operationId": "FilesController_downFile",
-				"parameters": [
-					{
-						"name": "id",
-						"required": true,
-						"in": "path",
-						"description": "File ID",
-						"schema": {
-							"type": "string"
-						}
-					}
-				],
-				"responses": {
-					"200": {
-						"description": "Returns the file as Buffer",
-						"content": {
-							"application/octet-stream": {
-								"schema": {
-									"type": "string",
-									"format": "binary"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Files"
-				]
-			}
 		}
 	},
 	"info": {
@@ -766,6 +670,15 @@
 					"messageId": {
 						"type": "string"
 					},
+					"duration": {
+						"type": "number"
+					},
+					"loudnessData": {
+						"type": "array",
+						"items": {
+							"type": "string"
+						}
+					},
 					"message": {
 						"type": "array",
 						"items": {
@@ -780,7 +693,9 @@
 					"size",
 					"mimeType",
 					"fileType",
-					"messageId"
+					"messageId",
+					"duration",
+					"loudnessData"
 				]
 			},
 			"MessageEntity": {
@@ -922,8 +837,30 @@
 						"type": "string",
 						"description": "Message id"
 					},
-					"fileIds": {
-						"description": "Array of file IDs",
+					"fileId": {
+						"type": "string",
+						"description": "file ID"
+					},
+					"fileType": {
+						"type": "string",
+						"enum": [
+							"is_voice",
+							"is_media"
+						]
+					},
+					"size": {
+						"type": "number"
+					},
+					"mimetype": {
+						"type": "string"
+					},
+					"originalName": {
+						"type": "string"
+					},
+					"duration": {
+						"type": "number"
+					},
+					"loudnessData": {
 						"type": "array",
 						"items": {
 							"type": "string"
@@ -932,21 +869,6 @@
 				},
 				"required": [
 					"chatId"
-				]
-			},
-			"UploadFileDto": {
-				"type": "object",
-				"properties": {
-					"fileType": {
-						"type": "string",
-						"enum": [
-							"is_voice",
-							"is_media"
-						]
-					}
-				},
-				"required": [
-					"fileType"
 				]
 			}
 		}

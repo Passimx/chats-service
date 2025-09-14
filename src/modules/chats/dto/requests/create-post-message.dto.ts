@@ -1,5 +1,7 @@
-import { IsArray, IsNotEmpty, IsOptional, IsString, IsUUID, Length } from 'class-validator';
+import { IsArray, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, IsUUID, Length } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Transform, Type } from 'class-transformer';
+import { FileEnum } from '../../types/file.enum';
 
 export class CreateMessageDto {
     @IsString()
@@ -34,12 +36,44 @@ export class CreateMessageDto {
     readonly parentMessageId?: string;
 
     @ApiPropertyOptional({
-        type: [String],
-        description: 'Array of file IDs',
+        type: String,
+        description: 'file ID',
         required: false,
     })
     @IsOptional()
+    @IsUUID('all')
+    readonly fileId?: string;
+
+    @ApiPropertyOptional({ enum: FileEnum })
+    @IsOptional()
+    @IsEnum(FileEnum)
+    readonly fileType?: FileEnum;
+
+    @ApiPropertyOptional()
+    @IsOptional()
+    @IsNumber()
+    readonly size?: number;
+
+    @ApiPropertyOptional()
+    @IsOptional()
+    @IsString()
+    readonly mimetype?: string;
+
+    @ApiPropertyOptional()
+    @IsOptional()
+    @IsString()
+    readonly originalName?: string;
+
+    @ApiPropertyOptional()
+    @IsOptional()
+    @Type(() => Number)
+    @IsNumber()
+    readonly duration?: number;
+
+    @ApiPropertyOptional()
+    @IsOptional()
+    @Transform(({ value }) => (typeof value === 'string' ? (JSON.parse(value) as number[]) : (value as number[])))
     @IsArray()
-    @IsUUID('all', { each: true })
-    readonly fileIds?: string[];
+    @IsNumber({}, { each: true })
+    readonly loudnessData?: number[];
 }

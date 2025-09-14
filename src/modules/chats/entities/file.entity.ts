@@ -1,15 +1,15 @@
 import { Entity, Enum, Index, ManyToOne, Property } from '@mikro-orm/core';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { CreatedEntity } from '../../../common/entities/created.entity';
-import { MessageEntity } from '../../chats/entities/message.entity';
 import { FileEnum } from '../types/file.enum';
+import { MessageEntity } from './message.entity';
 
 @Entity({ tableName: 'files' })
 @Index({ properties: ['id'], type: 'HASH' })
 export class FileEntity extends CreatedEntity {
     @ApiProperty()
     @Property()
-    readonly originalName: string;
+    readonly originalName?: string;
 
     @ApiProperty()
     @Property()
@@ -17,22 +17,39 @@ export class FileEntity extends CreatedEntity {
 
     @ApiProperty()
     @Property()
-    readonly mimeType: string;
+    readonly mimeType?: string;
 
     @ApiProperty()
     @Enum({ items: () => FileEnum, nativeEnumName: 'file_type_enum' })
-    readonly fileType: FileEnum;
+    readonly fileType?: FileEnum;
 
     @ApiProperty()
     @Property({ persist: false })
-    readonly messageId?: string;
+    readonly messageId!: string;
 
-    constructor(originalName: string, mimeType: string, fileType: FileEnum, size?: number) {
+    @ApiProperty()
+    @Property({ nullable: true })
+    duration?: number;
+
+    @ApiProperty()
+    @Property({ type: 'jsonb', nullable: true })
+    loudnessData?: number[];
+
+    constructor(
+        originalName?: string,
+        mimeType?: string,
+        fileType?: FileEnum,
+        size?: number,
+        duration?: number,
+        loudnessData?: number[],
+    ) {
         super();
         this.originalName = originalName;
         this.mimeType = mimeType;
         this.fileType = fileType;
         this.size = size;
+        this.duration = duration;
+        this.loudnessData = loudnessData;
     }
 
     @ApiPropertyOptional({ type: () => FileEntity, isArray: true })

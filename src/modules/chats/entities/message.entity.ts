@@ -2,7 +2,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Collection, Entity, Enum, Index, OneToMany, OneToOne, Property } from '@mikro-orm/core';
 import { CreatedEntity } from '../../../common/entities/created.entity';
 import { MessageTypeEnum } from '../types/message-type.enum';
-import { FileEntity } from '../../files/entity/file.entity';
+import { FileEntity } from './file.entity';
 import { ChatEntity } from './chat.entity';
 
 @Entity({ tableName: 'messages' })
