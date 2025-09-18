@@ -42,7 +42,7 @@ export class CreateMessageDto {
     })
     @IsOptional()
     @IsUUID('all')
-    readonly fileId?: string;
+    readonly fileIds?: string[];
 
     @ApiPropertyOptional({ enum: FileEnum })
     @IsOptional()

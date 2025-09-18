@@ -22,7 +22,7 @@ export class MessagesController {
             message.encryptMessage,
             message.message,
             message.parentMessageId,
-            message.fileId,
+            message.fileIds,
             message.fileType,
             message.duration,
             message.loudnessData,

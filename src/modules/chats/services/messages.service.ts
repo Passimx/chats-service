@@ -32,7 +32,7 @@ export class MessagesService {
         encryptMessage?: string,
         message?: string,
         parentMessageId?: string,
-        fileId?: string,
+        fileIds?: string[],
         fileType?: FileEnum,
         duration?: number,
         loudnessData?: number[],
@@ -70,10 +70,18 @@ export class MessagesService {
                 return new DataResponse(MessageErrorLanguageEnum.CHAT_NOT_FOUND);
             }
 
-            if (fileId) {
-                const fileEntity = new FileEntity(originalName, mimetype, fileType, size, duration, loudnessData);
-
-                await fork.insert(FileEntity, fileEntity);
+            if (fileIds && fileIds.length > 0) {
+                for (const fileId of fileIds) {
+                    await fork.insert(FileEntity, {
+                        id: fileId,
+                        originalName,
+                        mimeType: mimetype,
+                        fileType,
+                        size,
+                        duration,
+                        loudnessData,
+                    } as unknown as FileEntity);
+                }
             }
 
             const messageEntity = new MessageEntity(
@@ -89,17 +97,6 @@ export class MessagesService {
             await fork.populate(messageEntity, ['parentMessage', 'files']);
 
             await fork.insert(MessageEntity, messageEntity);
-
-            // if (fileId) {
-            //     await fork.nativeUpdate(
-            //         FileEntity,
-            //         {
-            //             id: { $in: fileId },
-            //             messageId: null,
-            //         },
-            //         { messageId: messageEntity.id },
-            //     );
-            // }
 
             await fork.commit();
 
