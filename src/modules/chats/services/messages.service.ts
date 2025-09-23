@@ -7,13 +7,12 @@ import { ChatEntity } from '../entities/chat.entity';
 import { DataResponse } from '../../../common/swagger/data-response.dto';
 import { QueueService } from '../../queue/queue.service';
 import { EventsEnum } from '../../queue/types/events.enum';
-import { MessageTypeEnum } from '../types/message-type.enum';
 import { MessageErrorLanguageEnum } from '../types/message-error-language.enum';
 import { TopicsEnum } from '../../queue/types/topics.enum';
 import { ChatTypeEnum } from '../types/chat-type.enum';
 import { FileEntity } from '../entities/file.entity';
 import { logger } from '../../../common/logger/logger';
-import { FileEnum } from '../types/file.enum';
+import { CreateFileDto } from '../dto/requests/create-file.dto';
 
 @Injectable()
 export class MessagesService {
@@ -27,19 +26,10 @@ export class MessagesService {
     ) {}
 
     async createMessage(
-        chatId: string,
-        type: MessageTypeEnum,
-        encryptMessage?: string,
-        message?: string,
-        parentMessageId?: string,
-        fileId?: string,
-        fileType?: FileEnum,
-        duration?: number,
-        loudnessData?: number[],
-        size?: number,
-        mimetype?: string,
-        originalName?: string,
+        payload: Partial<MessageEntity>,
+        files?: CreateFileDto[],
     ): Promise<DataResponse<MessageEntity | string>> {
+        const { parentMessageId, chatId } = payload;
         const fork = this.em.fork();
         await fork.begin();
 
@@ -70,36 +60,21 @@ export class MessagesService {
                 return new DataResponse(MessageErrorLanguageEnum.CHAT_NOT_FOUND);
             }
 
-            if (fileId) {
-                const fileEntity = new FileEntity(originalName, mimetype, fileType, size, duration, loudnessData);
-
-                await fork.insert(FileEntity, fileEntity);
-            }
-
-            const messageEntity = new MessageEntity(
-                chatId,
-                chat.countMessages,
-                type,
-                chat,
-                parentMessage,
-                encryptMessage,
-                message,
-            );
+            const messageEntity = new MessageEntity({
+                ...payload,
+                chat: chat,
+                number: chat.countMessages,
+                parentMessage: parentMessage ?? undefined,
+            });
 
             await fork.populate(messageEntity, ['parentMessage', 'files']);
 
             await fork.insert(MessageEntity, messageEntity);
 
-            // if (fileId) {
-            //     await fork.nativeUpdate(
-            //         FileEntity,
-            //         {
-            //             id: { $in: fileId },
-            //             messageId: null,
-            //         },
-            //         { messageId: messageEntity.id },
-            //     );
-            // }
+            if (files?.length)
+                await Promise.all(
+                    files.map((file) => fork.insert(FileEntity, new FileEntity({ ...file, message: messageEntity }))),
+                );
 
             await fork.commit();
 

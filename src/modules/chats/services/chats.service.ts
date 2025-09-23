@@ -5,15 +5,15 @@ import { ChatEntity } from '../entities/chat.entity';
 import { DataResponse } from '../../../common/swagger/data-response.dto';
 import { EventsEnum } from '../../queue/types/events.enum';
 import { QueueService } from '../../queue/queue.service';
-import { MessageTypeEnum } from '../types/message-type.enum';
 import { MessageErrorLanguageEnum } from '../types/message-error-language.enum';
-import { SystemMessageLanguageEnum } from '../types/system-message-language.enum';
 import { TopicsEnum } from '../../queue/types/topics.enum';
 import { MessageEntity } from '../entities/message.entity';
 import { ChatsRepository } from '../repositories/chats.repository';
 import { QueryGetChatsDto } from '../dto/requests/query-get-chats.dto';
 import { CreateOpenChatDto } from '../dto/requests/create-open-chat.dto';
 import { ChatDto } from '../dto/requests/post-favorites-chat.dto';
+import { MessageTypeEnum } from '../types/message-type.enum';
+import { SystemMessageLanguageEnum } from '../types/system-message-language.enum';
 import { MessagesService } from './messages.service';
 
 @Injectable()
@@ -31,13 +31,14 @@ export class ChatsService {
 
         await this.chatsRepository.insert(chatEntity);
 
-        await this.messagesService.createMessage(
-            chatEntity.id,
-            MessageTypeEnum.IS_CREATED_CHAT,
-            undefined,
-            SystemMessageLanguageEnum.create_chat,
-            undefined,
-        );
+        const messageResponse = await this.messagesService.createMessage({
+            chat: chatEntity,
+            type: MessageTypeEnum.IS_CREATED_CHAT,
+            message: SystemMessageLanguageEnum.create_chat,
+        });
+
+        if (!messageResponse.success) return new DataResponse<ChatEntity>(MessageErrorLanguageEnum.MESSAGE_NOT_FOUND);
+
         const createChat = await this.chatsRepository.findOne({ id: chatEntity.id }, { populate: ['message'] });
 
         const response = new DataResponse<ChatEntity>(createChat!);

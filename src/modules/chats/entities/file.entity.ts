@@ -29,27 +29,15 @@ export class FileEntity extends CreatedEntity {
 
     @ApiProperty()
     @Property({ nullable: true })
-    duration?: number;
+    readonly duration?: number;
 
     @ApiProperty()
     @Property({ type: 'jsonb', nullable: true })
-    loudnessData?: number[];
+    readonly loudnessData?: number[];
 
-    constructor(
-        originalName?: string,
-        mimeType?: string,
-        fileType?: FileEnum,
-        size?: number,
-        duration?: number,
-        loudnessData?: number[],
-    ) {
+    constructor(payload: Partial<FileEntity>) {
         super();
-        this.originalName = originalName;
-        this.mimeType = mimeType;
-        this.fileType = fileType;
-        this.size = size;
-        this.duration = duration;
-        this.loudnessData = loudnessData;
+        Object.assign(this, payload);
     }
 
     @ApiPropertyOptional({ type: () => FileEntity, isArray: true })

@@ -30,30 +30,17 @@ export class MessageEntity extends CreatedEntity {
     readonly parentMessageId?: string;
 
     @ApiProperty()
-    @Enum({ items: () => MessageTypeEnum, nativeEnumName: 'message_type_enum', nullable: true })
+    @Enum({
+        items: () => MessageTypeEnum,
+        nativeEnumName: 'message_type_enum',
+        nullable: true,
+        default: MessageTypeEnum.IS_USER,
+    })
     readonly type!: MessageTypeEnum;
 
-    constructor(
-        chatId: string,
-        number: number,
-        type: MessageTypeEnum,
-        chat: ChatEntity,
-        parentMessage: MessageEntity | null,
-        encryptMessage?: string,
-        message?: string,
-    ) {
+    constructor(payload: Partial<MessageEntity>) {
         super();
-        this.chatId = chatId;
-        this.number = number;
-        this.chat = chat;
-
-        if (encryptMessage) this.encryptMessage = encryptMessage;
-
-        if (message) this.message = message;
-
-        if (parentMessage) this.parentMessage = parentMessage;
-
-        if (type) this.type = type;
+        Object.assign(this, payload);
     }
 
     @ApiPropertyOptional({ type: () => ChatEntity, isArray: false })

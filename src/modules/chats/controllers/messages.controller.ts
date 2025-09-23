@@ -5,8 +5,8 @@ import { MessagesService } from '../services/messages.service';
 import { MessageEntity } from '../entities/message.entity';
 import { QueryGetMessagesDto } from '../dto/requests/query-get-messages.dto';
 import { DataResponse } from '../../../common/swagger/data-response.dto';
-import { MessageTypeEnum } from '../types/message-type.enum';
 import { ApiData } from '../../../common/swagger/api-data.decorator';
+import { MessageTypeEnum } from '../types/message-type.enum';
 
 @ApiTags('Messages')
 @Controller('messages')
@@ -15,21 +15,11 @@ export class MessagesController {
 
     @Post()
     @ApiData(MessageEntity)
-    createMessage(@Body() message: CreateMessageDto): Promise<DataResponse<MessageEntity | string>> {
-        return this.messagesService.createMessage(
-            message.chatId,
-            MessageTypeEnum.IS_USER,
-            message.encryptMessage,
-            message.message,
-            message.parentMessageId,
-            message.fileId,
-            message.fileType,
-            message.duration,
-            message.loudnessData,
-            message.size,
-            message.mimetype,
-            message.originalName,
-        );
+    createMessage(@Body() body: CreateMessageDto): Promise<DataResponse<MessageEntity | string>> {
+        const { files, ...payload } = body;
+        const message: Partial<MessageEntity> = { ...payload, type: MessageTypeEnum.IS_USER };
+
+        return this.messagesService.createMessage(message, files);
     }
 
     @Get()
