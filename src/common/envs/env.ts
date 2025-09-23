@@ -34,13 +34,7 @@ export const Envs = {
         port: process.env.KAFKA_EXTERNAL_PORT,
         user: String(process.env.KAFKA_CLIENT_USERS),
         password: String(process.env.KAFKA_USER_PASSWORD),
+        groupId: String(process.env.APP_KAFKA_GROUP_ID_CHAT_SERVICE),
         kafkaIsConnect: BooleanUtils.strToBoolWithDefault(process.env.KAFKA_IS_CONNECT, false),
-    },
-
-    webdev: {
-        host: process.env.WEBDAV_HOST,
-        port: process.env.WEBDAV_PORT,
-        user: String(process.env.USER_NAME_WEBDAV),
-        password: String(process.env.PASSWORD_WEBDAV),
     },
 };

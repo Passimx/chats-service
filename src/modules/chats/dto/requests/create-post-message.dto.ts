@@ -1,5 +1,7 @@
-import { IsArray, IsNotEmpty, IsOptional, IsString, IsUUID, Length } from 'class-validator';
+import { IsArray, IsNotEmpty, IsOptional, IsString, IsUUID, Length, ValidateNested } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
+import { CreateFileDto } from './create-file.dto';
 
 export class CreateMessageDto {
     @IsString()
@@ -33,13 +35,10 @@ export class CreateMessageDto {
     @IsUUID('all')
     readonly parentMessageId?: string;
 
-    @ApiPropertyOptional({
-        type: [String],
-        description: 'Array of file IDs',
-        required: false,
-    })
-    @IsOptional()
+    @ApiPropertyOptional({ type: CreateFileDto, isArray: true })
     @IsArray()
-    @IsUUID('all', { each: true })
-    readonly fileIds?: string[];
+    @IsOptional()
+    @Type(() => CreateFileDto)
+    @ValidateNested({ each: true })
+    readonly files?: CreateFileDto[];
 }

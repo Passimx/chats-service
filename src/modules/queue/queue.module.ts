@@ -20,7 +20,7 @@ import { InjectEnum } from './types/inject.enum';
                         },
                     },
                     consumer: {
-                        groupId: 'chat-service-group',
+                        groupId: Envs.kafka.groupId,
                     },
                 },
             },

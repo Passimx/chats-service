@@ -57,7 +57,8 @@ services:
       - KAFKA_CFG_PROCESS_ROLES=broker,controller
       - KAFKA_CFG_LISTENERS=CLIENT://:${KAFKA_CLIENT_PORT},INTERNAL://:${KAFKA_INTERNAL_PORT},EXTERNAL://:${KAFKA_EXTERNAL_PORT},
       - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=INTERNAL:PLAINTEXT,CLIENT:SASL_PLAINTEXT,EXTERNAL:SASL_PLAINTEXT
-      - KAFKA_CFG_ADVERTISED_LISTENERS=CLIENT://kafka:${KAFKA_CLIENT_PORT},EXTERNAL://kafka:${KAFKA_EXTERNAL_PORT}
+#      - KAFKA_CFG_ADVERTISED_LISTENERS=CLIENT://kafka:${KAFKA_CLIENT_PORT},EXTERNAL://kafka:${KAFKA_EXTERNAL_PORT}
+      - KAFKA_CFG_ADVERTISED_LISTENERS=CLIENT://kafka:${KAFKA_CLIENT_PORT},EXTERNAL://localhost:${KAFKA_EXTERNAL_PORT}
       - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=CLIENT
       - KAFKA_CFG_SASL_MECHANISM_INTER_BROKER_PROTOCOL=PLAIN
       - KAFKA_CFG_SASL_ENABLED_MECHANISMS=PLAIN
@@ -77,7 +78,7 @@ services:
           IFS="," read -ra TOPICS <<< "$$PRE_CREATE_TOPICS";
           for T in "$${TOPICS[@]}"; do
             /opt/bitnami/kafka/bin/kafka-topics.sh \
-              --bootstrap-server kafka:9094 \
+              --bootstrap-server localhost:9094 \
               --create --topic "$$T" --if-not-exists &&
             echo "Created $$T" ||
             echo "Failed to create $$T";
@@ -105,21 +106,6 @@ services:
           password="${KAFKA_USER_PASSWORD}";
     ports:
       - ${KAFKA_UI_PORT}:${KAFKA_UI_PORT}
-
-
-  webdav:
-    image: bytemark/webdav
-    ports:
-      - ${WEBDAV_PORT}:80
-    volumes:
-      - ./dav-data:/var/lib/dav
-    environment:
-      - AUTH_TYPE=Basic
-      - USERNAME=${USER_NAME_WEBDAV}
-      - PASSWORD=${PASSWORD_WEBDAV}
-    restart: unless-stopped
-    networks:
-      - main
 
 networks:
   main:
