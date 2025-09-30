@@ -10,7 +10,7 @@ import { MessageEntity } from './message.entity';
 export class ChatEntity extends CreatedEntity {
     @ApiProperty()
     @Property()
-    readonly title: string;
+    readonly title!: string;
 
     @ApiProperty()
     @Property({ default: 0 })
@@ -20,10 +20,9 @@ export class ChatEntity extends CreatedEntity {
     @Enum({ default: ChatTypeEnum.IS_OPEN, items: () => ChatTypeEnum, nativeEnumName: 'chat_type_enum' })
     readonly type!: ChatTypeEnum;
 
-    constructor(title: string) {
+    constructor(payload: Partial<ChatEntity>) {
         super();
-
-        this.title = title;
+        Object.assign(this, payload);
     }
 
     @ApiProperty()

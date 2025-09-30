@@ -1,28 +1,28 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsArray, IsEnum, IsNumber, IsOptional, IsString, IsUUID } from 'class-validator';
+import { IsArray, IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
 import { Transform } from 'class-transformer';
 import { FileEnum } from '../../types/file.enum';
 
 export class CreateFileDto {
-    @ApiProperty()
-    @IsUUID('all')
-    readonly id?: string;
-
     @ApiProperty({ enum: FileEnum })
     @IsEnum(FileEnum)
-    readonly fileType?: FileEnum;
+    readonly fileType!: FileEnum;
 
     @ApiProperty()
     @IsNumber()
-    readonly size?: number;
+    readonly size!: number;
 
     @ApiProperty()
     @IsString()
-    readonly mimeType?: string;
+    readonly mimeType!: string;
 
     @ApiProperty()
     @IsString()
-    readonly originalName?: string;
+    readonly url!: string;
+
+    @ApiProperty()
+    @IsString()
+    readonly originalName!: string;
 
     @ApiPropertyOptional()
     @IsOptional()
