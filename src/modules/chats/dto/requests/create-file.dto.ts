@@ -4,6 +4,10 @@ import { Transform } from 'class-transformer';
 import { FileEnum } from '../../types/file.enum';
 
 export class CreateFileDto {
+    @ApiProperty()
+    @IsString()
+    readonly id!: string;
+
     @ApiProperty({ enum: FileEnum })
     @IsEnum(FileEnum)
     readonly fileType!: FileEnum;
@@ -15,10 +19,6 @@ export class CreateFileDto {
     @ApiProperty()
     @IsString()
     readonly mimeType!: string;
-
-    @ApiProperty()
-    @IsString()
-    readonly url!: string;
 
     @ApiProperty()
     @IsString()
