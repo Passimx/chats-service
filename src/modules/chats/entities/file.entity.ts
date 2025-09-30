@@ -2,6 +2,7 @@ import { Entity, Enum, Index, ManyToOne, PrimaryKey, Property } from '@mikro-orm
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { FileEnum } from '../types/file.enum';
 import { MessageEntity } from './message.entity';
+import { ChatEntity } from './chat.entity';
 
 @Entity({ tableName: 'files' })
 @Index({ properties: ['id'], type: 'HASH' })
@@ -15,7 +16,7 @@ export class FileEntity {
     readonly originalName!: string;
 
     @ApiProperty()
-    @Property()
+    @Property({ persist: false })
     readonly chatId!: string;
 
     @ApiProperty()
@@ -50,7 +51,7 @@ export class FileEntity {
         Object.assign(this, payload);
     }
 
-    @ApiPropertyOptional({ type: () => FileEntity, isArray: true })
+    @ApiPropertyOptional({ type: () => FileEntity })
     @ManyToOne(() => MessageEntity, {
         nullable: true,
         hidden: true,
@@ -58,4 +59,13 @@ export class FileEntity {
         referenceColumnName: 'id',
     })
     readonly message?: MessageEntity;
+
+    @ApiPropertyOptional({ type: () => ChatEntity })
+    @ManyToOne(() => ChatEntity, {
+        nullable: true,
+        hidden: true,
+        joinColumn: 'chat_id',
+        referenceColumnName: 'id',
+    })
+    readonly chat?: ChatEntity;
 }
