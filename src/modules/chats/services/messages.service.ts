@@ -74,7 +74,7 @@ export class MessagesService {
             if (files?.length)
                 await Promise.all(
                     files.map((file) =>
-                        fork.insert(FileEntity, new FileEntity({ ...file, chatId, message: messageEntity })),
+                        fork.insert(FileEntity, new FileEntity({ ...file, chatId, chat, message: messageEntity })),
                     ),
                 );
 
