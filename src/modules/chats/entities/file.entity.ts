@@ -9,19 +9,23 @@ import { MessageEntity } from './message.entity';
 export class FileEntity extends CreatedEntity {
     @ApiProperty()
     @Property()
-    readonly originalName?: string;
+    readonly originalName!: string;
 
     @ApiProperty()
     @Property()
-    readonly size?: number;
+    readonly url!: string;
 
     @ApiProperty()
     @Property()
-    readonly mimeType?: string;
+    readonly size!: number;
+
+    @ApiProperty()
+    @Property()
+    readonly mimeType!: string;
 
     @ApiProperty()
     @Enum({ items: () => FileEnum, nativeEnumName: 'file_type_enum' })
-    readonly fileType?: FileEnum;
+    readonly fileType!: FileEnum;
 
     @ApiProperty()
     @Property({ persist: false })

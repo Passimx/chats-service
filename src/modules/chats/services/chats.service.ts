@@ -27,12 +27,13 @@ export class ChatsService {
     ) {}
 
     async createOpenChat(socketId: string, { title }: CreateOpenChatDto): Promise<DataResponse<ChatEntity>> {
-        const chatEntity = new ChatEntity(title);
+        const chatEntity = new ChatEntity({ title });
 
         await this.chatsRepository.insert(chatEntity);
 
         const messageResponse = await this.messagesService.createMessage({
             chat: chatEntity,
+            chatId: chatEntity.id,
             type: MessageTypeEnum.IS_CREATED_CHAT,
             message: SystemMessageLanguageEnum.create_chat,
         });
