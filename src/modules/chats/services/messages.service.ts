@@ -105,7 +105,7 @@ export class MessagesService {
             { chat: chatId, number: { $gt: offset ?? undefined } },
             {
                 limit: limit,
-                orderBy: { number: 'DESC' },
+                orderBy: { number: 'ASC' },
                 populate: ['parentMessage', 'files', 'parentMessage.files'],
             },
         );
