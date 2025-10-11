@@ -19,8 +19,6 @@ export class MessagesService {
     constructor(
         @InjectRepository(MessageEntity)
         private readonly messageRepository: EntityRepository<MessageEntity>,
-        @InjectRepository(ChatEntity)
-        private readonly chatRepository: EntityRepository<ChatEntity>,
         private readonly queueService: QueueService,
         private readonly em: EntityManager,
     ) {}
@@ -46,13 +44,13 @@ export class MessagesService {
                 }
             }
 
-            const chat = await this.chatRepository
-                .createQueryBuilder('chats')
-                .update({ countMessages: raw('count_messages + 1') })
-                .where({ id: chatId })
-                .andWhere('chats.type != ?', [ChatTypeEnum.IS_SYSTEM])
-                .returning('*')
-                .getSingleResult();
+            await fork.nativeUpdate(
+                ChatEntity,
+                { id: chatId, type: { $ne: ChatTypeEnum.IS_SYSTEM } },
+                { countMessages: raw('count_messages + 1') },
+            );
+
+            const chat = await fork.findOneOrFail(ChatEntity, { id: chatId });
 
             if (!chat) {
                 await fork.rollback();
@@ -72,10 +70,8 @@ export class MessagesService {
             await fork.insert(MessageEntity, messageEntity);
 
             if (files?.length)
-                await Promise.all(
-                    files.map((file) =>
-                        fork.insert(FileEntity, new FileEntity({ ...file, chatId, chat, message: messageEntity })),
-                    ),
+                await fork.insertMany(
+                    files.map((file) => new FileEntity({ ...file, chatId, chat, message: messageEntity })),
                 );
 
             await fork.commit();
@@ -109,7 +105,7 @@ export class MessagesService {
             { chat: chatId, number: { $gt: offset ?? undefined } },
             {
                 limit: limit,
-                orderBy: { number: 'DESC' },
+                orderBy: { number: 'ASC' },
                 populate: ['parentMessage', 'files', 'parentMessage.files'],
             },
         );
