@@ -1,12 +1,26 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsArray, IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
-import { Transform } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import { FileEnum } from '../../types/file.enum';
+
+class Metadata {
+    @ApiPropertyOptional()
+    @IsOptional()
+    @IsNumber()
+    readonly duration?: number;
+
+    @ApiPropertyOptional()
+    @IsOptional()
+    @Transform(({ value }) => (typeof value === 'string' ? (JSON.parse(value) as number[]) : (value as number[])))
+    @IsArray()
+    @IsNumber({}, { each: true })
+    readonly loudnessData?: number[];
+}
 
 export class CreateFileDto {
     @ApiProperty()
     @IsString()
-    readonly id!: string;
+    readonly key!: string;
 
     @ApiProperty({ enum: FileEnum })
     @IsEnum(FileEnum)
@@ -24,15 +38,8 @@ export class CreateFileDto {
     @IsString()
     readonly originalName!: string;
 
-    @ApiPropertyOptional()
+    @ApiPropertyOptional({ type: Metadata })
     @IsOptional()
-    @IsNumber()
-    readonly duration?: number;
-
-    @ApiPropertyOptional()
-    @IsOptional()
-    @Transform(({ value }) => (typeof value === 'string' ? (JSON.parse(value) as number[]) : (value as number[])))
-    @IsArray()
-    @IsNumber({}, { each: true })
-    readonly loudnessData?: number[];
+    @Type(() => Metadata)
+    readonly metadata?: Metadata;
 }

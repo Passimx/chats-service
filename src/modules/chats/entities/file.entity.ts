@@ -1,15 +1,16 @@
-import { Entity, Enum, Index, ManyToOne, PrimaryKey, Property } from '@mikro-orm/core';
+import { Entity, Enum, Index, ManyToOne, Property } from '@mikro-orm/core';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { FileEnum } from '../types/file.enum';
+import { CreatedEntity } from '../../../common/entities/created.entity';
 import { MessageEntity } from './message.entity';
 import { ChatEntity } from './chat.entity';
 
 @Entity({ tableName: 'files' })
 @Index({ properties: ['id'], type: 'HASH' })
-export class FileEntity {
+export class FileEntity extends CreatedEntity {
     @ApiProperty()
-    @PrimaryKey({ type: 'string' })
-    readonly id!: string;
+    @Property()
+    readonly key!: string;
 
     @ApiProperty()
     @Property()
@@ -36,18 +37,11 @@ export class FileEntity {
     readonly messageId!: string;
 
     @ApiProperty()
-    @Property({ nullable: true })
-    readonly duration?: number;
-
-    @ApiProperty()
     @Property({ type: 'jsonb', nullable: true })
-    readonly loudnessData?: number[];
-
-    @ApiProperty()
-    @Property({ defaultRaw: 'NOW()' })
-    readonly createdAt!: Date;
+    readonly metadata!: Record<string, any>;
 
     constructor(payload: Partial<FileEntity>) {
+        super();
         Object.assign(this, payload);
     }
 
