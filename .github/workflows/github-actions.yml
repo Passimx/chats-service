@@ -14,6 +14,7 @@ jobs:
       IMAGE_NAME: ${{ vars.IMAGE_NAME }}
     secrets:
       DOCKER_TOKEN: ${{ secrets.DOCKER_HUB_TOKEN }}
+      GIT_HUB_TOKEN: ${{ secrets.GIT_HUB_TOKEN }}
 
   release:
     needs: build
@@ -23,6 +24,7 @@ jobs:
       IMAGE_NAME: ${{ vars.IMAGE_NAME }}
     secrets:
       DOCKER_TOKEN: ${{ secrets.DOCKER_HUB_TOKEN }}
+      GIT_HUB_TOKEN: ${{ secrets.GIT_HUB_TOKEN }}
 
   deploy:
     needs: release
