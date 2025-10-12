@@ -83,7 +83,7 @@ export class ChatsService {
                 { id: chatId },
                 {
                     orderBy: { message: { createdAt: 'DESC NULLS LAST' } },
-                    populate: ['message'],
+                    populate: ['message', 'message.files'],
                 },
             );
 
