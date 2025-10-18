@@ -85,8 +85,9 @@ export class ChatsService {
                 },
             );
 
+            if (chat) chatIdsSet.add(chat.id);
+
             if (chat && (chat.countMessages > lastMessage || chat.maxUsersOnline > maxUsersOnline)) {
-                chatIdsSet.add(chat.id);
                 response.push(chat);
             }
         });
