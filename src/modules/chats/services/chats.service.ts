@@ -77,8 +77,6 @@ export class ChatsService {
         const promises = chats.map(async ({ chatId, lastMessage, maxUsersOnline }) => {
             if (chatIdsSet.has(chatId)) return;
 
-            chatIdsSet.add(chatId);
-
             const chat = await this.chatsRepository.findOne(
                 { id: chatId },
                 {
@@ -87,7 +85,10 @@ export class ChatsService {
                 },
             );
 
-            if (chat && (chat.countMessages > lastMessage || chat.maxUsersOnline > maxUsersOnline)) response.push(chat);
+            if (chat && (chat.countMessages > lastMessage || chat.maxUsersOnline > maxUsersOnline)) {
+                chatIdsSet.add(chat.id);
+                response.push(chat);
+            }
         });
 
         await Promise.allSettled(promises);
