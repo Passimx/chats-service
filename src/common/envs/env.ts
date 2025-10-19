@@ -19,7 +19,7 @@ export const Envs = {
         username: process.env.PG_USERNAME,
         password: process.env.PG_PASSWORD,
         migrationsRun: BooleanUtils.strToBoolWithDefault(process.env.PG_MIGRATIONS_RUN, false),
-        logging: BooleanUtils.strToBoolWithDefault(process.env.PG_LOGGINING, false),
+        logging: BooleanUtils.strToBoolWithDefault(process.env.PG_LOGGING, false),
     },
 
     swagger: {
