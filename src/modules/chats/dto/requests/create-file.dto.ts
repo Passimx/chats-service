@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsArray, IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsArray, IsDefined, IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
 import { Transform, Type } from 'class-transformer';
 import { FileEnum } from '../../types/file.enum';
 
@@ -41,5 +41,6 @@ export class CreateFileDto {
     @ApiPropertyOptional({ type: Metadata })
     @IsOptional()
     @Type(() => Metadata)
+    @IsDefined()
     readonly metadata?: Metadata;
 }

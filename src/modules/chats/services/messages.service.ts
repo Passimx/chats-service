@@ -78,7 +78,10 @@ export class MessagesService {
 
             const newMessageEntity: MessageEntity | null = await this.messageRepository.findOne(
                 { id: messageEntity.id },
-                { populate: ['parentMessage', 'files', 'parentMessage.files'] },
+                {
+                    populate: ['parentMessage', 'files', 'parentMessage.files'],
+                    orderBy: { files: { createdAt: 'ASC' }, parentMessage: { files: { createdAt: 'ASC' } } },
+                },
             );
 
             if (!newMessageEntity) {
@@ -105,8 +108,8 @@ export class MessagesService {
             { chat: chatId, number: { $gt: offset ?? undefined } },
             {
                 limit: limit,
-                orderBy: { number: 'ASC' },
                 populate: ['parentMessage', 'files', 'parentMessage.files'],
+                orderBy: { number: 'ASC', files: { createdAt: 'ASC' }, parentMessage: { files: { createdAt: 'ASC' } } },
             },
         );
 
