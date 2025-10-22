@@ -1,19 +1,9 @@
-import { IsArray, IsNotEmpty, IsOptional, IsString, IsUUID, Length, ValidateNested } from 'class-validator';
+import { IsArray, IsDefined, IsNotEmpty, IsOptional, IsString, IsUUID, Length, ValidateNested } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { CreateFileDto } from './create-file.dto';
 
 export class CreateMessageDto {
-    @IsString()
-    @ApiPropertyOptional({
-        description: 'Encrypt message',
-        minLength: 1,
-        maxLength: 32768,
-    })
-    @Length(1, 32768)
-    @IsOptional()
-    readonly encryptMessage?: string;
-
     @IsNotEmpty()
     @IsUUID('all')
     @ApiProperty({ description: 'Chat id' })
@@ -22,7 +12,6 @@ export class CreateMessageDto {
     @IsString()
     @ApiPropertyOptional({
         description: 'Message',
-
         minLength: 1,
         maxLength: 4096,
     })
@@ -40,5 +29,6 @@ export class CreateMessageDto {
     @IsOptional()
     @Type(() => CreateFileDto)
     @ValidateNested({ each: true })
+    @IsDefined()
     readonly files?: CreateFileDto[];
 }

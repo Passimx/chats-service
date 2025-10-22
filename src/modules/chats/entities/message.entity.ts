@@ -9,10 +9,6 @@ import { ChatEntity } from './chat.entity';
 @Index({ properties: ['chatId', 'number'], type: 'btree' })
 export class MessageEntity extends CreatedEntity {
     @ApiProperty()
-    @Property({ length: 1000, nullable: true })
-    readonly encryptMessage?: string;
-
-    @ApiProperty()
     @Property({ persist: false })
     readonly chatId!: string;
 
@@ -23,7 +19,7 @@ export class MessageEntity extends CreatedEntity {
     @Index()
     @ApiProperty()
     @Property({ length: 4096, nullable: true })
-    readonly message?: string; //используется только для openChat, в остальных частах используется encryptMessage
+    readonly message?: string;
 
     @ApiProperty()
     @Property({ persist: false })
