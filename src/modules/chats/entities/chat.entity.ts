@@ -9,8 +9,8 @@ import { MessageEntity } from './message.entity';
 @Index({ type: 'GIN', properties: 'title' })
 export class ChatEntity extends CreatedEntity {
     @ApiProperty()
-    @Property()
-    readonly title!: string;
+    @Property({ nullable: true })
+    readonly title?: string;
 
     @ApiProperty()
     @Property({ default: 0 })
