@@ -84,33 +84,28 @@ export class DialoguesService {
         return response;
     }
 
-    private async findExistingDialogue(publicKey1: string, publicKey2: string): Promise<ChatEntity | null> {
-        // Оптимизированный запрос для больших объемов данных
-        // Используем EXISTS вместо JOIN для лучшей производительности
+    private async findExistingDialogue(yourPublicKey: string, hisPublicKey: string): Promise<ChatEntity | null> {
         const result = (await this.em.getConnection().execute(
-            `
-                SELECT c.id
-                FROM chats c
-                WHERE c.type = 'is_dialogue'
-                  AND EXISTS (SELECT 1
-                              FROM chat_keys ck1
-                              WHERE ck1.chat_id::uuid = c.id
-                                AND ck1.public_key = ?)
-                  AND EXISTS (SELECT 1
-                              FROM chat_keys ck2
-                              WHERE ck2.chat_id::uuid = c.id
-                                AND ck2.public_key = ?)
-                    LIMIT 1
-            `,
-            [publicKey1, publicKey2],
-        )) as Array<{ id: string }>;
+            `SELECT DISTINCT ck1.chat_id
+             FROM chat_keys ck1
+                      INNER JOIN chat_keys ck2 ON ck1.chat_id = ck2.chat_id
+             WHERE ck1.public_key = ?
+               AND ck2.public_key = ? LIMIT 1`,
+            [yourPublicKey, hisPublicKey],
+        )) as Array<{ chat_id: string }>;
 
         if (result.length > 0) {
-            const chatData = result[0];
+            const chatId = result[0].chat_id;
 
-            return this.chatsRepository.findOne({ id: chatData.id }, { populate: ['message'] });
+            return this.chatsRepository.findOne({ id: chatId }, { populate: ['message'] });
         }
 
         return null;
+    }
+
+    async getDialogues(publicKey: string): Promise<DataResponse<string[]>> {
+        const chatIds = await this.chatsRepository.getDialogues(publicKey);
+
+        return new DataResponse<string[]>(chatIds);
     }
 }

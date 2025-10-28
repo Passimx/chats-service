@@ -658,6 +658,71 @@
 				"tags": [
 					"Dialogues"
 				]
+			},
+			"get": {
+				"operationId": "DialoguesController_getDialogues",
+				"parameters": [
+					{
+						"name": "public_key",
+						"required": true,
+						"in": "query",
+						"description": "Public key of the user",
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"type": "object",
+											"properties": {
+												"success": {
+													"type": "boolean",
+													"example": true
+												},
+												"data": {
+													"type": "array",
+													"items": {
+														"$ref": "#/components/schemas/String"
+													}
+												}
+											},
+											"required": [
+												"success",
+												"data"
+											]
+										},
+										{
+											"type": "object",
+											"properties": {
+												"success": {
+													"type": "boolean",
+													"example": false
+												},
+												"data": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"success",
+												"data"
+											]
+										}
+									]
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Dialogues"
+				]
 			}
 		}
 	},
@@ -981,6 +1046,10 @@
 					"his_public_key",
 					"encryption_key"
 				]
+			},
+			"String": {
+				"type": "object",
+				"properties": {}
 			}
 		}
 	}
