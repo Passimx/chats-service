@@ -27,6 +27,10 @@ export class MessagesService {
         payload: Partial<MessageEntity>,
         files?: CreateFileDto[],
     ): Promise<DataResponse<MessageEntity | string>> {
+        if (!payload.message?.trim() && (!files || files.length === 0)) {
+            return new DataResponse(MessageErrorLanguageEnum.INVALID_DATA);
+        }
+
         const { parentMessageId, chatId } = payload;
         const fork = this.em.fork();
         await fork.begin();
