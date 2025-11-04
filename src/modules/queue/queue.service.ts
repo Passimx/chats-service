@@ -28,10 +28,11 @@ export class QueueService {
         to: string | undefined,
         event: EventsEnum,
         data: DataResponse<unknown>,
+        publicKey?: string,
     ): void {
         if (!Envs.kafka.kafkaIsConnect || !this.isConnected) return;
 
-        const message = new MessageDto(to, event, data);
+        const message = new MessageDto(to, event, data, publicKey);
 
         this.producer.send({ topic, messages: [{ value: JSON.stringify(message) }] });
     }

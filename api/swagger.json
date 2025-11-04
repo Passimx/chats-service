@@ -245,6 +245,14 @@
 						"schema": {
 							"type": "string"
 						}
+					},
+					{
+						"name": "x-public-key",
+						"required": true,
+						"in": "header",
+						"schema": {
+							"type": "string"
+						}
 					}
 				],
 				"requestBody": {
@@ -316,6 +324,14 @@
 				"parameters": [
 					{
 						"name": "x-socket-id",
+						"required": true,
+						"in": "header",
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"name": "x-public-key",
 						"required": true,
 						"in": "header",
 						"schema": {
@@ -655,7 +671,13 @@
 						"format": "date-time",
 						"type": "string"
 					},
+					"key": {
+						"type": "string"
+					},
 					"originalName": {
+						"type": "string"
+					},
+					"chatId": {
 						"type": "string"
 					},
 					"size": {
@@ -670,32 +692,27 @@
 					"messageId": {
 						"type": "string"
 					},
-					"duration": {
-						"type": "number"
-					},
-					"loudnessData": {
-						"type": "array",
-						"items": {
-							"type": "string"
-						}
+					"metadata": {
+						"type": "object"
 					},
 					"message": {
-						"type": "array",
-						"items": {
-							"$ref": "#/components/schemas/FileEntity"
-						}
+						"$ref": "#/components/schemas/FileEntity"
+					},
+					"chat": {
+						"$ref": "#/components/schemas/ChatEntity"
 					}
 				},
 				"required": [
 					"id",
 					"createdAt",
+					"key",
 					"originalName",
+					"chatId",
 					"size",
 					"mimeType",
 					"fileType",
 					"messageId",
-					"duration",
-					"loudnessData"
+					"metadata"
 				]
 			},
 			"MessageEntity": {
@@ -706,9 +723,6 @@
 					},
 					"createdAt": {
 						"format": "date-time",
-						"type": "string"
-					},
-					"encryptMessage": {
 						"type": "string"
 					},
 					"chatId": {
@@ -742,7 +756,6 @@
 				"required": [
 					"id",
 					"createdAt",
-					"encryptMessage",
 					"chatId",
 					"number",
 					"message",
@@ -814,15 +827,57 @@
 					"chatIds"
 				]
 			},
+			"Metadata": {
+				"type": "object",
+				"properties": {
+					"duration": {
+						"type": "number"
+					},
+					"loudnessData": {
+						"type": "array",
+						"items": {
+							"type": "string"
+						}
+					}
+				}
+			},
+			"CreateFileDto": {
+				"type": "object",
+				"properties": {
+					"key": {
+						"type": "string"
+					},
+					"fileType": {
+						"type": "string",
+						"enum": [
+							"is_voice",
+							"is_media"
+						]
+					},
+					"size": {
+						"type": "number"
+					},
+					"mimeType": {
+						"type": "string"
+					},
+					"originalName": {
+						"type": "string"
+					},
+					"metadata": {
+						"$ref": "#/components/schemas/Metadata"
+					}
+				},
+				"required": [
+					"key",
+					"fileType",
+					"size",
+					"mimeType",
+					"originalName"
+				]
+			},
 			"CreateMessageDto": {
 				"type": "object",
 				"properties": {
-					"encryptMessage": {
-						"type": "string",
-						"description": "Encrypt message",
-						"minLength": 1,
-						"maxLength": 32768
-					},
 					"chatId": {
 						"type": "string",
 						"description": "Chat id"
@@ -837,33 +892,10 @@
 						"type": "string",
 						"description": "Message id"
 					},
-					"fileId": {
-						"type": "string",
-						"description": "file ID"
-					},
-					"fileType": {
-						"type": "string",
-						"enum": [
-							"is_voice",
-							"is_media"
-						]
-					},
-					"size": {
-						"type": "number"
-					},
-					"mimetype": {
-						"type": "string"
-					},
-					"originalName": {
-						"type": "string"
-					},
-					"duration": {
-						"type": "number"
-					},
-					"loudnessData": {
+					"files": {
 						"type": "array",
 						"items": {
-							"type": "string"
+							"$ref": "#/components/schemas/CreateFileDto"
 						}
 					}
 				},
