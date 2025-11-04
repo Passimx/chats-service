@@ -4,4 +4,5 @@ export enum MessageErrorLanguageEnum {
     PARENT_MESSAGE_NOT_FOUND = 'parent_message_not_found',
     SOME_CHATS_NOT_FOUND = 'some_chats_not_found',
     MESSAGE_NOT_FOUND = 'message_not_found',
+    INVALID_DATA = 'invalid_data',
 }
