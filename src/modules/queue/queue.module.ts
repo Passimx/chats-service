@@ -19,9 +19,7 @@ import { InjectEnum } from './types/inject.enum';
                             mechanism: 'plain',
                         },
                     },
-                    consumer: {
-                        groupId: Envs.kafka.groupId,
-                    },
+                    producerOnlyMode: true,
                 },
             },
         ]),

@@ -70,7 +70,7 @@ export class ChatsService {
         return new DataResponse(chat);
     }
 
-    async join(chats: ChatDto[], socketId: string): Promise<DataResponse<string | ChatEntity[]>> {
+    async join(chats: ChatDto[], socketId: string, publicKey?: string): Promise<DataResponse<string | ChatEntity[]>> {
         const response: ChatEntity[] = [];
         const chatIdsSet = new Set<string>();
 
@@ -93,6 +93,8 @@ export class ChatsService {
         });
 
         await Promise.allSettled(promises);
+
+        if (publicKey) chatIdsSet.add(publicKey);
 
         const responseChats = new DataResponse<string[]>(Array.from(chatIdsSet));
         this.queueService.sendMessage(TopicsEnum.JOIN, socketId, EventsEnum.JOIN_CHAT, responseChats);

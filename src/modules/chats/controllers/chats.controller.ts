@@ -44,8 +44,9 @@ export class ChatsController {
     join(
         @Body() favoriteChatsDto: FavoriteChatsDto,
         @Headers('x-socket-id') socketId: string,
+        @Headers('x-public-key') publicKey: string,
     ): Promise<DataResponse<string | ChatEntity[]>> {
-        return this.chatsService.join(favoriteChatsDto.chats, socketId);
+        return this.chatsService.join(favoriteChatsDto.chats, socketId, publicKey);
     }
 
     @Post('leave')
