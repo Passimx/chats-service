@@ -7,9 +7,9 @@ config();
 
 export const Envs = {
     main: {
-        host: process.env.APP_HOST || '0.0.0.0',
-        appPort: NumbersUtils.toNumberOrDefault(process.env.APP_PORT, 3000),
-        blackListTitles: process.env.FORBIDDEN_TITLES,
+        host: '0.0.0.0',
+        appPort: NumbersUtils.toNumberOrDefault(process.env.CHATS_SERVICE_APP_PORT, 3000),
+        blackListTitles: process.env.CHATS_SERVICE_FORBIDDEN_TITLES,
     },
 
     postgres: {
@@ -34,7 +34,7 @@ export const Envs = {
         port: process.env.KAFKA_EXTERNAL_PORT,
         user: String(process.env.KAFKA_CLIENT_USERS),
         password: String(process.env.KAFKA_USER_PASSWORD),
-        groupId: String(process.env.APP_KAFKA_GROUP_ID_CHAT_SERVICE),
+        groupId: String(process.env.CHATS_SERVICE_KAFKA_GROUP_ID),
         kafkaIsConnect: BooleanUtils.strToBoolWithDefault(process.env.KAFKA_IS_CONNECT, false),
     },
 };
