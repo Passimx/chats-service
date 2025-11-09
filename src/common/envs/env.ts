@@ -8,17 +8,17 @@ config();
 export const Envs = {
     main: {
         host: '0.0.0.0',
-        appPort: NumbersUtils.toNumberOrDefault(process.env.CHATS_SERVICE_APP_PORT, 3000),
+        appPort: NumbersUtils.toNumberOrDefault(process.env.CHATS_SERVICE_APP_PORT, 6020),
         blackListTitles: process.env.CHATS_SERVICE_FORBIDDEN_TITLES,
     },
 
     postgres: {
-        host: process.env.PG_HOST,
+        host: process.env.PG_HOST || 'postgres',
         port: NumbersUtils.toNumberOrDefault(process.env.PG_PORT, 5432),
         name: process.env.PG_DATABASE,
         username: process.env.PG_USERNAME,
         password: process.env.PG_PASSWORD,
-        migrationsRun: BooleanUtils.strToBoolWithDefault(process.env.PG_MIGRATIONS_RUN, false),
+        migrationsRun: BooleanUtils.strToBoolWithDefault(process.env.PG_MIGRATIONS_RUN, true),
         logging: BooleanUtils.strToBoolWithDefault(process.env.PG_LOGGING, false),
     },
 
@@ -34,7 +34,7 @@ export const Envs = {
         port: process.env.KAFKA_EXTERNAL_PORT,
         user: String(process.env.KAFKA_CLIENT_USERS),
         password: String(process.env.KAFKA_USER_PASSWORD),
-        groupId: String(process.env.CHATS_SERVICE_KAFKA_GROUP_ID),
-        kafkaIsConnect: BooleanUtils.strToBoolWithDefault(process.env.KAFKA_IS_CONNECT, false),
+        groupId: String(process.env.CHATS_SERVICE_KAFKA_GROUP_ID) || 'chat-service',
+        kafkaIsConnect: BooleanUtils.strToBoolWithDefault(process.env.KAFKA_IS_CONNECT, true),
     },
 };
