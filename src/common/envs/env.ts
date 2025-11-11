@@ -31,10 +31,10 @@ export const Envs = {
 
     kafka: {
         host: process.env.KAFKA_HOST || 'kafka',
-        port: process.env.KAFKA_EXTERNAL_PORT || 9094,
-        user: String(process.env.KAFKA_CLIENT_USERS) || 'user',
-        password: String(process.env.KAFKA_USER_PASSWORD) || 'bitnami',
-        groupId: String(process.env.CHATS_SERVICE_KAFKA_GROUP_ID) || 'chat-service',
+        port: NumbersUtils.toNumberOrDefault(process.env.KAFKA_EXTERNAL_PORT, 9094),
+        user: process.env.KAFKA_CLIENT_USERS || 'user',
+        password: process.env.KAFKA_USER_PASSWORD || 'bitnami',
+        groupId: process.env.CHATS_SERVICE_KAFKA_GROUP_ID || 'chat-service',
         kafkaIsConnect: BooleanUtils.strToBoolWithDefault(process.env.KAFKA_IS_CONNECT, true),
     },
 };
