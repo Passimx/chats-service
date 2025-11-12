@@ -11,6 +11,7 @@ import { MessageErrorLanguageEnum } from '../types/message-error-language.enum';
 import { TopicsEnum } from '../../queue/types/topics.enum';
 import { ChatTypeEnum } from '../types/chat-type.enum';
 import { FileEntity } from '../entities/file.entity';
+import { FileEnum } from '../types/file.enum';
 import { logger } from '../../../common/logger/logger';
 import { CreateFileDto } from '../dto/requests/create-file.dto';
 
@@ -98,6 +99,11 @@ export class MessagesService {
 
             this.queueService.sendMessage(TopicsEnum.EMIT, String(chatId), EventsEnum.CREATE_MESSAGE, response);
 
+            // Отправляем запросы на транскрипцию для голосовых файлов
+            if (files?.length && chatId) {
+                this.sendTranscriptionRequests(files, chatId);
+            }
+
             return response;
         } catch (e) {
             logger.error(e);
@@ -118,5 +124,29 @@ export class MessagesService {
         );
 
         return new DataResponse(getMessageNotSearch);
+    }
+
+    private sendTranscriptionRequests(files: CreateFileDto[], chatId: string): void {
+        const voiceFiles = files.filter((file) => file.fileType === FileEnum.IS_VOICE);
+
+        for (const file of voiceFiles) {
+            try {
+                // Отправляем запрос на транскрипцию через Kafka
+                // Формат: { data: { fileId: string, chatId: string } }
+                this.queueService.sendMessage(
+                    TopicsEnum.AUDIO_TRANSCRIPTION_REQUEST,
+                    chatId,
+                    EventsEnum.TRANSCRIBE_AUDIO,
+                    new DataResponse({
+                        fileId: file.key,
+                        chatId: chatId,
+                    }),
+                );
+
+                logger.info(`Sent transcription request for fileId: ${file.key}, chatId: ${chatId}`);
+            } catch (error: any) {
+                logger.error(`Failed to send transcription request for fileId: ${file.key}: ${error.message}`);
+            }
+        }
     }
 }

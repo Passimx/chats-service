@@ -4,4 +4,5 @@ export enum EventsEnum {
     JOIN_CHAT = 'join_chat',
     LEAVE_CHAT = 'leave_chat',
     GET_SYSTEM_CHAT = 'get_system_chat',
+    TRANSCRIBE_AUDIO = 'transcribe_audio',
 }
