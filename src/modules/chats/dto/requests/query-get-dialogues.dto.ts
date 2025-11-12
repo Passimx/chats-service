@@ -5,5 +5,5 @@ export class QueryGetDialoguesDto {
     @ApiProperty({ description: 'Public key of the user' })
     @IsString()
     @IsNotEmpty()
-    readonly public_key!: string;
+    readonly publicKey!: string;
 }

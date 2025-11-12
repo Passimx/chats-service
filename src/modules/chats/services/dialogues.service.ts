@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@mikro-orm/nestjs';
-import { EntityRepository } from '@mikro-orm/postgresql';
-import { EntityManager } from '@mikro-orm/core';
+import { EntityManager, EntityRepository } from '@mikro-orm/postgresql';
 import { ChatEntity } from '../entities/chat.entity';
 import { ChatKeyEntity } from '../entities/chat-key.entity';
 import { DataResponse } from '../../../common/swagger/data-response.dto';
@@ -30,7 +29,7 @@ export class DialoguesService {
 
     async createDialogue(socketId: string, keys: CreateDialoguesDto): Promise<DataResponse<ChatEntity | string>> {
         // Проверяем, не существует ли уже диалог между этими пользователями
-        const existingDialogue = await this.findExistingDialogue(keys.your_public_key, keys.his_public_key);
+        const existingDialogue = await this.findExistingDialogue(keys.senderPublicKey, keys.recipientPublicKey);
 
         if (existingDialogue) {
             return new DataResponse<ChatEntity>(existingDialogue);
@@ -45,14 +44,14 @@ export class DialoguesService {
         const chatKeys = [
             new ChatKeyEntity({
                 chatId: chatEntity.id,
-                publicKey: keys.your_public_key,
-                encryptionKey: keys.encryption_key,
+                publicKey: keys.senderPublicKey,
+                encryptionKey: keys.encryptionKey,
                 received: true,
             }),
             new ChatKeyEntity({
                 chatId: chatEntity.id,
-                publicKey: keys.his_public_key,
-                encryptionKey: keys.encryption_key,
+                publicKey: keys.recipientPublicKey,
+                encryptionKey: keys.encryptionKey,
                 received: false,
             }),
         ];
@@ -85,14 +84,17 @@ export class DialoguesService {
     }
 
     private async findExistingDialogue(yourPublicKey: string, hisPublicKey: string): Promise<ChatEntity | null> {
-        const result = (await this.em.getConnection().execute(
-            `SELECT DISTINCT ck1.chat_id
-             FROM chat_keys ck1
-                      INNER JOIN chat_keys ck2 ON ck1.chat_id = ck2.chat_id
-             WHERE ck1.public_key = ?
-               AND ck2.public_key = ? LIMIT 1`,
-            [yourPublicKey, hisPublicKey],
-        )) as Array<{ chat_id: string }>;
+        const knex = this.em.getConnection().getKnex();
+
+        const qb = knex
+            .select(knex.raw('DISTINCT ck1.chat_id as chat_id'))
+            .from('chat_keys as ck1')
+            .innerJoin('chat_keys as ck2', 'ck1.chat_id', '=', 'ck2.chat_id')
+            .where('ck1.public_key', '=', yourPublicKey)
+            .where('ck2.public_key', '=', hisPublicKey)
+            .limit(1);
+
+        const result = (await qb) as Array<{ chat_id: string }>;
 
         if (result.length > 0) {
             const chatId = result[0].chat_id;
@@ -104,8 +106,31 @@ export class DialoguesService {
     }
 
     async getDialogues(publicKey: string): Promise<DataResponse<string[]>> {
-        const chatIds = await this.chatsRepository.getDialogues(publicKey);
+        const chatKeys = await this.em.find(ChatKeyEntity, {
+            publicKey: publicKey,
+            received: false,
+        });
+
+        const chatIds = chatKeys.map((key) => key.chatId);
 
         return new DataResponse<string[]>(chatIds);
+    }
+
+    async updateDialoguesReceived(publicKey: string, chatIds: string[]): Promise<DataResponse<boolean>> {
+        if (chatIds.length !== 0) {
+            await this.em.nativeUpdate(
+                ChatKeyEntity,
+                {
+                    publicKey: publicKey,
+                    chatId: { $in: chatIds },
+                    received: false,
+                },
+                {
+                    received: true,
+                },
+            );
+        }
+
+        return new DataResponse<boolean>(true);
     }
 }

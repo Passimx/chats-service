@@ -6,6 +6,7 @@ import { CreateDialoguesDto } from '../dto/requests/create-dialogues.dto';
 import { DataResponse } from '../../../common/swagger/data-response.dto';
 import { ChatEntity } from '../entities/chat.entity';
 import { QueryGetDialoguesDto } from '../dto/requests/query-get-dialogues.dto';
+import { DialoguesReceivedDto } from '../dto/requests/mark-dialogues-received.dto';
 
 @ApiTags('Dialogues')
 @Controller('dialogues')
@@ -24,6 +25,12 @@ export class DialoguesController {
     @Get()
     @ApiData(String, true)
     getDialogues(@Query() query: QueryGetDialoguesDto): Promise<DataResponse<string[] | string>> {
-        return this.dialoguesService.getDialogues(query.public_key);
+        return this.dialoguesService.getDialogues(query.publicKey);
+    }
+
+    @Post('received')
+    @ApiData(Boolean)
+    updateDialoguesReceived(@Body() body: DialoguesReceivedDto): Promise<DataResponse<boolean>> {
+        return this.dialoguesService.updateDialoguesReceived(body.publicKey, body.chatIds);
     }
 }

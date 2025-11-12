@@ -50,16 +50,4 @@ export class ChatsRepository extends SqlEntityRepository<ChatEntity> {
             .where({ type: ChatTypeEnum.IS_SYSTEM })
             .getResult();
     }
-
-    async getDialogues(publicKey: string): Promise<string[]> {
-        const result = await this.em.getConnection().execute(
-            `SELECT chat_id
-             FROM chat_keys
-             WHERE public_key = ?
-               AND received = false`,
-            [publicKey],
-        );
-
-        return result.map((row: Record<string, unknown>) => row.chat_id as string);
-    }
 }

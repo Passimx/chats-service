@@ -5,15 +5,15 @@ export class CreateDialoguesDto {
     @ApiProperty({ description: 'Свой публичный ключ' })
     @IsString()
     @IsNotEmpty()
-    readonly your_public_key!: string;
+    readonly senderPublicKey!: string;
 
     @ApiProperty({ description: 'Публичный ключ опанента' })
     @IsString()
     @IsNotEmpty()
-    readonly his_public_key!: string;
+    readonly recipientPublicKey!: string;
 
     @ApiProperty({ description: 'Общий ключ шифрования' })
     @IsString()
     @IsNotEmpty()
-    readonly encryption_key!: string;
+    readonly encryptionKey!: string;
 }

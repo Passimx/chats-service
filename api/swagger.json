@@ -663,7 +663,7 @@
 				"operationId": "DialoguesController_getDialogues",
 				"parameters": [
 					{
-						"name": "public_key",
+						"name": "publicKey",
 						"required": true,
 						"in": "query",
 						"description": "Public key of the user",
@@ -691,6 +691,70 @@
 													"items": {
 														"$ref": "#/components/schemas/String"
 													}
+												}
+											},
+											"required": [
+												"success",
+												"data"
+											]
+										},
+										{
+											"type": "object",
+											"properties": {
+												"success": {
+													"type": "boolean",
+													"example": false
+												},
+												"data": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"success",
+												"data"
+											]
+										}
+									]
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Dialogues"
+				]
+			}
+		},
+		"/dialogues/received": {
+			"post": {
+				"operationId": "DialoguesController_updateDialoguesReceived",
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/DialoguesReceivedDto"
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"type": "object",
+											"properties": {
+												"success": {
+													"type": "boolean",
+													"example": true
+												},
+												"data": {
+													"$ref": "#/components/schemas/Boolean"
 												}
 											},
 											"required": [
@@ -1028,28 +1092,50 @@
 			"CreateDialoguesDto": {
 				"type": "object",
 				"properties": {
-					"your_public_key": {
+					"senderPublicKey": {
 						"type": "string",
 						"description": "Свой публичный ключ"
 					},
-					"his_public_key": {
+					"recipientPublicKey": {
 						"type": "string",
 						"description": "Публичный ключ опанента"
 					},
-					"encryption_key": {
+					"encryptionKey": {
 						"type": "string",
 						"description": "Общий ключ шифрования"
 					}
 				},
 				"required": [
-					"your_public_key",
-					"his_public_key",
-					"encryption_key"
+					"senderPublicKey",
+					"recipientPublicKey",
+					"encryptionKey"
 				]
 			},
 			"String": {
 				"type": "object",
 				"properties": {}
+			},
+			"Boolean": {
+				"type": "object",
+				"properties": {}
+			},
+			"DialoguesReceivedDto": {
+				"type": "object",
+				"properties": {
+					"publicKey": {
+						"type": "string"
+					},
+					"chatIds": {
+						"type": "array",
+						"items": {
+							"type": "string"
+						}
+					}
+				},
+				"required": [
+					"publicKey",
+					"chatIds"
+				]
 			}
 		}
 	}
