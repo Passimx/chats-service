@@ -10,6 +10,7 @@ export const Envs = {
         host: '0.0.0.0',
         appPort: NumbersUtils.toNumberOrDefault(process.env.CHATS_SERVICE_APP_PORT, 6020),
         blackListTitles: process.env.CHATS_SERVICE_FORBIDDEN_TITLES,
+        appSalt: process.env.APP_SALT || 'sha256',
     },
 
     postgres: {

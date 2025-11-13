@@ -1,19 +1,22 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsString, MaxLength } from 'class-validator';
 
 export class CreateDialoguesDto {
-    @ApiProperty({ description: 'Свой публичный ключ' })
+    @ApiProperty({ description: 'Публичный ключ создателя' })
     @IsString()
     @IsNotEmpty()
-    readonly your_public_key!: string;
+    @MaxLength(128)
+    readonly senderPublicKeyHash!: string;
 
-    @ApiProperty({ description: 'Публичный ключ опанента' })
+    @ApiProperty({ description: 'Публичный ключ оппонента' })
     @IsString()
     @IsNotEmpty()
-    readonly his_public_key!: string;
+    @MaxLength(128)
+    readonly recipientPublicKeyHash!: string;
 
-    @ApiProperty({ description: 'Общий ключ шифрования' })
+    @ApiProperty({ description: 'Зашифрованный общий ключ шифрования для чата' })
     @IsString()
     @IsNotEmpty()
-    readonly encryption_key!: string;
+    @MaxLength(8192)
+    readonly encryptionKey!: string;
 }

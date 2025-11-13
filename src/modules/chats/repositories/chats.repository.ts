@@ -62,4 +62,8 @@ export class ChatsRepository extends SqlEntityRepository<ChatEntity> {
 
         return result.map((row: Record<string, unknown>) => row.chat_id as string);
     }
+
+    public async getDialogue(id: string): Promise<ChatEntity | null> {
+        return this.findOne({ id }, { populate: ['keys'] });
+    }
 }

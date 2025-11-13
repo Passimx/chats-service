@@ -1,13 +1,19 @@
-import { Entity, Enum, Index, OneToOne, Property } from '@mikro-orm/core';
+import { Collection, Entity, Enum, Index, OneToMany, OneToOne, Property } from '@mikro-orm/core';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { CreatedEntity } from '../../../common/entities/created.entity';
 import { ChatTypeEnum } from '../types/chat-type.enum';
 import { ChatsRepository } from '../repositories/chats.repository';
 import { MessageEntity } from './message.entity';
+import { ChatKeyEntity } from './chat-key.entity';
 
 @Entity({ tableName: 'chats', repository: () => ChatsRepository })
 @Index({ type: 'GIN', properties: 'title' })
 export class ChatEntity extends CreatedEntity {
+    constructor(payload: Partial<ChatEntity>) {
+        super();
+        Object.assign(this, payload);
+    }
+
     @ApiProperty()
     @Property({ nullable: true })
     readonly title?: string;
@@ -20,11 +26,6 @@ export class ChatEntity extends CreatedEntity {
     @Enum({ default: ChatTypeEnum.IS_OPEN, items: () => ChatTypeEnum, nativeEnumName: 'chat_type_enum' })
     readonly type!: ChatTypeEnum;
 
-    constructor(payload: Partial<ChatEntity>) {
-        super();
-        Object.assign(this, payload);
-    }
-
     @ApiProperty()
     @Property({
         default: 1,
@@ -34,4 +35,8 @@ export class ChatEntity extends CreatedEntity {
     @ApiPropertyOptional({ type: () => MessageEntity, isArray: true })
     @OneToOne(() => MessageEntity, (message) => message.chat, { unique: false })
     readonly message!: MessageEntity;
+
+    @ApiProperty({ type: () => ChatKeyEntity, isArray: true, nullable: true })
+    @OneToMany(() => ChatKeyEntity, (key) => key.chat)
+    readonly keys = new Collection<ChatKeyEntity>(this);
 }

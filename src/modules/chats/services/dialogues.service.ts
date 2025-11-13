@@ -1,111 +1,73 @@
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@mikro-orm/nestjs';
-import { EntityRepository } from '@mikro-orm/postgresql';
 import { EntityManager } from '@mikro-orm/core';
 import { ChatEntity } from '../entities/chat.entity';
-import { ChatKeyEntity } from '../entities/chat-key.entity';
 import { DataResponse } from '../../../common/swagger/data-response.dto';
-import { MessageEntity } from '../entities/message.entity';
 import { ChatsRepository } from '../repositories/chats.repository';
 import { CreateDialoguesDto } from '../dto/requests/create-dialogues.dto';
+import { QueueService } from '../../queue/queue.service';
+import { ChatKeysRepository } from '../repositories/chat-keys.repository';
 import { ChatTypeEnum } from '../types/chat-type.enum';
+import { ChatKeyEntity } from '../entities/chat-key.entity';
 import { MessageTypeEnum } from '../types/message-type.enum';
 import { SystemMessageLanguageEnum } from '../types/system-message-language.enum';
-import { MessageErrorLanguageEnum } from '../types/message-error-language.enum';
 import { TopicsEnum } from '../../queue/types/topics.enum';
-import { QueueService } from '../../queue/queue.service';
 import { EventsEnum } from '../../queue/types/events.enum';
+import { ChatsService } from './chats.service';
 import { MessagesService } from './messages.service';
 
 @Injectable()
 export class DialoguesService {
     constructor(
-        @InjectRepository(MessageEntity)
-        readonly messageRepository: EntityRepository<MessageEntity>,
+        private readonly chatKeysRepository: ChatKeysRepository,
         private readonly queueService: QueueService,
         private readonly messagesService: MessagesService,
-        readonly chatsRepository: ChatsRepository,
+        private readonly chatsRepository: ChatsRepository,
         private readonly em: EntityManager,
+        private readonly chatsService: ChatsService,
     ) {}
 
-    async createDialogue(socketId: string, keys: CreateDialoguesDto): Promise<DataResponse<ChatEntity | string>> {
-        // Проверяем, не существует ли уже диалог между этими пользователями
-        const existingDialogue = await this.findExistingDialogue(keys.your_public_key, keys.his_public_key);
+    async createDialogue({ encryptionKey, ...body }: CreateDialoguesDto): Promise<DataResponse<ChatEntity | string>> {
+        let dialogue = await this.chatKeysRepository.getDialogue(body.senderPublicKeyHash, body.recipientPublicKeyHash);
 
-        if (existingDialogue) {
-            return new DataResponse<ChatEntity>(existingDialogue);
+        if (dialogue) return this.chatsService.findChat(dialogue.id);
+
+        const fork = this.em.fork();
+        await fork.begin();
+
+        try {
+            const chatEntity = new ChatEntity({
+                type: ChatTypeEnum.IS_DIALOGUE,
+            } as ChatEntity);
+
+            const chatId = await fork.insert(ChatEntity, chatEntity);
+
+            await fork.insertMany(
+                ChatKeyEntity,
+                [body.senderPublicKeyHash, body.recipientPublicKeyHash].map((publicKeyHash) => ({
+                    chatId,
+                    encryptionKey,
+                    publicKeyHash,
+                })),
+            );
+
+            await fork.commit();
+
+            await this.messagesService.createMessage({
+                chat: chatEntity,
+                chatId: chatEntity.id,
+                type: MessageTypeEnum.IS_CREATED_CHAT,
+                message: SystemMessageLanguageEnum.DIALOGUE_IS_CREATE,
+            });
+
+            dialogue = await this.chatsRepository.getDialogue(chatEntity.id);
+        } catch (error) {
+            await fork.rollback();
         }
 
-        const chatEntity = new ChatEntity({
-            type: ChatTypeEnum.IS_DIALOGUE,
-        });
-
-        await this.chatsRepository.insert(chatEntity);
-
-        const chatKeys = [
-            new ChatKeyEntity({
-                chatId: chatEntity.id,
-                publicKey: keys.your_public_key,
-                encryptionKey: keys.encryption_key,
-                received: true,
-            }),
-            new ChatKeyEntity({
-                chatId: chatEntity.id,
-                publicKey: keys.his_public_key,
-                encryptionKey: keys.encryption_key,
-                received: false,
-            }),
-        ];
-
-        await this.em.persistAndFlush(chatKeys);
-
-        const messageResponse = await this.messagesService.createMessage({
-            chat: chatEntity,
-            chatId: chatEntity.id,
-            type: MessageTypeEnum.IS_CREATED_DIALOGUES,
-            message: SystemMessageLanguageEnum.create_dialogue,
-        });
-
-        if (!messageResponse.success) return new DataResponse<ChatEntity>(MessageErrorLanguageEnum.MESSAGE_NOT_FOUND);
-
-        const createChat = await this.chatsRepository.findOne({ id: chatEntity.id }, { populate: ['message'] });
-
-        const response = new DataResponse<ChatEntity>(createChat!);
-        this.queueService.sendMessage(TopicsEnum.EMIT, socketId, EventsEnum.CREATE_CHAT, response);
-
-        const chatId: string[] = [chatEntity.id];
-        this.queueService.sendMessage(
-            TopicsEnum.JOIN,
-            socketId,
-            EventsEnum.JOIN_CHAT,
-            new DataResponse<string[]>(chatId),
-        );
+        const response = await this.chatsService.findChat(dialogue!.id);
+        this.queueService.sendMessage(TopicsEnum.EMIT, body.recipientPublicKeyHash, EventsEnum.CREATE_CHAT, response);
+        this.queueService.sendMessage(TopicsEnum.EMIT, body.senderPublicKeyHash, EventsEnum.CREATE_CHAT, response);
 
         return response;
-    }
-
-    private async findExistingDialogue(yourPublicKey: string, hisPublicKey: string): Promise<ChatEntity | null> {
-        const result = (await this.em.getConnection().execute(
-            `SELECT DISTINCT ck1.chat_id
-             FROM chat_keys ck1
-                      INNER JOIN chat_keys ck2 ON ck1.chat_id = ck2.chat_id
-             WHERE ck1.public_key = ?
-               AND ck2.public_key = ? LIMIT 1`,
-            [yourPublicKey, hisPublicKey],
-        )) as Array<{ chat_id: string }>;
-
-        if (result.length > 0) {
-            const chatId = result[0].chat_id;
-
-            return this.chatsRepository.findOne({ id: chatId }, { populate: ['message'] });
-        }
-
-        return null;
-    }
-
-    async getDialogues(publicKey: string): Promise<DataResponse<string[]>> {
-        const chatIds = await this.chatsRepository.getDialogues(publicKey);
-
-        return new DataResponse<string[]>(chatIds);
     }
 }

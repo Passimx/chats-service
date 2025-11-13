@@ -8,7 +8,7 @@ import { MessageEntity } from './entities/message.entity';
 import { ChatKeyEntity } from './entities/chat-key.entity';
 import { ChatsController } from './controllers/chats.controller';
 import { MessagesController } from './controllers/messages.controller';
-import { DialoguesController } from './controllers/ dialogues.controller';
+import { DialoguesController } from './controllers/dialogues.controller';
 import { MessagesService } from './services/messages.service';
 
 @Module({

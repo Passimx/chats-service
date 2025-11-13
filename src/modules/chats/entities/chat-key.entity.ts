@@ -1,34 +1,35 @@
-import { Entity, Index, Property, Unique } from '@mikro-orm/core';
+import { Entity, Index, ManyToOne, Property, Unique } from '@mikro-orm/core';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsBoolean, IsString } from 'class-validator';
 import { CreatedEntity } from '../../../common/entities/created.entity';
+import { ChatKeysRepository } from '../repositories/chat-keys.repository';
+import { ChatEntity } from './chat.entity';
 
-@Entity({ tableName: 'chat_keys' })
-@Unique({ properties: ['chatId', 'publicKey'] })
-@Index({ properties: ['publicKey', 'chatId'], type: 'btree' })
+@Entity({ tableName: 'chat_keys', repository: () => ChatKeysRepository })
+@Unique({ properties: ['chatId', 'publicKeyHash'] })
+@Index({ properties: ['publicKeyHash', 'chatId'], type: 'btree' })
 export class ChatKeyEntity extends CreatedEntity {
-    @ApiProperty()
-    @Property({ type: 'uuid' })
-    @IsString()
-    readonly chatId!: string;
-
-    @ApiProperty()
-    @Property()
-    @IsString()
-    readonly publicKey!: string;
-
-    @ApiProperty()
-    @Property()
-    @IsString()
-    readonly encryptionKey!: string;
-
-    @ApiProperty()
-    @IsBoolean()
-    @Property({ default: false })
-    readonly received!: boolean;
-
     constructor(payload: Partial<ChatKeyEntity>) {
         super();
         Object.assign(this, payload);
     }
+
+    @ApiProperty()
+    @Property({ persist: false })
+    readonly chatId!: string;
+
+    @ApiProperty()
+    @Property({ length: 128 })
+    readonly publicKeyHash!: string;
+
+    @ApiProperty()
+    @Property({ length: 4096 })
+    readonly encryptionKey!: string;
+
+    @ApiProperty()
+    @Property({ default: false })
+    readonly received!: boolean;
+
+    @ApiProperty({ type: () => ChatEntity })
+    @ManyToOne(() => ChatEntity)
+    readonly chat!: ChatEntity;
 }
