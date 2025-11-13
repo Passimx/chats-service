@@ -586,6 +586,144 @@
 					"Messages"
 				]
 			}
+		},
+		"/dialogues": {
+			"post": {
+				"operationId": "DialoguesController_createDialogue",
+				"parameters": [
+					{
+						"name": "x-socket-id",
+						"required": true,
+						"in": "header",
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/CreateDialoguesDto"
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"type": "object",
+											"properties": {
+												"success": {
+													"type": "boolean",
+													"example": true
+												},
+												"data": {
+													"$ref": "#/components/schemas/ChatEntity"
+												}
+											},
+											"required": [
+												"success",
+												"data"
+											]
+										},
+										{
+											"type": "object",
+											"properties": {
+												"success": {
+													"type": "boolean",
+													"example": false
+												},
+												"data": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"success",
+												"data"
+											]
+										}
+									]
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Dialogues"
+				]
+			},
+			"get": {
+				"operationId": "DialoguesController_getDialogues",
+				"parameters": [
+					{
+						"name": "public_key",
+						"required": true,
+						"in": "query",
+						"description": "Public key of the user",
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"type": "object",
+											"properties": {
+												"success": {
+													"type": "boolean",
+													"example": true
+												},
+												"data": {
+													"type": "array",
+													"items": {
+														"$ref": "#/components/schemas/String"
+													}
+												}
+											},
+											"required": [
+												"success",
+												"data"
+											]
+										},
+										{
+											"type": "object",
+											"properties": {
+												"success": {
+													"type": "boolean",
+													"example": false
+												},
+												"data": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"success",
+												"data"
+											]
+										}
+									]
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Dialogues"
+				]
+			}
 		}
 	},
 	"info": {
@@ -655,7 +793,13 @@
 						"format": "date-time",
 						"type": "string"
 					},
+					"key": {
+						"type": "string"
+					},
 					"originalName": {
+						"type": "string"
+					},
+					"chatId": {
 						"type": "string"
 					},
 					"size": {
@@ -670,32 +814,27 @@
 					"messageId": {
 						"type": "string"
 					},
-					"duration": {
-						"type": "number"
-					},
-					"loudnessData": {
-						"type": "array",
-						"items": {
-							"type": "string"
-						}
+					"metadata": {
+						"type": "object"
 					},
 					"message": {
-						"type": "array",
-						"items": {
-							"$ref": "#/components/schemas/FileEntity"
-						}
+						"$ref": "#/components/schemas/FileEntity"
+					},
+					"chat": {
+						"$ref": "#/components/schemas/ChatEntity"
 					}
 				},
 				"required": [
 					"id",
 					"createdAt",
+					"key",
 					"originalName",
+					"chatId",
 					"size",
 					"mimeType",
 					"fileType",
 					"messageId",
-					"duration",
-					"loudnessData"
+					"metadata"
 				]
 			},
 			"MessageEntity": {
@@ -706,9 +845,6 @@
 					},
 					"createdAt": {
 						"format": "date-time",
-						"type": "string"
-					},
-					"encryptMessage": {
 						"type": "string"
 					},
 					"chatId": {
@@ -742,7 +878,6 @@
 				"required": [
 					"id",
 					"createdAt",
-					"encryptMessage",
 					"chatId",
 					"number",
 					"message",
@@ -814,15 +949,57 @@
 					"chatIds"
 				]
 			},
+			"Metadata": {
+				"type": "object",
+				"properties": {
+					"duration": {
+						"type": "number"
+					},
+					"loudnessData": {
+						"type": "array",
+						"items": {
+							"type": "string"
+						}
+					}
+				}
+			},
+			"CreateFileDto": {
+				"type": "object",
+				"properties": {
+					"key": {
+						"type": "string"
+					},
+					"fileType": {
+						"type": "string",
+						"enum": [
+							"is_voice",
+							"is_media"
+						]
+					},
+					"size": {
+						"type": "number"
+					},
+					"mimeType": {
+						"type": "string"
+					},
+					"originalName": {
+						"type": "string"
+					},
+					"metadata": {
+						"$ref": "#/components/schemas/Metadata"
+					}
+				},
+				"required": [
+					"key",
+					"fileType",
+					"size",
+					"mimeType",
+					"originalName"
+				]
+			},
 			"CreateMessageDto": {
 				"type": "object",
 				"properties": {
-					"encryptMessage": {
-						"type": "string",
-						"description": "Encrypt message",
-						"minLength": 1,
-						"maxLength": 32768
-					},
 					"chatId": {
 						"type": "string",
 						"description": "Chat id"
@@ -837,39 +1014,42 @@
 						"type": "string",
 						"description": "Message id"
 					},
-					"fileId": {
-						"type": "string",
-						"description": "file ID"
-					},
-					"fileType": {
-						"type": "string",
-						"enum": [
-							"is_voice",
-							"is_media"
-						]
-					},
-					"size": {
-						"type": "number"
-					},
-					"mimetype": {
-						"type": "string"
-					},
-					"originalName": {
-						"type": "string"
-					},
-					"duration": {
-						"type": "number"
-					},
-					"loudnessData": {
+					"files": {
 						"type": "array",
 						"items": {
-							"type": "string"
+							"$ref": "#/components/schemas/CreateFileDto"
 						}
 					}
 				},
 				"required": [
 					"chatId"
 				]
+			},
+			"CreateDialoguesDto": {
+				"type": "object",
+				"properties": {
+					"your_public_key": {
+						"type": "string",
+						"description": "Свой публичный ключ"
+					},
+					"his_public_key": {
+						"type": "string",
+						"description": "Публичный ключ опанента"
+					},
+					"encryption_key": {
+						"type": "string",
+						"description": "Общий ключ шифрования"
+					}
+				},
+				"required": [
+					"your_public_key",
+					"his_public_key",
+					"encryption_key"
+				]
+			},
+			"String": {
+				"type": "object",
+				"properties": {}
 			}
 		}
 	}
