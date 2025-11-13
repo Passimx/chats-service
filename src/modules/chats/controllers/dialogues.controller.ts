@@ -1,4 +1,4 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Headers, Post } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { DialoguesService } from '../services/dialogues.service';
 import { ApiData } from '../../../common/swagger/api-data.decorator';
@@ -13,7 +13,10 @@ export class DialoguesController {
 
     @Post()
     @ApiData(ChatEntity)
-    createDialogue(@Body() body: CreateDialoguesDto): Promise<DataResponse<ChatEntity | string>> {
-        return this.dialoguesService.createDialogue(body);
+    createDialogue(
+        @Headers('x-socket-id') socketId: string,
+        @Body() body: CreateDialoguesDto,
+    ): Promise<DataResponse<ChatEntity | string>> {
+        return this.dialoguesService.createDialogue(socketId, body);
     }
 }
