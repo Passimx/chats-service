@@ -73,6 +73,8 @@ export class ChatsRepository extends SqlEntityRepository<ChatEntity> {
     public async getDialogueByKeys(keys: CreateDialogueKeyDto[]) {
         const qb = this.createQueryBuilder('chats');
 
+        if (keys.length === 1) qb.andWhere({ 'chats.type': ChatTypeEnum.IS_FAVORITES });
+
         keys.forEach(({ publicKeyHash }, index) => {
             const alias = `key_${index}`;
             qb.innerJoin('chats.keys', alias, { [`${alias}.public_key_hash`]: publicKeyHash });
