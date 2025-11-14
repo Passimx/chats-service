@@ -40,6 +40,7 @@ export class DialoguesService {
             return this.chatsService.findChat(dialogue.id);
         }
 
+        let message = SystemMessageLanguageEnum.DIALOGUE_IS_CREATE;
         const fork = this.em.fork();
         await fork.begin();
 
@@ -50,6 +51,7 @@ export class DialoguesService {
             if (keys.length === 1 || keys[0].publicKeyHash === keys[1].publicKeyHash) {
                 chatType = ChatTypeEnum.IS_FAVORITES;
                 title = 'favorites';
+                message = SystemMessageLanguageEnum.FAVORITE_IS_CREATE;
             }
 
             const chatEntity = new ChatEntity({
@@ -74,7 +76,7 @@ export class DialoguesService {
                 chat: chatEntity,
                 chatId: chatEntity.id,
                 type: MessageTypeEnum.IS_CREATED_CHAT,
-                message: SystemMessageLanguageEnum.DIALOGUE_IS_CREATE,
+                message,
             });
 
             dialogue = await this.chatsRepository.getDialogue(chatEntity.id);
