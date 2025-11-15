@@ -130,23 +130,15 @@ export class MessagesService {
         const voiceFiles = files.filter((file) => file.fileType === FileEnum.IS_VOICE);
 
         for (const file of voiceFiles) {
-            try {
-                // Отправляем запрос на транскрипцию через Kafka
-                // Формат: { data: { fileId: string, chatId: string } }
-                this.queueService.sendMessage(
-                    TopicsEnum.AUDIO_TRANSCRIPTION_REQUEST,
-                    chatId,
-                    EventsEnum.TRANSCRIBE_AUDIO,
-                    new DataResponse({
-                        fileId: file.key,
-                        chatId: chatId,
-                    }),
-                );
-
-                logger.info(`Sent transcription request for fileId: ${file.key}, chatId: ${chatId}`);
-            } catch (error: any) {
-                logger.error(`Failed to send transcription request for fileId: ${file.key}: ${error.message}`);
-            }
+            this.queueService.sendMessage(
+                TopicsEnum.AUDIO_TRANSCRIPTION_REQUEST,
+                chatId,
+                EventsEnum.TRANSCRIBE_AUDIO,
+                new DataResponse({
+                    fileId: file.key,
+                    chatId: chatId,
+                }),
+            );
         }
     }
 }

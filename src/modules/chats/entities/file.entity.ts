@@ -45,6 +45,10 @@ export class FileEntity extends CreatedEntity {
         Object.assign(this, payload);
     }
 
+    @ApiPropertyOptional()
+    @Property({ nullable: true, type: 'text' })
+    readonly transcriptionVoice?: string;
+
     @ApiPropertyOptional({ type: () => FileEntity })
     @ManyToOne(() => MessageEntity, {
         nullable: true,
