@@ -35,35 +35,24 @@ export class ChatsRepository extends SqlEntityRepository<ChatEntity> {
         return qb.getResult();
     }
 
-    async findChatById(id: string): Promise<ChatEntity | null> {
+    public async findChatById(id: string): Promise<ChatEntity | null> {
         return this.createQueryBuilder('chats')
             .leftJoinAndSelect('chats.message', 'message', lastMessageCondition)
             .leftJoinAndSelect('message.parentMessage', 'parentMessage')
+            .leftJoinAndSelect('parentMessage.files', 'parentMessageFiles')
             .leftJoinAndSelect('message.files', 'files')
             .leftJoinAndSelect('chats.keys', 'keys')
             .where('chats.id = ?', [id])
             .getSingleResult();
     }
 
-    async getSystemChats(): Promise<string | ChatEntity[]> {
+    public async getSystemChats(): Promise<string | ChatEntity[]> {
         return await this.createQueryBuilder('chats')
             .leftJoinAndSelect('chats.message', 'message', lastMessageCondition)
             .leftJoinAndSelect('message.parentMessage', 'parentMessage')
             .leftJoinAndSelect('message.files', 'files')
             .where({ type: ChatTypeEnum.IS_SYSTEM })
             .getResult();
-    }
-
-    async getDialogues(publicKey: string): Promise<string[]> {
-        const result = await this.em.getConnection().execute(
-            `SELECT chat_id
-             FROM chat_keys
-             WHERE public_key = ?
-               AND received = false`,
-            [publicKey],
-        );
-
-        return result.map((row: Record<string, unknown>) => row.chat_id as string);
     }
 
     public async getDialogue(id: string): Promise<ChatEntity | null> {
@@ -81,5 +70,18 @@ export class ChatsRepository extends SqlEntityRepository<ChatEntity> {
         });
 
         return qb.getSingleResult();
+    }
+
+    public async getNotReceivedChats(publicKeyHash: string): Promise<ChatEntity[]> {
+        return this.createQueryBuilder('chats')
+            .where({ type: ChatTypeEnum.IS_DIALOGUE })
+            .innerJoinAndSelect('chats.message', 'message', lastMessageCondition)
+            .leftJoinAndSelect('message.files', 'files')
+            .leftJoinAndSelect('chats.keys', 'keys')
+            .innerJoin('chats.keys', 'key', { 'key.public_key_hash': publicKeyHash, 'key.received': false })
+            .orderBy({
+                'files.createdAt': QueryOrder.ASC_NULLS_LAST,
+            })
+            .getResult();
     }
 }
