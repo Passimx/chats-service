@@ -3,8 +3,8 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { CreatedEntity } from '../../../common/entities/created.entity';
 import { ChatTypeEnum } from '../types/chat-type.enum';
 import { ChatsRepository } from '../repositories/chats.repository';
+import { ChatKeyEntity } from '../../keys/entities/chat-key.entity';
 import { MessageEntity } from './message.entity';
-import { ChatKeyEntity } from './chat-key.entity';
 
 @Entity({ tableName: 'chats', repository: () => ChatsRepository })
 @Index({ type: 'GIN', properties: 'title' })

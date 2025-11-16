@@ -74,13 +74,20 @@ export class ChatsService {
         const response: ChatEntity[] = [];
         const chatIdsSet = new Set<string>();
 
+        // новые чаты
+        const notReceivedChats = await this.chatsRepository.getNotReceivedChats(socketId);
+        notReceivedChats?.forEach((chat) => {
+            response.push(chat);
+            chatIdsSet.add(chat.id);
+        });
+
         const promises = chats.map(async ({ chatId, lastMessage, maxUsersOnline }) => {
             if (chatIdsSet.has(chatId)) return;
 
             const chat = await this.chatsRepository.findOne(
                 { id: chatId },
                 {
-                    orderBy: { message: { createdAt: 'DESC NULLS LAST' } },
+                    orderBy: { message: { createdAt: 'DESC', files: { createdAt: 'DESC' } } },
                     populate: ['message', 'message.files'],
                 },
             );

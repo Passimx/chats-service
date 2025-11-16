@@ -8,7 +8,7 @@ import { QueueService } from '../../queue/queue.service';
 import { ChatTypeEnum } from '../types/chat-type.enum';
 import { MessageTypeEnum } from '../types/message-type.enum';
 import { SystemMessageLanguageEnum } from '../types/system-message-language.enum';
-import { ChatKeyEntity } from '../entities/chat-key.entity';
+import { ChatKeyEntity } from '../../keys/entities/chat-key.entity';
 import { TopicsEnum } from '../../queue/types/topics.enum';
 import { EventsEnum } from '../../queue/types/events.enum';
 import { ChatsService } from './chats.service';
