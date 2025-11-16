@@ -7,7 +7,7 @@ import { ChatEntity } from '../entities/chat.entity';
 import { DataResponse } from '../../../common/swagger/data-response.dto';
 import { QueueService } from '../../queue/queue.service';
 import { EventsEnum } from '../../queue/types/events.enum';
-import { MessageErrorLanguageEnum } from '../types/message-error-language.enum';
+import { MessageErrorEnum } from '../types/message-error.enum';
 import { TopicsEnum } from '../../queue/types/topics.enum';
 import { ChatTypeEnum } from '../types/chat-type.enum';
 import { FileEntity } from '../entities/file.entity';
@@ -29,7 +29,7 @@ export class MessagesService {
         files?: CreateFileDto[],
     ): Promise<DataResponse<MessageEntity | string>> {
         if (!payload.message?.trim() && (!files || files.length === 0)) {
-            return new DataResponse(MessageErrorLanguageEnum.INVALID_DATA);
+            return new DataResponse(MessageErrorEnum.INVALID_DATA);
         }
 
         const { parentMessageId, chatId } = payload;
@@ -45,7 +45,7 @@ export class MessagesService {
                 if (!parentMessage) {
                     await fork.rollback();
 
-                    return new DataResponse(MessageErrorLanguageEnum.PARENT_MESSAGE_NOT_FOUND);
+                    return new DataResponse(MessageErrorEnum.PARENT_MESSAGE_NOT_FOUND);
                 }
             }
 
@@ -60,7 +60,7 @@ export class MessagesService {
             if (!chat) {
                 await fork.rollback();
 
-                return new DataResponse(MessageErrorLanguageEnum.CHAT_NOT_FOUND);
+                return new DataResponse(MessageErrorEnum.CHAT_NOT_FOUND);
             }
 
             const messageEntity = new MessageEntity({
@@ -92,7 +92,7 @@ export class MessagesService {
             if (!newMessageEntity) {
                 await fork.rollback();
 
-                return new DataResponse(MessageErrorLanguageEnum.MESSAGE_NOT_FOUND);
+                return new DataResponse(MessageErrorEnum.MESSAGE_NOT_FOUND);
             }
 
             const response = new DataResponse<MessageEntity | string>(newMessageEntity);
@@ -109,7 +109,7 @@ export class MessagesService {
             logger.error(e);
             await fork.rollback();
 
-            return new DataResponse(MessageErrorLanguageEnum.MESSAGE_NOT_FOUND);
+            return new DataResponse(MessageErrorEnum.MESSAGE_NOT_FOUND);
         }
     }
 

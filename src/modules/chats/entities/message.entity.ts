@@ -8,6 +8,11 @@ import { ChatEntity } from './chat.entity';
 @Entity({ tableName: 'messages' })
 @Index({ properties: ['chatId', 'number'], type: 'btree' })
 export class MessageEntity extends CreatedEntity {
+    constructor(payload: Partial<MessageEntity>) {
+        super();
+        Object.assign(this, payload);
+    }
+
     @ApiProperty()
     @Property({ persist: false })
     readonly chatId!: string;
@@ -33,11 +38,6 @@ export class MessageEntity extends CreatedEntity {
         default: MessageTypeEnum.IS_USER,
     })
     readonly type!: MessageTypeEnum;
-
-    constructor(payload: Partial<MessageEntity>) {
-        super();
-        Object.assign(this, payload);
-    }
 
     @ApiPropertyOptional({ type: () => ChatEntity, isArray: false })
     @OneToOne(() => ChatEntity, { type: 'uuid', unique: false, hidden: true })

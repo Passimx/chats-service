@@ -1,31 +1,5 @@
 version: '3.8'
 services:
-  notifications-service:
-    image: passimx/notifications-service
-    container_name: passimx-notifications-service
-    restart: always
-    env_file: .env
-    networks:
-      - main
-    depends_on:
-      - kafka
-    ports:
-      - ${APP_PORT_NOTIFICATION}:${APP_PORT_NOTIFICATION}
-      - ${SOCKET_PORT_NOTIFICATION}:${SOCKET_PORT_NOTIFICATION}
-
-  chats-service:
-    image: passimx/chats-service
-    container_name: passimx-chats-service
-    depends_on:
-      - postgres
-      - kafka
-    restart: always
-    env_file: .env
-    networks:
-      - main
-    ports:
-      - ${APP_PORT}:${APP_PORT}
-
   postgres:
     image: postgres:17-alpine
     container_name: passimx-postgres
@@ -57,7 +31,7 @@ services:
       - KAFKA_CFG_PROCESS_ROLES=broker,controller
       - KAFKA_CFG_LISTENERS=CLIENT://:${KAFKA_CLIENT_PORT},INTERNAL://:${KAFKA_INTERNAL_PORT},EXTERNAL://:${KAFKA_EXTERNAL_PORT},
       - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=INTERNAL:PLAINTEXT,CLIENT:SASL_PLAINTEXT,EXTERNAL:SASL_PLAINTEXT
-#      - KAFKA_CFG_ADVERTISED_LISTENERS=CLIENT://kafka:${KAFKA_CLIENT_PORT},EXTERNAL://kafka:${KAFKA_EXTERNAL_PORT}
+      #      - KAFKA_CFG_ADVERTISED_LISTENERS=CLIENT://kafka:${KAFKA_CLIENT_PORT},EXTERNAL://kafka:${KAFKA_EXTERNAL_PORT}
       - KAFKA_CFG_ADVERTISED_LISTENERS=CLIENT://kafka:${KAFKA_CLIENT_PORT},EXTERNAL://localhost:${KAFKA_EXTERNAL_PORT}
       - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=CLIENT
       - KAFKA_CFG_SASL_MECHANISM_INTER_BROKER_PROTOCOL=PLAIN
@@ -85,27 +59,6 @@ services:
           done;
         ) & /opt/bitnami/scripts/kafka/run.sh
 
-  kafka-ui:
-    container_name: passimx-kafka-ui
-    image: provectuslabs/kafka-ui:latest
-    restart: always
-    depends_on:
-      - kafka
-    networks:
-      - main
-    env_file: .env
-    environment:
-      - KAFKA_CLUSTERS_0_NAME=${KAFKA_UI_HOST}
-      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=${KAFKA_HOST}:${KAFKA_CLIENT_PORT}
-      - KAFKA_CLUSTERS_0_PROPERTIES_SECURITY_PROTOCOL=SASL_PLAINTEXT
-      - KAFKA_CLUSTERS_0_PROPERTIES_SASL_MECHANISM=PLAIN
-      - >
-        KAFKA_CLUSTERS_0_PROPERTIES_SASL_JAAS_CONFIG=org.apache.kafka.common.security.plain.PlainLoginModule
-          required
-          username="${KAFKA_CLIENT_USERS}"
-          password="${KAFKA_USER_PASSWORD}";
-    ports:
-      - ${KAFKA_UI_PORT}:${KAFKA_UI_PORT}
 
 networks:
   main:

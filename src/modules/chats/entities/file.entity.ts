@@ -8,6 +8,11 @@ import { ChatEntity } from './chat.entity';
 @Entity({ tableName: 'files' })
 @Index({ properties: ['id'], type: 'HASH' })
 export class FileEntity extends CreatedEntity {
+    constructor(payload: Partial<FileEntity>) {
+        super();
+        Object.assign(this, payload);
+    }
+
     @ApiProperty()
     @Property()
     readonly key!: string;

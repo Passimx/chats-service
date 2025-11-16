@@ -5,7 +5,7 @@ import { ChatEntity } from '../entities/chat.entity';
 import { DataResponse } from '../../../common/swagger/data-response.dto';
 import { EventsEnum } from '../../queue/types/events.enum';
 import { QueueService } from '../../queue/queue.service';
-import { MessageErrorLanguageEnum } from '../types/message-error-language.enum';
+import { MessageErrorEnum } from '../types/message-error.enum';
 import { TopicsEnum } from '../../queue/types/topics.enum';
 import { MessageEntity } from '../entities/message.entity';
 import { ChatsRepository } from '../repositories/chats.repository';
@@ -35,10 +35,10 @@ export class ChatsService {
             chat: chatEntity,
             chatId: chatEntity.id,
             type: MessageTypeEnum.IS_CREATED_CHAT,
-            message: SystemMessageLanguageEnum.create_chat,
+            message: SystemMessageLanguageEnum.CHAT_IS_CREATE,
         });
 
-        if (!messageResponse.success) return new DataResponse<ChatEntity>(MessageErrorLanguageEnum.MESSAGE_NOT_FOUND);
+        if (!messageResponse.success) return new DataResponse<ChatEntity>(MessageErrorEnum.MESSAGE_NOT_FOUND);
 
         const createChat = await this.chatsRepository.findOne({ id: chatEntity.id }, { populate: ['message'] });
 
@@ -65,7 +65,7 @@ export class ChatsService {
     async findChat(id: string): Promise<DataResponse<string | ChatEntity>> {
         const chat = await this.chatsRepository.findChatById(id);
 
-        if (!chat) return new DataResponse(MessageErrorLanguageEnum.CHAT_WITH_ID_NOT_FOUND);
+        if (!chat) return new DataResponse(MessageErrorEnum.CHAT_WITH_ID_NOT_FOUND);
 
         return new DataResponse(chat);
     }
@@ -74,13 +74,20 @@ export class ChatsService {
         const response: ChatEntity[] = [];
         const chatIdsSet = new Set<string>();
 
+        // новые чаты
+        const notReceivedChats = await this.chatsRepository.getNotReceivedChats(socketId);
+        notReceivedChats?.forEach((chat) => {
+            response.push(chat);
+            chatIdsSet.add(chat.id);
+        });
+
         const promises = chats.map(async ({ chatId, lastMessage, maxUsersOnline }) => {
             if (chatIdsSet.has(chatId)) return;
 
             const chat = await this.chatsRepository.findOne(
                 { id: chatId },
                 {
-                    orderBy: { message: { createdAt: 'DESC NULLS LAST' } },
+                    orderBy: { message: { createdAt: 'DESC', files: { createdAt: 'DESC' } } },
                     populate: ['message', 'message.files'],
                 },
             );
@@ -125,7 +132,7 @@ export class ChatsService {
     async getSystemChats(): Promise<DataResponse<string | ChatEntity[]>> {
         const systemChats = await this.chatsRepository.getSystemChats();
 
-        if (!systemChats) return new DataResponse(MessageErrorLanguageEnum.CHAT_WITH_ID_NOT_FOUND);
+        if (!systemChats) return new DataResponse(MessageErrorEnum.CHAT_WITH_ID_NOT_FOUND);
 
         return new DataResponse<ChatEntity[]>(systemChats);
     }

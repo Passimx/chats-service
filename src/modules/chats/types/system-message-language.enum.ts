@@ -1,4 +1,5 @@
 export enum SystemMessageLanguageEnum {
-    create_chat = 'chat_is_create',
-    create_avatar = 'avatar_is_create',
+    CHAT_IS_CREATE = 'chat_is_create',
+    DIALOGUE_IS_CREATE = 'dialogue_is_create',
+    FAVORITE_IS_CREATE = 'favorite_is_create',
 }
