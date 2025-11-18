@@ -34,7 +34,11 @@ export class KeysService {
         return new DataResponse<PublicKeyDto>({ publicKey });
     }
 
-    public async receiveKey(chatId: string): Promise<void> {
-        await this.chatKeysRepository.nativeUpdate({ chatId, received: false }, { received: true });
+    public async receiveKey(chatId: string, publicKeyHash: string): Promise<void> {
+        await this.chatKeysRepository.nativeUpdate({ chatId, publicKeyHash }, { received: true });
+
+        const countNotReceivedKeys = await this.chatKeysRepository.count({ chatId, received: false });
+
+        if (countNotReceivedKeys === 0) await this.chatKeysRepository.nativeDelete({ chatId });
     }
 }

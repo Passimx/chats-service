@@ -62,8 +62,8 @@ export class ChatsService {
         return new DataResponse(chats);
     }
 
-    async findChat(id: string): Promise<DataResponse<string | ChatEntity>> {
-        const chat = await this.chatsRepository.findChatById(id);
+    async findChat(id: string, publicKeyHash: string): Promise<DataResponse<string | ChatEntity>> {
+        const chat = await this.chatsRepository.findChatById(id, publicKeyHash);
 
         if (!chat) return new DataResponse(MessageErrorEnum.CHAT_WITH_ID_NOT_FOUND);
 

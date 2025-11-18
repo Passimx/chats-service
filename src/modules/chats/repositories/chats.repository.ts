@@ -15,7 +15,7 @@ export class ChatsRepository extends SqlEntityRepository<ChatEntity> {
             .leftJoinAndSelect('message.parentMessage', 'parentMessage')
             .leftJoinAndSelect('message.files', 'files')
             .where({ id: { $nin: notFavoriteChatIds } })
-            .andWhere({ title: { $ne: null } })
+            .andWhere({ type: { $in: [ChatTypeEnum.IS_OPEN] } })
             .orderBy({
                 maxUsersOnline: QueryOrder.DESC_NULLS_LAST,
                 message: { createdAt: QueryOrder.DESC_NULLS_LAST },
@@ -35,15 +35,26 @@ export class ChatsRepository extends SqlEntityRepository<ChatEntity> {
         return qb.getResult();
     }
 
-    public async findChatById(id: string): Promise<ChatEntity | null> {
-        return this.createQueryBuilder('chats')
+    public async findChatById(id: string, publicKeyHash: string): Promise<ChatEntity | null> {
+        const qb = this.createQueryBuilder('chats')
             .leftJoinAndSelect('chats.message', 'message', lastMessageCondition)
             .leftJoinAndSelect('message.parentMessage', 'parentMessage')
             .leftJoinAndSelect('parentMessage.files', 'parentMessageFiles')
             .leftJoinAndSelect('message.files', 'files')
             .leftJoinAndSelect('chats.keys', 'keys')
+            .leftJoin('chats.keys', 'userKey')
             .where('chats.id = ?', [id])
-            .getSingleResult();
+            .andWhere({
+                $or: [
+                    { type: { $in: [ChatTypeEnum.IS_OPEN] } },
+                    {
+                        type: { $in: [ChatTypeEnum.IS_DIALOGUE, ChatTypeEnum.IS_FAVORITES] },
+                        'userKey.publicKeyHash': publicKeyHash,
+                    },
+                ],
+            });
+
+        return qb.getSingleResult();
     }
 
     public async getSystemChats(): Promise<string | ChatEntity[]> {

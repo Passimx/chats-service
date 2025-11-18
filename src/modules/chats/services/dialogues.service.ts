@@ -28,7 +28,7 @@ export class DialoguesService {
         let dialogue = await this.chatsRepository.getDialogueByKeys(keys);
 
         if (dialogue) {
-            const response = await this.chatsService.findChat(dialogue.id);
+            const response = await this.chatsService.findChat(dialogue.id, socketId);
             this.queueService.sendMessage(
                 TopicsEnum.JOIN,
                 socketId,
@@ -37,7 +37,7 @@ export class DialoguesService {
             );
             this.queueService.sendMessage(TopicsEnum.EMIT, socketId, EventsEnum.CREATE_DIALOGUE, response);
 
-            return this.chatsService.findChat(dialogue.id);
+            return response;
         }
 
         let message = SystemMessageLanguageEnum.DIALOGUE_IS_CREATE;
@@ -84,7 +84,7 @@ export class DialoguesService {
             await fork.rollback();
         }
 
-        const response = await this.chatsService.findChat(dialogue!.id);
+        const response = await this.chatsService.findChat(dialogue!.id, socketId);
 
         keys.map(({ publicKeyHash }) =>
             this.queueService.sendMessage(

@@ -35,8 +35,11 @@ export class ChatsController {
 
     @Get(':id')
     @ApiData(ChatEntity, true)
-    getChat(@Param('id', ParseUUIDPipe) id: string): Promise<DataResponse<string | ChatEntity>> {
-        return this.chatsService.findChat(id);
+    getChat(
+        @Param('id', ParseUUIDPipe) id: string,
+        @Headers('x-socket-id') socketId: string,
+    ): Promise<DataResponse<string | ChatEntity>> {
+        return this.chatsService.findChat(id, socketId);
     }
 
     @Post('join')
