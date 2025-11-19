@@ -23,7 +23,10 @@ export class KeysService {
 
         if (!publicKeyEntity) return new DataResponse<string>(MessageErrorEnum.PUBLIC_KEY_NOT_FOUND);
 
-        return new DataResponse<PublicKeyDto>({ publicKey: publicKeyEntity.publicKey });
+        return new DataResponse<PublicKeyDto>({
+            publicKey: publicKeyEntity.publicKey,
+            publicKeyHash: publicKeyEntity.publicKeyHash,
+        });
     }
 
     public async keepPubicKey({ publicKey }: KeepPublicKeyDto): Promise<DataResponse<PublicKeyDto | string>> {
@@ -31,7 +34,7 @@ export class KeysService {
 
         await this.publicKeysRepository.insert({ publicKeyHash, publicKey });
 
-        return new DataResponse<PublicKeyDto>({ publicKey });
+        return new DataResponse<PublicKeyDto>({ publicKey, publicKeyHash });
     }
 
     public async receiveKey(chatId: string, publicKeyHash: string): Promise<void> {
