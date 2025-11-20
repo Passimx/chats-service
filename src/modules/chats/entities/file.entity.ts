@@ -45,15 +45,6 @@ export class FileEntity extends CreatedEntity {
     @Property({ type: 'jsonb', nullable: true })
     readonly metadata!: Record<string, any>;
 
-    constructor(payload: Partial<FileEntity>) {
-        super();
-        Object.assign(this, payload);
-    }
-
-    @ApiPropertyOptional()
-    @Property({ nullable: true, type: 'text' })
-    readonly transcriptionVoice?: string;
-
     @ApiPropertyOptional({ type: () => FileEntity })
     @ManyToOne(() => MessageEntity, {
         nullable: true,

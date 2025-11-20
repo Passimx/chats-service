@@ -606,6 +606,259 @@
 					}
 				}
 			}
+		},
+		"/dialogues": {
+			"post": {
+				"operationId": "DialoguesController_createDialogue",
+				"parameters": [
+					{
+						"name": "x-socket-id",
+						"required": true,
+						"in": "header",
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/CreateDialoguesDto"
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"type": "object",
+											"properties": {
+												"success": {
+													"type": "boolean",
+													"example": true
+												},
+												"data": {
+													"$ref": "#/components/schemas/ChatEntity"
+												}
+											},
+											"required": [
+												"success",
+												"data"
+											]
+										},
+										{
+											"type": "object",
+											"properties": {
+												"success": {
+													"type": "boolean",
+													"example": false
+												},
+												"data": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"success",
+												"data"
+											]
+										}
+									]
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Dialogues"
+				]
+			}
+		},
+		"/keys/publicKey": {
+			"get": {
+				"operationId": "KeysController_getPublicKey",
+				"parameters": [
+					{
+						"name": "publicKeyHash",
+						"required": true,
+						"in": "query",
+						"schema": {
+							"maxLength": 128,
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"type": "object",
+											"properties": {
+												"success": {
+													"type": "boolean",
+													"example": true
+												},
+												"data": {
+													"$ref": "#/components/schemas/PublicKeyDto"
+												}
+											},
+											"required": [
+												"success",
+												"data"
+											]
+										},
+										{
+											"type": "object",
+											"properties": {
+												"success": {
+													"type": "boolean",
+													"example": false
+												},
+												"data": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"success",
+												"data"
+											]
+										}
+									]
+								}
+							}
+						}
+					}
+				}
+			},
+			"post": {
+				"operationId": "KeysController_keepPubicKey",
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/KeepPublicKeyDto"
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"type": "object",
+											"properties": {
+												"success": {
+													"type": "boolean",
+													"example": true
+												},
+												"data": {
+													"$ref": "#/components/schemas/PublicKeyDto"
+												}
+											},
+											"required": [
+												"success",
+												"data"
+											]
+										},
+										{
+											"type": "object",
+											"properties": {
+												"success": {
+													"type": "boolean",
+													"example": false
+												},
+												"data": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"success",
+												"data"
+											]
+										}
+									]
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/keys/receiveKey/{chatId}": {
+			"post": {
+				"operationId": "KeysController_receiveKey",
+				"parameters": [
+					{
+						"name": "key",
+						"required": true,
+						"in": "path",
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"type": "object",
+											"properties": {
+												"success": {
+													"type": "boolean",
+													"example": true
+												},
+												"data": {
+													"type": "object"
+												}
+											},
+											"required": [
+												"success",
+												"data"
+											]
+										},
+										{
+											"type": "object",
+											"properties": {
+												"success": {
+													"type": "boolean",
+													"example": false
+												},
+												"data": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"success",
+												"data"
+											]
+										}
+									]
+								}
+							}
+						}
+					}
+				}
+			}
 		}
 	},
 	"info": {
@@ -627,6 +880,42 @@
 	],
 	"components": {
 		"schemas": {
+			"ChatKeyEntity": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"createdAt": {
+						"format": "date-time",
+						"type": "string"
+					},
+					"chatId": {
+						"type": "string"
+					},
+					"publicKeyHash": {
+						"type": "string"
+					},
+					"encryptionKey": {
+						"type": "string"
+					},
+					"received": {
+						"type": "boolean"
+					},
+					"chat": {
+						"$ref": "#/components/schemas/ChatEntity"
+					}
+				},
+				"required": [
+					"id",
+					"createdAt",
+					"chatId",
+					"publicKeyHash",
+					"encryptionKey",
+					"received",
+					"chat"
+				]
+			},
 			"ChatEntity": {
 				"type": "object",
 				"properties": {
@@ -654,6 +943,13 @@
 						"items": {
 							"$ref": "#/components/schemas/MessageEntity"
 						}
+					},
+					"keys": {
+						"nullable": true,
+						"type": "array",
+						"items": {
+							"$ref": "#/components/schemas/ChatKeyEntity"
+						}
 					}
 				},
 				"required": [
@@ -662,7 +958,8 @@
 					"title",
 					"countMessages",
 					"type",
-					"maxUsersOnline"
+					"maxUsersOnline",
+					"keys"
 				]
 			},
 			"FileEntity": {
@@ -698,9 +995,6 @@
 					},
 					"metadata": {
 						"type": "object"
-					},
-					"transcriptionVoice": {
-						"type": "string"
 					},
 					"message": {
 						"$ref": "#/components/schemas/FileEntity"
@@ -935,6 +1229,7 @@
 						"type": "string",
 						"enum": [
 							"create_chat",
+							"create_dialogue",
 							"create_message",
 							"join_chat",
 							"leave_chat",
@@ -950,6 +1245,60 @@
 					"to",
 					"event",
 					"data"
+				]
+			},
+			"CreateDialogueKeyDto": {
+				"type": "object",
+				"properties": {
+					"publicKeyHash": {
+						"type": "string",
+						"description": "Публичный ключ"
+					},
+					"encryptionKey": {
+						"type": "string",
+						"description": "Зашифрованный общий ключ шифрования для чата"
+					}
+				},
+				"required": [
+					"publicKeyHash",
+					"encryptionKey"
+				]
+			},
+			"CreateDialoguesDto": {
+				"type": "object",
+				"properties": {
+					"keys": {
+						"type": "array",
+						"items": {
+							"$ref": "#/components/schemas/CreateDialogueKeyDto"
+						}
+					}
+				},
+				"required": [
+					"keys"
+				]
+			},
+			"PublicKeyDto": {
+				"type": "object",
+				"properties": {
+					"publicKey": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"publicKey"
+				]
+			},
+			"KeepPublicKeyDto": {
+				"type": "object",
+				"properties": {
+					"publicKey": {
+						"type": "string",
+						"maxLength": 4096
+					}
+				},
+				"required": [
+					"publicKey"
 				]
 			}
 		}

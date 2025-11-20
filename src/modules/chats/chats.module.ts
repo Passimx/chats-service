@@ -5,7 +5,6 @@ import { ChatsService } from './services/chats.service';
 import { DialoguesService } from './services/dialogues.service';
 import { ChatEntity } from './entities/chat.entity';
 import { MessageEntity } from './entities/message.entity';
-import { ChatKeyEntity } from './entities/chat-key.entity';
 import { FileEntity } from './entities/file.entity';
 import { ChatsController } from './controllers/chats.controller';
 import { MessagesController } from './controllers/messages.controller';
@@ -15,9 +14,8 @@ import { MessagesService } from './services/messages.service';
 import { TranscriptionService } from './services/transcription.service';
 
 @Module({
-    imports: [MikroOrmModule.forFeature([ChatEntity, MessageEntity, FileEntity, ChatKeyEntity]), QueueModule],
+    imports: [MikroOrmModule.forFeature([ChatEntity, MessageEntity, FileEntity]), QueueModule],
     providers: [ChatsService, MessagesService, TranscriptionService, DialoguesService],
     controllers: [ChatsController, MessagesController, TranscriptionController, DialoguesController],
 })
 export class ChatsModule {}
-
