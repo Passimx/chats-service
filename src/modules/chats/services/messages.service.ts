@@ -21,6 +21,8 @@ export class MessagesService {
         @InjectRepository(MessageEntity)
         private readonly messageRepository: EntityRepository<MessageEntity>,
         private readonly queueService: QueueService,
+        @InjectRepository(ChatEntity)
+        private readonly chatRepository: EntityRepository<ChatEntity>,
         private readonly em: EntityManager,
     ) {}
 
@@ -126,19 +128,23 @@ export class MessagesService {
         return new DataResponse(getMessageNotSearch);
     }
 
-    private sendTranscriptionRequests(files: CreateFileDto[], chatId: string): void {
+    async sendTranscriptionRequests(files: CreateFileDto[], chatId: string) {
         const voiceFiles = files.filter((file) => file.fileType === FileEnum.IS_VOICE);
 
-        for (const file of voiceFiles) {
-            this.queueService.sendMessage(
-                TopicsEnum.AUDIO_TRANSCRIPTION_REQUEST,
-                chatId,
-                EventsEnum.TRANSCRIBE_AUDIO,
-                new DataResponse({
-                    fileId: file.key,
-                    chatId: chatId,
-                }),
-            );
+        const chat = await this.chatRepository.findOne(chatId);
+
+        if (chat?.type === ChatTypeEnum.IS_OPEN) {
+            for (const file of voiceFiles) {
+                this.queueService.sendMessage(
+                    TopicsEnum.AUDIO_TRANSCRIPTION_REQUEST,
+                    chatId,
+                    EventsEnum.TRANSCRIBE_AUDIO,
+                    new DataResponse({
+                        fileId: file.key,
+                        chatId: chatId,
+                    }),
+                );
+            }
         }
     }
 }

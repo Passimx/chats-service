@@ -12,10 +12,6 @@ export class TranscriptionService {
     ) {}
 
     async addTranscriptionVoice(fileId: string, transcriptionVoice: string): Promise<void> {
-        if (!fileId) {
-            return;
-        }
-
         const file = await this.fileRepository.findOne({ key: fileId });
 
         if (!file || file.metadata?.transcriptionVoice) {
@@ -28,7 +24,7 @@ export class TranscriptionService {
         );
     }
 
-    async getTranscriptionService(id: string): Promise<DataResponse<{ transcription: string } | string>> {
+    async getTranscriptionVoice(id: string): Promise<DataResponse<{ transcription: string } | string>> {
         const file = await this.fileRepository.findOne({ key: id });
 
         if (!file || !file.metadata?.transcriptionVoice) {

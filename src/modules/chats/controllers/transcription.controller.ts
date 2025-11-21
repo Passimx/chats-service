@@ -18,6 +18,6 @@ export class TranscriptionController {
 
     @Get(':id')
     getTranscriptionVoice(@Param('id') id: string): Promise<DataResponse<{ transcription: string } | string>> {
-        return this.transcriptionService.getTranscriptionService(id);
+        return this.transcriptionService.getTranscriptionVoice(id);
     }
 }
