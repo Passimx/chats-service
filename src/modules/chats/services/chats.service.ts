@@ -14,6 +14,8 @@ import { CreateOpenChatDto } from '../dto/requests/create-open-chat.dto';
 import { ChatDto } from '../dto/requests/post-favorites-chat.dto';
 import { MessageTypeEnum } from '../types/message-type.enum';
 import { SystemMessageLanguageEnum } from '../types/system-message-language.enum';
+import { ChatTypeEnum } from '../types/chat-type.enum';
+import { Mutable } from '../../../common/types/mutable.type';
 import { MessagesService } from './messages.service';
 
 @Injectable()
@@ -26,10 +28,11 @@ export class ChatsService {
         readonly chatsRepository: ChatsRepository,
     ) {}
 
-    async createOpenChat(socketId: string, { title }: CreateOpenChatDto): Promise<DataResponse<ChatEntity>> {
+    async createChat(socketId: string, { title }: CreateOpenChatDto): Promise<DataResponse<ChatEntity>> {
         const chatEntity = new ChatEntity({ title });
 
         await this.chatsRepository.insert(chatEntity);
+        await this.chatsRepository.nativeUpdate({ id: chatEntity.id }, { name: chatEntity.id });
 
         const messageResponse = await this.messagesService.createMessage({
             chat: chatEntity,
@@ -56,10 +59,12 @@ export class ChatsService {
         return response;
     }
 
-    async getOpenChats(query: QueryGetChatsDto): Promise<DataResponse<ChatEntity[]>> {
-        const chats = await this.chatsRepository.findChats(query);
+    async getChats(socketId: string, query: QueryGetChatsDto): Promise<DataResponse<ChatEntity[]>> {
+        const chats = await this.chatsRepository.findChats(socketId, query);
 
-        return new DataResponse(chats);
+        const data = chats.map((chat) => this.prepareDialogue(socketId, chat));
+
+        return new DataResponse(data);
     }
 
     async findChat(id: string, publicKeyHash: string): Promise<DataResponse<string | ChatEntity>> {
@@ -67,7 +72,9 @@ export class ChatsService {
 
         if (!chat) return new DataResponse(MessageErrorEnum.CHAT_WITH_ID_NOT_FOUND);
 
-        return new DataResponse(chat);
+        const data = this.prepareDialogue(publicKeyHash, chat);
+
+        return new DataResponse(data);
     }
 
     async join(chats: ChatDto[], socketId: string): Promise<DataResponse<string | ChatEntity[]>> {
@@ -77,25 +84,19 @@ export class ChatsService {
         // новые чаты
         const notReceivedChats = await this.chatsRepository.getNotReceivedChats(socketId);
         notReceivedChats?.forEach((chat) => {
-            response.push(chat);
+            response.push(this.prepareDialogue(socketId, chat));
             chatIdsSet.add(chat.id);
         });
 
         const promises = chats.map(async ({ chatId, lastMessage, maxUsersOnline }) => {
             if (chatIdsSet.has(chatId)) return;
 
-            const chat = await this.chatsRepository.findOne(
-                { id: chatId },
-                {
-                    orderBy: { message: { createdAt: 'DESC', files: { createdAt: 'DESC' } } },
-                    populate: ['message', 'message.files'],
-                },
-            );
+            const chat = await this.chatsRepository.findChatById(chatId);
 
             if (chat) chatIdsSet.add(chat.id);
 
             if (chat && (chat.countMessages > lastMessage || chat.maxUsersOnline > maxUsersOnline)) {
-                response.push(chat);
+                response.push(this.prepareDialogue(socketId, chat));
             }
         });
 
@@ -151,5 +152,19 @@ export class ChatsService {
             EventsEnum.GET_SYSTEM_CHAT,
             new DataResponse(chatIds),
         );
+    }
+
+    public prepareDialogue(socketId: string, chat: ChatEntity): ChatEntity {
+        if (chat.type !== ChatTypeEnum.IS_DIALOGUE) return chat;
+
+        const chatKey = chat.keys.find((key) => key.publicKeyHash !== socketId);
+
+        if (!chatKey) return chat;
+
+        const payload: Mutable<ChatEntity> = chat;
+
+        payload.title = chatKey.publicKey.name;
+
+        return payload;
     }
 }

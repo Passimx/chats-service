@@ -8,14 +8,21 @@ import { CreateDialogueKeyDto } from '../dto/requests/create-dialogues.dto';
 const lastMessageCondition = { 'chats.count_messages': raw('"message".number') };
 
 export class ChatsRepository extends SqlEntityRepository<ChatEntity> {
-    public findChats({ title, limit, offset, notFavoriteChatIds }: QueryGetChatsDto): Promise<ChatEntity[]> {
+    public findChats(
+        publicKeyHash: string,
+        { search, limit, offset, notFavoriteChatIds }: QueryGetChatsDto,
+    ): Promise<ChatEntity[]> {
         const qb = this.createQueryBuilder('chats')
-
             .leftJoinAndSelect('chats.message', 'message', lastMessageCondition)
             .leftJoinAndSelect('message.parentMessage', 'parentMessage')
             .leftJoinAndSelect('message.files', 'files')
+            .leftJoinAndSelect('chats.keys', 'keys', { 'chats.type': ChatTypeEnum.IS_DIALOGUE })
+            .leftJoinAndSelect('keys.publicKey', 'publicKey')
+            .leftJoin('chats.keys', 'userKey', { 'userKey.publicKeyHash': publicKeyHash })
             .where({ id: { $nin: notFavoriteChatIds } })
-            .andWhere({ type: { $in: [ChatTypeEnum.IS_OPEN] } })
+            .andWhere({
+                $or: [{ 'chats.type': { $in: [ChatTypeEnum.IS_OPEN] } }, { 'userKey.publicKeyHash': publicKeyHash }],
+            })
             .orderBy({
                 maxUsersOnline: QueryOrder.DESC_NULLS_LAST,
                 message: { createdAt: QueryOrder.DESC_NULLS_LAST },
@@ -23,32 +30,36 @@ export class ChatsRepository extends SqlEntityRepository<ChatEntity> {
             .limit(limit)
             .offset(offset);
 
-        if (title?.length) {
-            const queryWords = title.toLowerCase().split(' ');
+        if (search?.length) {
+            const queryWords = search.toLowerCase().split(' ');
             const arrayWords = queryWords.map((word) => ({
                 $or: [{ title: { $ilike: `${word}%` } }, { title: { $ilike: `% ${word}%` } }],
             }));
 
-            qb.andWhere({ $and: arrayWords });
+            qb.andWhere({
+                $or: [{ 'publicKey.name': { $ilike: `%${search}%` } }, { 'chats.name': search }, arrayWords],
+            });
         }
 
         return qb.getResult();
     }
 
-    public async findChatById(id: string, publicKeyHash: string): Promise<ChatEntity | null> {
+    public async findChatById(id: string, publicKeyHash?: string): Promise<ChatEntity | null> {
         const qb = this.createQueryBuilder('chats')
             .leftJoinAndSelect('chats.message', 'message', lastMessageCondition)
             .leftJoinAndSelect('message.parentMessage', 'parentMessage')
             .leftJoinAndSelect('parentMessage.files', 'parentMessageFiles')
             .leftJoinAndSelect('message.files', 'files')
             .leftJoinAndSelect('chats.keys', 'keys')
-            .leftJoin('chats.keys', 'userKey')
-            .where('chats.id = ?', [id])
-            .andWhere({
+            .leftJoinAndSelect('keys.publicKey', 'publicKey')
+            .leftJoin('chats.keys', 'userKey', { 'userKey.publicKeyHash': publicKeyHash })
+            .where('chats.id = ?', [id]);
+
+        if (publicKeyHash)
+            qb.andWhere({
                 $or: [
-                    { type: { $in: [ChatTypeEnum.IS_OPEN] } },
+                    { type: { $nin: [ChatTypeEnum.IS_DIALOGUE, ChatTypeEnum.IS_FAVORITES] } },
                     {
-                        type: { $in: [ChatTypeEnum.IS_DIALOGUE, ChatTypeEnum.IS_FAVORITES] },
                         'userKey.publicKeyHash': publicKeyHash,
                     },
                 ],
@@ -89,6 +100,7 @@ export class ChatsRepository extends SqlEntityRepository<ChatEntity> {
             .innerJoinAndSelect('chats.message', 'message', lastMessageCondition)
             .leftJoinAndSelect('message.files', 'files')
             .leftJoinAndSelect('chats.keys', 'keys')
+            .leftJoinAndSelect('keys.publicKey', 'publicKey')
             .innerJoin('chats.keys', 'key', { 'key.public_key_hash': publicKeyHash, 'key.received': false })
             .orderBy({
                 'files.createdAt': QueryOrder.ASC_NULLS_LAST,

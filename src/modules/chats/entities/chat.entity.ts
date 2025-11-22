@@ -8,11 +8,16 @@ import { MessageEntity } from './message.entity';
 
 @Entity({ tableName: 'chats', repository: () => ChatsRepository })
 @Index({ type: 'GIN', properties: 'title' })
+@Index({ type: 'hash', properties: 'name' })
 export class ChatEntity extends CreatedEntity {
     constructor(payload: Partial<ChatEntity>) {
         super();
         Object.assign(this, payload);
     }
+
+    @ApiProperty({ nullable: true, maxLength: 64 })
+    @Property({ length: 64, nullable: true })
+    readonly name!: string;
 
     @ApiProperty()
     @Property({ nullable: true })

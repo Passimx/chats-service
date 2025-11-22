@@ -9,6 +9,10 @@ export class PublicKeyEntity {
     readonly publicKeyHash!: string;
 
     @ApiProperty()
+    @Property({ length: 128 })
+    readonly name!: string;
+
+    @ApiProperty()
     @Property({ length: 4096 })
     readonly publicKey!: string;
 }

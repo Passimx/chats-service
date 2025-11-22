@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Headers, Param, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Headers, Param, Patch, Post, Query } from '@nestjs/common';
 import { DataResponse } from '../../common/swagger/data-response.dto';
 import { ApiData } from '../../common/swagger/api-data.decorator';
 import { ApiDataEmpty } from '../../common/swagger/api-data-empty.decorator';
@@ -6,6 +6,7 @@ import { KeysService } from './keys.service';
 import { PublicKeyDto } from './dto/responses/public-key.dto';
 import { GetPublicKeyDto } from './dto/requests/get-public-key.dto';
 import { KeepPublicKeyDto } from './dto/requests/keep-public-key.dto';
+import { UpdatePublicKey } from './dto/requests/update-public-key';
 
 @Controller('keys')
 export class KeysController {
@@ -21,6 +22,12 @@ export class KeysController {
     @ApiData(PublicKeyDto)
     keepPubicKey(@Body() body: KeepPublicKeyDto): Promise<DataResponse<PublicKeyDto | string>> {
         return this.keysService.keepPubicKey(body);
+    }
+
+    @Patch('publicKey')
+    @ApiData(PublicKeyDto)
+    updatePublicKey(@Headers('x-socket-id') socketId: string, @Body() body: UpdatePublicKey) {
+        return this.keysService.updatePubicKey(socketId, body);
     }
 
     @Post('receiveKey/:chatId')

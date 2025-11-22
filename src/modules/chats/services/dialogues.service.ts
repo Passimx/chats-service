@@ -11,6 +11,7 @@ import { SystemMessageLanguageEnum } from '../types/system-message-language.enum
 import { ChatKeyEntity } from '../../keys/entities/chat-key.entity';
 import { TopicsEnum } from '../../queue/types/topics.enum';
 import { EventsEnum } from '../../queue/types/events.enum';
+import { MessageErrorEnum } from '../types/message-error.enum';
 import { ChatsService } from './chats.service';
 import { MessagesService } from './messages.service';
 
@@ -84,7 +85,9 @@ export class DialoguesService {
             await fork.rollback();
         }
 
-        const response = await this.chatsService.findChat(dialogue!.id, socketId);
+        const chat = await this.chatsRepository.findChatById(dialogue!.id);
+
+        if (!chat) return new DataResponse(MessageErrorEnum.CHAT_NOT_FOUND);
 
         keys.map(({ publicKeyHash }) =>
             this.queueService.sendMessage(
@@ -95,10 +98,12 @@ export class DialoguesService {
             ),
         );
 
-        keys.map(({ publicKeyHash }) =>
-            this.queueService.sendMessage(TopicsEnum.EMIT, publicKeyHash, EventsEnum.CREATE_DIALOGUE, response),
-        );
+        keys.map(({ publicKeyHash }) => {
+            const data = this.chatsService.prepareDialogue(publicKeyHash, chat);
+            const response = new DataResponse<ChatEntity>(data);
+            this.queueService.sendMessage(TopicsEnum.EMIT, publicKeyHash, EventsEnum.CREATE_DIALOGUE, response);
+        });
 
-        return response;
+        return new DataResponse<ChatEntity>(this.chatsService.prepareDialogue(socketId, chat));
     }
 }
