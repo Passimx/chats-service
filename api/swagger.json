@@ -587,6 +587,26 @@
 				]
 			}
 		},
+		"/transcription/{id}": {
+			"get": {
+				"operationId": "TranscriptionController_getTranscriptionVoice",
+				"parameters": [
+					{
+						"name": "id",
+						"required": true,
+						"in": "path",
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": ""
+					}
+				}
+			}
+		},
 		"/dialogues": {
 			"post": {
 				"operationId": "DialoguesController_createDialogue",
@@ -658,16 +678,18 @@
 				"tags": [
 					"Dialogues"
 				]
-			},
+			}
+		},
+		"/keys/publicKey": {
 			"get": {
-				"operationId": "DialoguesController_getDialogues",
+				"operationId": "KeysController_getPublicKey",
 				"parameters": [
 					{
-						"name": "public_key",
+						"name": "publicKeyHash",
 						"required": true,
 						"in": "query",
-						"description": "Public key of the user",
 						"schema": {
+							"maxLength": 128,
 							"type": "string"
 						}
 					}
@@ -687,10 +709,7 @@
 													"example": true
 												},
 												"data": {
-													"type": "array",
-													"items": {
-														"$ref": "#/components/schemas/String"
-													}
+													"$ref": "#/components/schemas/PublicKeyDto"
 												}
 											},
 											"required": [
@@ -719,10 +738,126 @@
 							}
 						}
 					}
+				}
+			},
+			"post": {
+				"operationId": "KeysController_keepPubicKey",
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/KeepPublicKeyDto"
+							}
+						}
+					}
 				},
-				"tags": [
-					"Dialogues"
-				]
+				"responses": {
+					"200": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"type": "object",
+											"properties": {
+												"success": {
+													"type": "boolean",
+													"example": true
+												},
+												"data": {
+													"$ref": "#/components/schemas/PublicKeyDto"
+												}
+											},
+											"required": [
+												"success",
+												"data"
+											]
+										},
+										{
+											"type": "object",
+											"properties": {
+												"success": {
+													"type": "boolean",
+													"example": false
+												},
+												"data": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"success",
+												"data"
+											]
+										}
+									]
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/keys/receiveKey/{chatId}": {
+			"post": {
+				"operationId": "KeysController_receiveKey",
+				"parameters": [
+					{
+						"name": "key",
+						"required": true,
+						"in": "path",
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"type": "object",
+											"properties": {
+												"success": {
+													"type": "boolean",
+													"example": true
+												},
+												"data": {
+													"type": "object"
+												}
+											},
+											"required": [
+												"success",
+												"data"
+											]
+										},
+										{
+											"type": "object",
+											"properties": {
+												"success": {
+													"type": "boolean",
+													"example": false
+												},
+												"data": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"success",
+												"data"
+											]
+										}
+									]
+								}
+							}
+						}
+					}
+				}
 			}
 		}
 	},
@@ -745,6 +880,42 @@
 	],
 	"components": {
 		"schemas": {
+			"ChatKeyEntity": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"createdAt": {
+						"format": "date-time",
+						"type": "string"
+					},
+					"chatId": {
+						"type": "string"
+					},
+					"publicKeyHash": {
+						"type": "string"
+					},
+					"encryptionKey": {
+						"type": "string"
+					},
+					"received": {
+						"type": "boolean"
+					},
+					"chat": {
+						"$ref": "#/components/schemas/ChatEntity"
+					}
+				},
+				"required": [
+					"id",
+					"createdAt",
+					"chatId",
+					"publicKeyHash",
+					"encryptionKey",
+					"received",
+					"chat"
+				]
+			},
 			"ChatEntity": {
 				"type": "object",
 				"properties": {
@@ -772,6 +943,13 @@
 						"items": {
 							"$ref": "#/components/schemas/MessageEntity"
 						}
+					},
+					"keys": {
+						"nullable": true,
+						"type": "array",
+						"items": {
+							"$ref": "#/components/schemas/ChatKeyEntity"
+						}
 					}
 				},
 				"required": [
@@ -780,7 +958,8 @@
 					"title",
 					"countMessages",
 					"type",
-					"maxUsersOnline"
+					"maxUsersOnline",
+					"keys"
 				]
 			},
 			"FileEntity": {
@@ -1025,31 +1204,102 @@
 					"chatId"
 				]
 			},
-			"CreateDialoguesDto": {
+			"DataResponse": {
 				"type": "object",
 				"properties": {
-					"your_public_key": {
-						"type": "string",
-						"description": "Свой публичный ключ"
+					"success": {
+						"type": "boolean"
 					},
-					"his_public_key": {
-						"type": "string",
-						"description": "Публичный ключ опанента"
-					},
-					"encryption_key": {
-						"type": "string",
-						"description": "Общий ключ шифрования"
+					"data": {
+						"type": "object"
 					}
 				},
 				"required": [
-					"your_public_key",
-					"his_public_key",
-					"encryption_key"
+					"success",
+					"data"
 				]
 			},
-			"String": {
+			"MessageDto": {
 				"type": "object",
-				"properties": {}
+				"properties": {
+					"to": {
+						"type": "string"
+					},
+					"event": {
+						"type": "string",
+						"enum": [
+							"create_chat",
+							"create_dialogue",
+							"create_message",
+							"join_chat",
+							"leave_chat",
+							"get_system_chat",
+							"transcribe_audio"
+						]
+					},
+					"data": {
+						"$ref": "#/components/schemas/DataResponse"
+					}
+				},
+				"required": [
+					"to",
+					"event",
+					"data"
+				]
+			},
+			"CreateDialogueKeyDto": {
+				"type": "object",
+				"properties": {
+					"publicKeyHash": {
+						"type": "string",
+						"description": "Публичный ключ"
+					},
+					"encryptionKey": {
+						"type": "string",
+						"description": "Зашифрованный общий ключ шифрования для чата"
+					}
+				},
+				"required": [
+					"publicKeyHash",
+					"encryptionKey"
+				]
+			},
+			"CreateDialoguesDto": {
+				"type": "object",
+				"properties": {
+					"keys": {
+						"type": "array",
+						"items": {
+							"$ref": "#/components/schemas/CreateDialogueKeyDto"
+						}
+					}
+				},
+				"required": [
+					"keys"
+				]
+			},
+			"PublicKeyDto": {
+				"type": "object",
+				"properties": {
+					"publicKey": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"publicKey"
+				]
+			},
+			"KeepPublicKeyDto": {
+				"type": "object",
+				"properties": {
+					"publicKey": {
+						"type": "string",
+						"maxLength": 4096
+					}
+				},
+				"required": [
+					"publicKey"
+				]
 			}
 		}
 	}

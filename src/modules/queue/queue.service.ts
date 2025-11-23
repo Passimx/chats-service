@@ -18,7 +18,9 @@ export class QueueService {
 
         const client = this.kafkaClient.createClient<Kafka>();
 
-        this.producer = client.producer();
+        this.producer = client.producer({
+            allowAutoTopicCreation: true,
+        });
 
         this.producer.connect().then(() => (this.isConnected = true));
     }

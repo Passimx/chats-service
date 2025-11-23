@@ -11,6 +11,7 @@ import { MessageErrorEnum } from '../types/message-error.enum';
 import { TopicsEnum } from '../../queue/types/topics.enum';
 import { ChatTypeEnum } from '../types/chat-type.enum';
 import { FileEntity } from '../entities/file.entity';
+import { FileEnum } from '../types/file.enum';
 import { logger } from '../../../common/logger/logger';
 import { CreateFileDto } from '../dto/requests/create-file.dto';
 
@@ -20,6 +21,8 @@ export class MessagesService {
         @InjectRepository(MessageEntity)
         private readonly messageRepository: EntityRepository<MessageEntity>,
         private readonly queueService: QueueService,
+        @InjectRepository(ChatEntity)
+        private readonly chatRepository: EntityRepository<ChatEntity>,
         private readonly em: EntityManager,
     ) {}
 
@@ -98,6 +101,11 @@ export class MessagesService {
 
             this.queueService.sendMessage(TopicsEnum.EMIT, String(chatId), EventsEnum.CREATE_MESSAGE, response);
 
+            // Отправляем запросы на транскрипцию для голосовых файлов
+            if (files?.length && chatId) {
+                this.sendTranscriptionRequests(files, chatId);
+            }
+
             return response;
         } catch (e) {
             logger.error(e);
@@ -118,5 +126,25 @@ export class MessagesService {
         );
 
         return new DataResponse(getMessageNotSearch);
+    }
+
+    async sendTranscriptionRequests(files: CreateFileDto[], chatId: string) {
+        const voiceFiles = files.filter((file) => file.fileType === FileEnum.IS_VOICE);
+
+        const chat = await this.chatRepository.findOne(chatId);
+
+        if (chat?.type === ChatTypeEnum.IS_OPEN) {
+            for (const file of voiceFiles) {
+                this.queueService.sendMessage(
+                    TopicsEnum.AUDIO_TRANSCRIPTION_REQUEST,
+                    chatId,
+                    EventsEnum.TRANSCRIBE_AUDIO,
+                    new DataResponse({
+                        fileId: file.key,
+                        chatId: chatId,
+                    }),
+                );
+            }
+        }
     }
 }
