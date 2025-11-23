@@ -15,7 +15,7 @@ export class KeysController {
     @Get('publicKey')
     @ApiData(PublicKeyDto)
     getPublicKey(@Query() query: GetPublicKeyDto): Promise<DataResponse<PublicKeyDto | string>> {
-        return this.keysService.getPublicKey(query.publicKeyHash);
+        return this.keysService.getPublicKey(query.name);
     }
 
     @Post('publicKey')

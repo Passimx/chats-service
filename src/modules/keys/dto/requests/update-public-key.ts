@@ -1,11 +1,9 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator';
+import { IsObject, IsOptional } from 'class-validator';
 
 export class UpdatePublicKey {
-    @ApiPropertyOptional({ maxLength: 32 })
+    @ApiPropertyOptional({ type: 'object' })
     @IsOptional()
-    @IsString()
-    @IsNotEmpty()
-    @MaxLength(32)
-    readonly name?: string;
+    @IsObject()
+    readonly metadata?: Record<string, any>;
 }

@@ -29,7 +29,7 @@ export class DialoguesService {
         let dialogue = await this.chatsRepository.getDialogueByKeys(keys);
 
         if (dialogue) {
-            const response = await this.chatsService.findChat(dialogue.id, socketId);
+            const response = await this.chatsService.findChatByName(dialogue.name!, socketId);
             this.queueService.sendMessage(
                 TopicsEnum.JOIN,
                 socketId,
@@ -48,19 +48,24 @@ export class DialoguesService {
         try {
             let chatType: ChatTypeEnum = ChatTypeEnum.IS_DIALOGUE;
             let title = undefined;
+            let name = undefined;
 
             if (keys.length === 1 || keys[0].publicKeyHash === keys[1].publicKeyHash) {
                 chatType = ChatTypeEnum.IS_FAVORITES;
                 title = 'favorites';
                 message = SystemMessageLanguageEnum.FAVORITE_IS_CREATE;
+                name = socketId;
             }
 
             const chatEntity = new ChatEntity({
                 type: chatType,
                 title,
+                name,
             } as ChatEntity);
 
             const chatId = await fork.insert(ChatEntity, chatEntity);
+
+            if (!name) await fork.nativeUpdate(ChatEntity, { id: chatId }, { name: chatId });
 
             await fork.insertMany(
                 ChatKeyEntity,
@@ -85,7 +90,7 @@ export class DialoguesService {
             await fork.rollback();
         }
 
-        const chat = await this.chatsRepository.findChatById(dialogue!.id);
+        const chat = await this.chatsRepository.findChatByName(dialogue!.name!);
 
         if (!chat) return new DataResponse(MessageErrorEnum.CHAT_NOT_FOUND);
 
@@ -99,8 +104,7 @@ export class DialoguesService {
         );
 
         keys.map(({ publicKeyHash }) => {
-            const data = this.chatsService.prepareDialogue(publicKeyHash, chat);
-            const response = new DataResponse<ChatEntity>(data);
+            const response = new DataResponse<ChatEntity>(this.chatsService.prepareDialogue(publicKeyHash, chat));
             this.queueService.sendMessage(TopicsEnum.EMIT, publicKeyHash, EventsEnum.CREATE_DIALOGUE, response);
         });
 

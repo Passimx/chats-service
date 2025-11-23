@@ -9,5 +9,6 @@ import { ChatKeyEntity } from './entities/chat-key.entity';
     imports: [MikroOrmModule.forFeature([PublicKeyEntity, ChatKeyEntity])],
     controllers: [KeysController],
     providers: [KeysService],
+    exports: [MikroOrmModule],
 })
 export class KeysModule {}

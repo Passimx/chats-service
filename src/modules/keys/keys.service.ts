@@ -19,8 +19,8 @@ export class KeysService {
         private readonly chatKeysRepository: EntityRepository<ChatKeyEntity>,
     ) {}
 
-    public async getPublicKey(publicKeyHash: string): Promise<DataResponse<PublicKeyDto | string>> {
-        const publicKeyEntity = await this.publicKeysRepository.findOne({ publicKeyHash });
+    public async getPublicKey(name: string): Promise<DataResponse<PublicKeyDto | string>> {
+        const publicKeyEntity = await this.publicKeysRepository.findOne({ name });
 
         if (!publicKeyEntity) return new DataResponse<string>(MessageErrorEnum.PUBLIC_KEY_NOT_FOUND);
 
@@ -29,7 +29,12 @@ export class KeysService {
 
     public async keepPubicKey(data: KeepPublicKeyDto): Promise<DataResponse<PublicKeyDto | string>> {
         const publicKeyHash = CryptoUtils.getHash(data.publicKey);
-        await this.publicKeysRepository.insert({ publicKeyHash, name: publicKeyHash, publicKey: data.publicKey });
+        await this.publicKeysRepository.insert({
+            publicKeyHash,
+            name: publicKeyHash,
+            publicKey: data.publicKey,
+            metadata: data.metadata,
+        });
 
         return this.getPublicKey(publicKeyHash);
     }

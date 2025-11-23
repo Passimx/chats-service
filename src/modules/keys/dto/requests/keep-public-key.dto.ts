@@ -1,5 +1,6 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString, MaxLength } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsNotEmpty, IsObject, IsOptional, IsString, MaxLength } from 'class-validator';
+import { PublicKeyMetadataType } from '../../types/public-key-metadata.type';
 
 export class KeepPublicKeyDto {
     @ApiProperty({ maxLength: 4096 })
@@ -7,4 +8,9 @@ export class KeepPublicKeyDto {
     @IsNotEmpty()
     @MaxLength(4096)
     readonly publicKey!: string;
+
+    @ApiPropertyOptional({ type: 'object' })
+    @IsOptional()
+    @IsObject()
+    readonly metadata!: PublicKeyMetadataType;
 }

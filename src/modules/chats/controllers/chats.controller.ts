@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Headers, Param, ParseUUIDPipe, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Headers, Param, Post, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { MessagePattern } from '@nestjs/microservices';
 import { ChatsService } from '../services/chats.service';
@@ -36,13 +36,13 @@ export class ChatsController {
         return this.chatsService.getChats(socketId, query);
     }
 
-    @Get(':id')
+    @Get(':name')
     @ApiData(ChatEntity, true)
-    getChat(
-        @Param('id', ParseUUIDPipe) id: string,
+    getChatByName(
+        @Param('name') name: string,
         @Headers('x-socket-id') socketId: string,
     ): Promise<DataResponse<string | ChatEntity>> {
-        return this.chatsService.findChat(id, socketId);
+        return this.chatsService.findChatByName(name, socketId);
     }
 
     @Post('join')

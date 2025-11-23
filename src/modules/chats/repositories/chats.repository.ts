@@ -16,12 +16,15 @@ export class ChatsRepository extends SqlEntityRepository<ChatEntity> {
             .leftJoinAndSelect('chats.message', 'message', lastMessageCondition)
             .leftJoinAndSelect('message.parentMessage', 'parentMessage')
             .leftJoinAndSelect('message.files', 'files')
-            .leftJoinAndSelect('chats.keys', 'keys', { 'chats.type': ChatTypeEnum.IS_DIALOGUE })
+            .leftJoinAndSelect('chats.keys', 'keys')
             .leftJoinAndSelect('keys.publicKey', 'publicKey')
             .leftJoin('chats.keys', 'userKey', { 'userKey.publicKeyHash': publicKeyHash })
             .where({ id: { $nin: notFavoriteChatIds } })
             .andWhere({
-                $or: [{ 'chats.type': { $in: [ChatTypeEnum.IS_OPEN] } }, { 'userKey.publicKeyHash': publicKeyHash }],
+                $or: [
+                    { 'chats.type': { $in: [ChatTypeEnum.IS_OPEN, ChatTypeEnum.IS_SYSTEM] } },
+                    { 'userKey.publicKeyHash': publicKeyHash },
+                ],
             })
             .orderBy({
                 maxUsersOnline: QueryOrder.DESC_NULLS_LAST,
@@ -35,16 +38,23 @@ export class ChatsRepository extends SqlEntityRepository<ChatEntity> {
             const arrayWords = queryWords.map((word) => ({
                 $or: [{ title: { $ilike: `${word}%` } }, { title: { $ilike: `% ${word}%` } }],
             }));
-
             qb.andWhere({
-                $or: [{ 'publicKey.name': { $ilike: `%${search}%` } }, { 'chats.name': search }, arrayWords],
+                $or: [
+                    arrayWords,
+                    { 'chats.name': search },
+                    {
+                        'publicKey.name': search,
+                        'chats.type': ChatTypeEnum.IS_DIALOGUE,
+                        'publicKey.publicKeyHash': { $ne: publicKeyHash },
+                    },
+                ],
             });
         }
 
         return qb.getResult();
     }
 
-    public async findChatById(id: string, publicKeyHash?: string): Promise<ChatEntity | null> {
+    public async findChatByName(name: string, publicKeyHash?: string): Promise<ChatEntity | null> {
         const qb = this.createQueryBuilder('chats')
             .leftJoinAndSelect('chats.message', 'message', lastMessageCondition)
             .leftJoinAndSelect('message.parentMessage', 'parentMessage')
@@ -53,7 +63,7 @@ export class ChatsRepository extends SqlEntityRepository<ChatEntity> {
             .leftJoinAndSelect('chats.keys', 'keys')
             .leftJoinAndSelect('keys.publicKey', 'publicKey')
             .leftJoin('chats.keys', 'userKey', { 'userKey.publicKeyHash': publicKeyHash })
-            .where('chats.id = ?', [id]);
+            .where('chats.name = ?', [name]);
 
         if (publicKeyHash)
             qb.andWhere({

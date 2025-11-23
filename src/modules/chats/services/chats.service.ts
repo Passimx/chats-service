@@ -16,6 +16,7 @@ import { MessageTypeEnum } from '../types/message-type.enum';
 import { SystemMessageLanguageEnum } from '../types/system-message-language.enum';
 import { ChatTypeEnum } from '../types/chat-type.enum';
 import { Mutable } from '../../../common/types/mutable.type';
+import { PublicKeyEntity } from '../../keys/entities/public-key.entity';
 import { MessagesService } from './messages.service';
 
 @Injectable()
@@ -23,12 +24,14 @@ export class ChatsService {
     constructor(
         @InjectRepository(MessageEntity)
         readonly messageRepository: EntityRepository<MessageEntity>,
+        @InjectRepository(PublicKeyEntity)
+        private readonly publicKeysRepository: EntityRepository<PublicKeyEntity>,
         private readonly queueService: QueueService,
         private readonly messagesService: MessagesService,
         readonly chatsRepository: ChatsRepository,
     ) {}
 
-    async createChat(socketId: string, { title }: CreateOpenChatDto): Promise<DataResponse<ChatEntity>> {
+    public async createChat(socketId: string, { title }: CreateOpenChatDto): Promise<DataResponse<ChatEntity>> {
         const chatEntity = new ChatEntity({ title });
 
         await this.chatsRepository.insert(chatEntity);
@@ -59,25 +62,46 @@ export class ChatsService {
         return response;
     }
 
-    async getChats(socketId: string, query: QueryGetChatsDto): Promise<DataResponse<ChatEntity[]>> {
+    public async getChats(socketId: string, query: QueryGetChatsDto): Promise<DataResponse<ChatEntity[]>> {
         const chats = await this.chatsRepository.findChats(socketId, query);
-
         const data = chats.map((chat) => this.prepareDialogue(socketId, chat));
+
+        if (!chats.length) {
+            const chat = await this.getPublicKeyAsDialogue(socketId, query.search);
+
+            if (chat) data.push(chat);
+        }
 
         return new DataResponse(data);
     }
 
-    async findChat(id: string, publicKeyHash: string): Promise<DataResponse<string | ChatEntity>> {
-        const chat = await this.chatsRepository.findChatById(id, publicKeyHash);
+    public async findChatByName(name: string, publicKeyHash: string): Promise<DataResponse<string | ChatEntity>> {
+        let chat = await this.chatsRepository.findChatByName(name, publicKeyHash);
+
+        if (chat) return new DataResponse(this.prepareDialogue(publicKeyHash, chat));
+
+        chat = await this.getPublicKeyAsDialogue(publicKeyHash, name);
 
         if (!chat) return new DataResponse(MessageErrorEnum.CHAT_WITH_ID_NOT_FOUND);
 
-        const data = this.prepareDialogue(publicKeyHash, chat);
-
-        return new DataResponse(data);
+        return new DataResponse(chat);
     }
 
-    async join(chats: ChatDto[], socketId: string): Promise<DataResponse<string | ChatEntity[]>> {
+    public async getPublicKeyAsDialogue(publicKeyHash: string, name: string) {
+        const publicKey = await this.publicKeysRepository.findOne({ name, publicKeyHash: { $ne: publicKeyHash } });
+
+        if (!publicKey) return null;
+
+        return {
+            title: publicKey.metadata.name,
+            name: publicKey.publicKeyHash,
+            countMessages: 0,
+            type: ChatTypeEnum.IS_DIALOGUE,
+            maxUsersOnline: 0,
+        } as ChatEntity;
+    }
+
+    public async join(chats: ChatDto[], socketId: string): Promise<DataResponse<string | ChatEntity[]>> {
         const response: ChatEntity[] = [];
         const chatIdsSet = new Set<string>();
 
@@ -88,10 +112,10 @@ export class ChatsService {
             chatIdsSet.add(chat.id);
         });
 
-        const promises = chats.map(async ({ chatId, lastMessage, maxUsersOnline }) => {
-            if (chatIdsSet.has(chatId)) return;
+        const promises = chats.map(async ({ name, lastMessage, maxUsersOnline }) => {
+            const chat = await this.chatsRepository.findChatByName(name, socketId);
 
-            const chat = await this.chatsRepository.findChatById(chatId);
+            if (!chat || chatIdsSet.has(chat?.id)) return;
 
             if (chat) chatIdsSet.add(chat.id);
 
@@ -108,7 +132,7 @@ export class ChatsService {
         return new DataResponse<ChatEntity[]>(response);
     }
 
-    async leave(chatIds: string[], socketId: string): Promise<DataResponse<object>> {
+    public async leave(chatIds: string[], socketId: string): Promise<DataResponse<object>> {
         const filterLeaveChat = await this.chatsRepository.find({
             id: { $in: chatIds },
         });
@@ -120,7 +144,7 @@ export class ChatsService {
         return new DataResponse<object>({});
     }
 
-    updateMaxUsersOnline(chatId: string, maxOnline: number): Promise<number> {
+    public updateMaxUsersOnline(chatId: string, maxOnline: number): Promise<number> {
         return this.chatsRepository.nativeUpdate(
             {
                 id: chatId,
@@ -130,7 +154,7 @@ export class ChatsService {
         );
     }
 
-    async getSystemChats(): Promise<DataResponse<string | ChatEntity[]>> {
+    public async getSystemChats(): Promise<DataResponse<string | ChatEntity[]>> {
         const systemChats = await this.chatsRepository.getSystemChats();
 
         if (!systemChats) return new DataResponse(MessageErrorEnum.CHAT_WITH_ID_NOT_FOUND);
@@ -138,7 +162,7 @@ export class ChatsService {
         return new DataResponse<ChatEntity[]>(systemChats);
     }
 
-    async putSystemcChats() {
+    public async putSystemcChats() {
         const response = await this.getSystemChats();
 
         if (typeof response.data === 'string') {
