@@ -25,8 +25,8 @@ export class KeysController {
     }
 
     @Patch('publicKey')
-    @ApiData(PublicKeyDto)
-    updatePublicKey(@Headers('x-socket-id') socketId: string, @Body() body: UpdatePublicKey) {
+    @ApiDataEmpty()
+    updatePublicKey(@Headers('x-socket-id') socketId: string, @Body() body: UpdatePublicKey): Promise<void> {
         return this.keysService.updatePubicKey(socketId, body);
     }
 

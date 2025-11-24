@@ -39,13 +39,8 @@ export class KeysService {
         return this.getPublicKey(publicKeyHash);
     }
 
-    public async updatePubicKey(
-        publicKeyHash: string,
-        data: UpdatePublicKey,
-    ): Promise<DataResponse<PublicKeyDto | string>> {
+    public async updatePubicKey(publicKeyHash: string, data: UpdatePublicKey): Promise<void> {
         await this.publicKeysRepository.nativeUpdate({ publicKeyHash }, data);
-
-        return this.getPublicKey(publicKeyHash);
     }
 
     public async receiveKey(chatId: string, publicKeyHash: string): Promise<void> {
