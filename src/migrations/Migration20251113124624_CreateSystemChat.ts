@@ -3,8 +3,8 @@ import { Migration } from '@mikro-orm/migrations';
 export class Migration20251113124624_CreateSystemChat extends Migration {
     override up(): void {
         this.addSql(`
-            INSERT INTO "chats" (title, count_messages, type, max_users_online)
-            VALUES ('PassimX', 1, 'is_system', 1);
+            INSERT INTO "chats" (title, name, count_messages, type, max_users_online)
+            VALUES ('PassimX', 'passimx', 1, 'is_system', 1);
         `);
         this.addSql(`
             INSERT INTO "messages" (chat_id, number, type, message, parent_message_id)

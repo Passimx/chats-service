@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Headers, Param, ParseUUIDPipe, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Headers, Param, Post, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { MessagePattern } from '@nestjs/microservices';
 import { ChatsService } from '../services/chats.service';
@@ -12,6 +12,7 @@ import { LeaveChatsDto } from '../dto/requests/post-leave-chat.dto';
 import { ApiDataEmpty } from '../../../common/swagger/api-data-empty.decorator';
 import { TopicsEnum } from '../../queue/types/topics.enum';
 import { OnlineCountUsers } from '../types/max-online-users';
+import { KeepKeyDto } from '../dto/requests/keep-key.dto';
 
 @ApiTags('Chats')
 @Controller('chats')
@@ -24,19 +25,35 @@ export class ChatsController {
         @Body() body: CreateOpenChatDto,
         @Headers('x-socket-id') socketId: string,
     ): Promise<DataResponse<string | ChatEntity>> {
-        return this.chatsService.createOpenChat(socketId, body);
+        return this.chatsService.createChat(socketId, body);
     }
 
     @Get()
     @ApiData(ChatEntity, true)
-    getChats(@Query() query: QueryGetChatsDto): Promise<DataResponse<ChatEntity[]>> {
-        return this.chatsService.getOpenChats(query);
+    getChats(
+        @Query() query: QueryGetChatsDto,
+        @Headers('x-socket-id') socketId: string,
+    ): Promise<DataResponse<ChatEntity[]>> {
+        return this.chatsService.getChats(socketId, query);
     }
 
-    @Get(':id')
+    @Get(':name')
     @ApiData(ChatEntity, true)
-    getChat(@Param('id', ParseUUIDPipe) id: string): Promise<DataResponse<string | ChatEntity>> {
-        return this.chatsService.findChat(id);
+    getChatByName(
+        @Param('name') name: string,
+        @Headers('x-socket-id') socketId: string,
+    ): Promise<DataResponse<string | ChatEntity>> {
+        return this.chatsService.findChatByName(name, socketId);
+    }
+
+    @Post(':id/keep_chat_key')
+    @ApiDataEmpty()
+    keepChatKey(
+        @Param('id') chatId: string,
+        @Headers('x-socket-id') socketId: string,
+        @Body() body: KeepKeyDto,
+    ): Promise<void> {
+        return this.chatsService.keepChatKey(socketId, chatId, body);
     }
 
     @Post('join')

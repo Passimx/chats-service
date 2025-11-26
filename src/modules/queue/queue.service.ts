@@ -25,16 +25,16 @@ export class QueueService {
         this.producer.connect().then(() => (this.isConnected = true));
     }
 
-    public sendMessage(
+    public async sendMessage(
         topic: TopicsEnum,
         to: string | undefined,
         event: EventsEnum,
         data: DataResponse<unknown>,
-    ): void {
+    ): Promise<void> {
         if (!Envs.kafka.kafkaIsConnect || !this.isConnected) return;
 
         const message = new MessageDto(to, event, data);
 
-        this.producer.send({ topic, messages: [{ value: JSON.stringify(message) }] });
+        await this.producer.send({ topic, messages: [{ value: JSON.stringify(message) }] });
     }
 }

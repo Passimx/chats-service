@@ -7,7 +7,7 @@ export class QueryGetChatsDto {
     @ApiProperty({ description: 'Chat name' })
     @IsString()
     @IsNotEmpty()
-    readonly title?: string;
+    readonly search!: string;
 
     @ApiPropertyOptional({ description: 'Limit chat' })
     @IsInteger()

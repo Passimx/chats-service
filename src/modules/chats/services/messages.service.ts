@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { EntityRepository, raw } from '@mikro-orm/postgresql';
 import { EntityManager } from '@mikro-orm/core';
@@ -14,6 +14,8 @@ import { FileEntity } from '../entities/file.entity';
 import { FileEnum } from '../types/file.enum';
 import { logger } from '../../../common/logger/logger';
 import { CreateFileDto } from '../dto/requests/create-file.dto';
+import { ChatsRepository } from '../repositories/chats.repository';
+import { ChatsService } from './chats.service';
 
 @Injectable()
 export class MessagesService {
@@ -24,6 +26,9 @@ export class MessagesService {
         @InjectRepository(ChatEntity)
         private readonly chatRepository: EntityRepository<ChatEntity>,
         private readonly em: EntityManager,
+        @Inject(forwardRef(() => ChatsService))
+        private readonly chatsService: ChatsService,
+        readonly chatsRepository: ChatsRepository,
     ) {}
 
     async createMessage(
@@ -39,17 +44,9 @@ export class MessagesService {
         await fork.begin();
 
         try {
-            let parentMessage: MessageEntity | null = null;
-
-            if (parentMessageId) {
-                parentMessage = await fork.findOne(MessageEntity, { id: parentMessageId, chatId });
-
-                if (!parentMessage) {
-                    await fork.rollback();
-
-                    return new DataResponse(MessageErrorEnum.PARENT_MESSAGE_NOT_FOUND);
-                }
-            }
+            const parentMessage = parentMessageId
+                ? await fork.findOneOrFail(MessageEntity, { id: parentMessageId, chatId })
+                : undefined;
 
             await fork.nativeUpdate(
                 ChatEntity,
@@ -58,12 +55,6 @@ export class MessagesService {
             );
 
             const chat = await fork.findOneOrFail(ChatEntity, { id: chatId });
-
-            if (!chat) {
-                await fork.rollback();
-
-                return new DataResponse(MessageErrorEnum.CHAT_NOT_FOUND);
-            }
 
             const messageEntity = new MessageEntity({
                 ...payload,
@@ -78,7 +69,16 @@ export class MessagesService {
 
             if (files?.length)
                 await fork.insertMany(
-                    files.map((file) => new FileEntity({ ...file, chatId, chat, message: messageEntity })),
+                    files.map(
+                        (file, index) =>
+                            new FileEntity({
+                                ...file,
+                                chatId,
+                                chat,
+                                message: messageEntity,
+                                createdAt: new Date(Date.now() + index),
+                            }),
+                    ),
                 );
 
             await fork.commit();
@@ -99,12 +99,34 @@ export class MessagesService {
 
             const response = new DataResponse<MessageEntity | string>(newMessageEntity);
 
-            this.queueService.sendMessage(TopicsEnum.EMIT, String(chatId), EventsEnum.CREATE_MESSAGE, response);
-
             // Отправляем запросы на транскрипцию для голосовых файлов
             if (files?.length && chatId) {
-                this.sendTranscriptionRequests(files, chatId);
+                await this.sendTranscriptionRequests(files, chatId);
             }
+
+            if (newMessageEntity.number === 1) {
+                const chat = await this.chatsRepository.getChatById(chatId!);
+
+                const tasks: Promise<unknown>[] = chat!.keys.map(({ publicKeyHash }) => {
+                    const response = new DataResponse<ChatEntity>(
+                        this.chatsService.prepareDialogue(publicKeyHash, chat!),
+                    );
+
+                    return this.queueService.sendMessage(
+                        TopicsEnum.EMIT,
+                        publicKeyHash,
+                        EventsEnum.CREATE_DIALOGUE,
+                        response,
+                    );
+                });
+                await Promise.all(tasks);
+            } else
+                await this.queueService.sendMessage(
+                    TopicsEnum.EMIT,
+                    String(chatId),
+                    EventsEnum.CREATE_MESSAGE,
+                    response,
+                );
 
             return response;
         } catch (e) {
