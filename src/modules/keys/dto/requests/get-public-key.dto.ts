@@ -6,5 +6,5 @@ export class GetPublicKeyDto {
     @IsNotEmpty()
     @IsString()
     @MaxLength(128)
-    readonly name!: string;
+    readonly publicKeyHash!: string;
 }

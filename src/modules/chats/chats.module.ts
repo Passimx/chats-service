@@ -3,17 +3,17 @@ import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { QueueModule } from '../queue/queue.module';
 import { KeysModule } from '../keys/keys.module';
 import { ChatsService } from './services/chats.service';
-import { DialoguesService } from './services/dialogues.service';
 import { ChatEntity } from './entities/chat.entity';
 import { MessageEntity } from './entities/message.entity';
 import { ChatsController } from './controllers/chats.controller';
 import { MessagesController } from './controllers/messages.controller';
-import { DialoguesController } from './controllers/dialogues.controller';
 import { MessagesService } from './services/messages.service';
+import { FileEntity } from './entities/file.entity';
 
 @Module({
-    imports: [MikroOrmModule.forFeature([ChatEntity, MessageEntity]), QueueModule, KeysModule],
-    providers: [ChatsService, MessagesService, DialoguesService],
-    controllers: [ChatsController, MessagesController, DialoguesController],
+    imports: [MikroOrmModule.forFeature([ChatEntity, MessageEntity, FileEntity]), QueueModule, KeysModule],
+    providers: [ChatsService, MessagesService],
+    controllers: [ChatsController, MessagesController],
+    exports: [MikroOrmModule],
 })
 export class ChatsModule {}

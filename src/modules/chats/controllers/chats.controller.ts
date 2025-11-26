@@ -12,6 +12,7 @@ import { LeaveChatsDto } from '../dto/requests/post-leave-chat.dto';
 import { ApiDataEmpty } from '../../../common/swagger/api-data-empty.decorator';
 import { TopicsEnum } from '../../queue/types/topics.enum';
 import { OnlineCountUsers } from '../types/max-online-users';
+import { KeepKeyDto } from '../dto/requests/keep-key.dto';
 
 @ApiTags('Chats')
 @Controller('chats')
@@ -43,6 +44,16 @@ export class ChatsController {
         @Headers('x-socket-id') socketId: string,
     ): Promise<DataResponse<string | ChatEntity>> {
         return this.chatsService.findChatByName(name, socketId);
+    }
+
+    @Post(':id/keep_chat_key')
+    @ApiDataEmpty()
+    keepChatKey(
+        @Param('id') chatId: string,
+        @Headers('x-socket-id') socketId: string,
+        @Body() body: KeepKeyDto,
+    ): Promise<void> {
+        return this.chatsService.keepChatKey(socketId, chatId, body);
     }
 
     @Post('join')

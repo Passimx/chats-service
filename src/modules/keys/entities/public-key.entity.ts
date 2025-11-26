@@ -20,4 +20,8 @@ export class PublicKeyEntity {
     @ApiProperty()
     @Property({ type: 'jsonb' })
     readonly metadata!: PublicKeyMetadataType;
+
+    @ApiProperty()
+    @Property({ defaultRaw: 'NOW()' })
+    readonly createdAt?: Date;
 }

@@ -22,8 +22,8 @@ export class ChatKeyEntity extends CreatedEntity {
     @Property({ persist: false, lazy: true })
     readonly publicKeyHash!: string;
 
-    @ApiProperty()
-    @Property({ length: 4096 })
+    @ApiProperty({ nullable: true })
+    @Property({ length: 4096, nullable: true })
     readonly encryptionKey!: string;
 
     @ApiProperty()
