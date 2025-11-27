@@ -132,8 +132,8 @@ export class ChatsService {
             chatIdsSet.add(chat.id);
         });
 
-        const promises = chats.map(async ({ name, lastMessage, maxUsersOnline }) => {
-            const chat = await this.chatsRepository.findChatByName(name, socketId);
+        const promises = chats.map(async ({ chatId, lastMessage, maxUsersOnline }) => {
+            const chat = await this.chatsRepository.getChatById(chatId);
 
             if (!chat || chatIdsSet.has(chat?.id)) return;
 
