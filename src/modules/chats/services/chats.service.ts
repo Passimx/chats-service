@@ -114,11 +114,9 @@ export class ChatsService {
             { publicKeyHash: publicKey.publicKeyHash, chatId: chatEntity.id },
         ] as ChatKeyEntity[]);
 
-        return {
-            ...chatEntity,
-            title: publicKey.metadata.name,
-            name: publicKey.publicKeyHash,
-        } as ChatEntity;
+        const chatWithKeys = await this.chatsRepository.getChatById(chatEntity.id);
+
+        return this.prepareDialogue(publicKeyHash, chatWithKeys!);
     }
 
     public async join(chats: ChatDto[], socketId: string): Promise<DataResponse<string | ChatEntity[]>> {
