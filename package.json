@@ -1,19 +1,10 @@
 {
   "name": "passim",
-  "version": "0.0.1",
   "description": "open platform for messaging",
-  "author": {
-    "tg": "ramzini22",
-    "url": "https://github.com/ramzini22",
-    "name": "Ramil' Zinnatullin"
-  },
-  "homepage": "https://github.com/ramzini22",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/ramzini22"
-  },
-  "private": true,
-  "license": "UNLICENSED",
+  "version": "0.0.1",
+  "type": "commonjs",
+  "private": false,
+  "license": "MIT LICENSE",
   "scripts": {
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",

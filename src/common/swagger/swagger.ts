@@ -11,7 +11,7 @@ export function useSwagger(app: NestFastifyApplication): void {
     const config = documentBuilder
         .setTitle(projectInfo.name)
         .setVersion(projectInfo.version)
-        .setLicense(projectInfo.license, projectInfo.homepage)
+        .setLicense(projectInfo.license, projectInfo.description)
         .build();
 
     const document = SwaggerModule.createDocument(app, config, {
