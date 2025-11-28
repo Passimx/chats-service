@@ -22,3 +22,6 @@ jobs:
     secrets:
       DOCKER_TOKEN: ${{ secrets.DOCKER_HUB_TOKEN }}
       GIT_HUB_TOKEN: ${{ secrets.GIT_HUB_TOKEN }}
+    permissions:
+      contents: write
+      packages: write
