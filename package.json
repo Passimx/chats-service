@@ -1,7 +1,7 @@
 {
   "name": "passim",
   "description": "open platform for messaging",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "type": "commonjs",
   "private": false,
   "license": "MIT LICENSE",
