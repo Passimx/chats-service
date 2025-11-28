@@ -1,12 +1,11 @@
-import { IsArray, IsInt, IsNotEmpty, IsNumber, IsString, ValidateNested } from 'class-validator';
+import { IsArray, IsInt, IsNumber, IsUUID, ValidateNested } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 
 export class ChatDto {
-    @IsString()
-    @IsNotEmpty()
+    @IsUUID()
     @ApiProperty({ description: 'Id chat' })
-    readonly name!: string;
+    readonly chatId!: string;
 
     @IsNumber()
     @IsInt()
