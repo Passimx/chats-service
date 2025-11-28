@@ -1,0 +1,38 @@
+name: CI/CD Pipeline
+
+permissions:
+  contents: write
+
+on:
+  push:
+    branches:
+      - quick*
+
+jobs:
+  build_version:
+    runs-on: ubuntu-latest
+    outputs:
+      VERSION: ${{ steps.get_version.outputs.VERSION }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: get_version
+        run: |
+          VERSION=$(jq -r .version package.json)
+          echo "VERSION=$VERSION" >> "$GITHUB_OUTPUT"
+    permissions:
+      contents: write
+      packages: write
+
+  build:
+    needs: build_version
+    uses: Passimx/ci-cd-workflows/.github/workflows/build.yml@main
+    with:
+      ORGANIZATION_NAME: ${{ vars.ORGANIZATION_NAME }}
+      IMAGE_NAME: ${{ vars.IMAGE_NAME }}
+      VERSION: ${{ needs.version.outputs.release_version }}
+    secrets:
+      DOCKER_TOKEN: ${{ secrets.DOCKER_HUB_TOKEN }}
+      GIT_HUB_TOKEN: ${{ secrets.GIT_HUB_TOKEN }}
+    permissions:
+      contents: write
+      packages: write
