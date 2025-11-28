@@ -15,6 +15,7 @@ jobs:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   build:
+    needs: version
     uses: Passimx/ci-cd-workflows/.github/workflows/build.yml@main
     with:
       ORGANIZATION_NAME: ${{ vars.ORGANIZATION_NAME }}
