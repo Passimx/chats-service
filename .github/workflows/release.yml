@@ -1,0 +1,22 @@
+name: CI/CD Pipeline
+
+permissions:
+  contents: write
+
+on:
+  push:
+    branches:
+      - release
+
+jobs:
+  release:
+    uses: Passimx/ci-cd-workflows/.github/workflows/release.yml@main
+    with:
+      ORGANIZATION_NAME: ${{ vars.ORGANIZATION_NAME }}
+      IMAGE_NAME: ${{ vars.IMAGE_NAME }}
+    secrets:
+      DOCKER_TOKEN: ${{ secrets.DOCKER_HUB_TOKEN }}
+      GIT_HUB_TOKEN: ${{ secrets.GIT_HUB_TOKEN }}
+    permissions:
+      contents: write
+      packages: write
