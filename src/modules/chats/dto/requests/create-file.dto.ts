@@ -3,7 +3,7 @@ import { IsArray, IsDefined, IsEnum, IsNumber, IsOptional, IsString } from 'clas
 import { Transform, Type } from 'class-transformer';
 import { FileEnum } from '../../types/file.enum';
 
-class Metadata {
+export class Metadata {
     @ApiPropertyOptional()
     @IsOptional()
     @IsNumber()
@@ -15,6 +15,12 @@ class Metadata {
     @IsArray()
     @IsNumber({}, { each: true })
     readonly loudnessData?: number[];
+
+    // если null - то значит зашифрован
+    @ApiPropertyOptional({ nullable: true })
+    @IsOptional()
+    @IsString()
+    readonly transcriptionVoice?: string | null;
 }
 
 export class CreateFileDto {

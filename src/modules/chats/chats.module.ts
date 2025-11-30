@@ -9,11 +9,13 @@ import { ChatsController } from './controllers/chats.controller';
 import { MessagesController } from './controllers/messages.controller';
 import { MessagesService } from './services/messages.service';
 import { FileEntity } from './entities/file.entity';
+import { FilesController } from './controllers/files.controller';
+import { FilesService } from './services/files.service';
 
 @Module({
     imports: [MikroOrmModule.forFeature([ChatEntity, MessageEntity, FileEntity]), QueueModule, KeysModule],
-    providers: [ChatsService, MessagesService],
-    controllers: [ChatsController, MessagesController],
+    providers: [ChatsService, MessagesService, FilesService],
+    controllers: [ChatsController, MessagesController, FilesController],
     exports: [MikroOrmModule],
 })
 export class ChatsModule {}

@@ -2,10 +2,11 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Collection, Entity, Enum, Index, OneToMany, OneToOne, Property } from '@mikro-orm/core';
 import { CreatedEntity } from '../../../common/entities/created.entity';
 import { MessageTypeEnum } from '../types/message-type.enum';
+import { MessagesRepository } from '../repositories/messages.repository';
 import { FileEntity } from './file.entity';
 import { ChatEntity } from './chat.entity';
 
-@Entity({ tableName: 'messages' })
+@Entity({ tableName: 'messages', repository: () => MessagesRepository })
 @Index({ properties: ['chatId', 'number'], type: 'btree' })
 export class MessageEntity extends CreatedEntity {
     constructor(payload: Partial<MessageEntity>) {

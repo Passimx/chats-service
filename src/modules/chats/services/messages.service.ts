@@ -1,6 +1,5 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
-import { InjectRepository } from '@mikro-orm/nestjs';
-import { EntityRepository, raw } from '@mikro-orm/postgresql';
+import { raw } from '@mikro-orm/postgresql';
 import { EntityManager } from '@mikro-orm/core';
 import { MessageEntity } from '../entities/message.entity';
 import { ChatEntity } from '../entities/chat.entity';
@@ -15,23 +14,23 @@ import { FileEnum } from '../types/file.enum';
 import { logger } from '../../../common/logger/logger';
 import { CreateFileDto } from '../dto/requests/create-file.dto';
 import { ChatsRepository } from '../repositories/chats.repository';
+import { MessagesRepository } from '../repositories/messages.repository';
+import { FilesRepository } from '../repositories/files.repository';
 import { ChatsService } from './chats.service';
 
 @Injectable()
 export class MessagesService {
     constructor(
-        @InjectRepository(MessageEntity)
-        private readonly messageRepository: EntityRepository<MessageEntity>,
+        private readonly messageRepository: MessagesRepository,
         private readonly queueService: QueueService,
-        @InjectRepository(ChatEntity)
-        private readonly chatRepository: EntityRepository<ChatEntity>,
         private readonly em: EntityManager,
         @Inject(forwardRef(() => ChatsService))
         private readonly chatsService: ChatsService,
-        readonly chatsRepository: ChatsRepository,
+        private readonly chatsRepository: ChatsRepository,
+        private readonly filesRepository: FilesRepository,
     ) {}
 
-    async createMessage(
+    public async createMessage(
         payload: Partial<MessageEntity>,
         files?: CreateFileDto[],
     ): Promise<DataResponse<MessageEntity | string>> {
@@ -67,6 +66,10 @@ export class MessagesService {
 
             await fork.insert(MessageEntity, messageEntity);
 
+            let transcriptionVoice = undefined;
+
+            if (![ChatTypeEnum.IS_OPEN].includes(chat.type)) transcriptionVoice = null;
+
             if (files?.length)
                 await fork.insertMany(
                     files.map(
@@ -77,6 +80,7 @@ export class MessagesService {
                                 chat,
                                 message: messageEntity,
                                 createdAt: new Date(Date.now() + index),
+                                metadata: { ...file.metadata, transcriptionVoice },
                             }),
                     ),
                 );
@@ -100,8 +104,8 @@ export class MessagesService {
             const response = new DataResponse<MessageEntity | string>(newMessageEntity);
 
             // Отправляем запросы на транскрипцию для голосовых файлов
-            if (files?.length && chatId) {
-                await this.sendTranscriptionRequests(files, chatId);
+            if (transcriptionVoice !== null) {
+                await this.sendTranscriptionRequests(messageEntity.files.getItems());
             }
 
             if (newMessageEntity.number === 1) {
@@ -137,7 +141,7 @@ export class MessagesService {
         }
     }
 
-    async getMessages(chatId: string, limit: number, offset: number): Promise<DataResponse<MessageEntity[]>> {
+    public async getMessages(chatId: string, limit: number, offset: number): Promise<DataResponse<MessageEntity[]>> {
         const getMessageNotSearch = await this.messageRepository.find(
             { chat: chatId, number: { $gt: offset ?? undefined } },
             {
@@ -150,23 +154,31 @@ export class MessagesService {
         return new DataResponse(getMessageNotSearch);
     }
 
-    async sendTranscriptionRequests(files: CreateFileDto[], chatId: string) {
+    public async getFile(
+        publicKeyHash: string,
+        messageId: string,
+        fileId: string,
+    ): Promise<DataResponse<FileEntity | string>> {
+        const file = await this.filesRepository.getFile(publicKeyHash, { messageId, id: fileId });
+
+        if (!file) return new DataResponse('file not found');
+
+        return new DataResponse(file);
+    }
+
+    private async sendTranscriptionRequests(files: FileEntity[]) {
         const voiceFiles = files.filter((file) => file.fileType === FileEnum.IS_VOICE);
 
-        const chat = await this.chatRepository.findOne(chatId);
-
-        if (chat?.type === ChatTypeEnum.IS_OPEN) {
-            for (const file of voiceFiles) {
-                this.queueService.sendMessage(
-                    TopicsEnum.AUDIO_TRANSCRIPTION_REQUEST,
-                    chatId,
-                    EventsEnum.TRANSCRIBE_AUDIO,
-                    new DataResponse({
-                        fileId: file.key,
-                        chatId: chatId,
-                    }),
-                );
-            }
+        for (const file of voiceFiles) {
+            await this.queueService.sendMessage(
+                TopicsEnum.AUDIO_TRANSCRIPTION_REQUEST,
+                file.chatId,
+                EventsEnum.TRANSCRIBE_AUDIO,
+                new DataResponse({
+                    fileId: file.key,
+                    chatId: file.chatId,
+                }),
+            );
         }
     }
 }

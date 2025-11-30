@@ -2,10 +2,12 @@ import { Entity, Enum, Index, ManyToOne, Property } from '@mikro-orm/core';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { FileEnum } from '../types/file.enum';
 import { CreatedEntity } from '../../../common/entities/created.entity';
+import { Metadata } from '../dto/requests/create-file.dto';
+import { FilesRepository } from '../repositories/files.repository';
 import { MessageEntity } from './message.entity';
 import { ChatEntity } from './chat.entity';
 
-@Entity({ tableName: 'files' })
+@Entity({ tableName: 'files', repository: () => FilesRepository })
 @Index({ properties: ['id'], type: 'HASH' })
 export class FileEntity extends CreatedEntity {
     constructor(payload: Partial<FileEntity>) {
@@ -43,7 +45,7 @@ export class FileEntity extends CreatedEntity {
 
     @ApiProperty()
     @Property({ type: 'jsonb', nullable: true })
-    readonly metadata!: Record<string, any>;
+    readonly metadata!: Metadata;
 
     @ApiPropertyOptional({ type: () => FileEntity })
     @ManyToOne(() => MessageEntity, {
