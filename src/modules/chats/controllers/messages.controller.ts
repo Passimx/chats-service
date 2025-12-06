@@ -25,8 +25,11 @@ export class MessagesController {
 
     @Get()
     @ApiData(MessageEntity, true)
-    getMessages(@Query() query: QueryGetMessagesDto): Promise<DataResponse<MessageEntity[]>> {
-        return this.messagesService.getMessages(query.chatId, query.limit, query.offset);
+    getMessages(
+        @Query() query: QueryGetMessagesDto,
+        @Headers('x-socket-id') socketId: string,
+    ): Promise<DataResponse<MessageEntity[]>> {
+        return this.messagesService.getMessages(socketId, query);
     }
 
     @Get(':messageId/files/:fileId')

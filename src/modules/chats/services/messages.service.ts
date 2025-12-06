@@ -16,6 +16,7 @@ import { CreateFileDto } from '../dto/requests/create-file.dto';
 import { ChatsRepository } from '../repositories/chats.repository';
 import { MessagesRepository } from '../repositories/messages.repository';
 import { FilesRepository } from '../repositories/files.repository';
+import { QueryGetMessagesDto } from '../dto/requests/query-get-messages.dto';
 import { ChatsService } from './chats.service';
 
 @Injectable()
@@ -141,17 +142,10 @@ export class MessagesService {
         }
     }
 
-    public async getMessages(chatId: string, limit: number, offset: number): Promise<DataResponse<MessageEntity[]>> {
-        const getMessageNotSearch = await this.messageRepository.find(
-            { chat: chatId, number: { $gt: offset ?? undefined } },
-            {
-                limit: limit,
-                populate: ['parentMessage', 'files', 'parentMessage.files'],
-                orderBy: { number: 'ASC', files: { createdAt: 'ASC' }, parentMessage: { files: { createdAt: 'ASC' } } },
-            },
-        );
+    public async getMessages(socketId: string, query: QueryGetMessagesDto): Promise<DataResponse<MessageEntity[]>> {
+        const messages = await this.messageRepository.findMessages(socketId, query);
 
-        return new DataResponse(getMessageNotSearch);
+        return new DataResponse(messages);
     }
 
     public async getFile(
