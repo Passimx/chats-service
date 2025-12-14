@@ -16,11 +16,14 @@ export class MessagesController {
 
     @Post()
     @ApiData(MessageEntity)
-    createMessage(@Body() body: CreateMessageDto): Promise<DataResponse<MessageEntity | string>> {
+    createMessage(
+        @Body() body: CreateMessageDto,
+        @Headers('x-socket-id') userId: string,
+    ): Promise<DataResponse<MessageEntity | string>> {
         const { files, ...payload } = body;
         const message: Partial<MessageEntity> = { ...payload, type: MessageTypeEnum.IS_USER };
 
-        return this.messagesService.createMessage(message, files);
+        return this.messagesService.createMessage({ userId, ...message }, files);
     }
 
     @Get()

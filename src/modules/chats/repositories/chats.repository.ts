@@ -2,23 +2,23 @@ import { QueryOrder, raw, SelectQueryBuilder, SqlEntityRepository } from '@mikro
 import { ChatEntity } from '../entities/chat.entity';
 import { QueryGetChatsDto } from '../dto/requests/query-get-chats.dto';
 import { ChatTypeEnum } from '../types/chat-type.enum';
-import { KeyDto } from '../dto/requests/keep-key.dto';
+import { ChatKeyEntity } from '../entities/chat-key.entity';
 
 // eslint-disable-next-line
 const lastMessageCondition = { 'chats.count_messages': raw('"message".number') };
 
 export class ChatsRepository extends SqlEntityRepository<ChatEntity> {
     public findChats(
-        publicKeyHash: string,
+        userId: string,
         { search, limit, offset, notFavoriteChatIds }: QueryGetChatsDto,
     ): Promise<ChatEntity[]> {
         const qb = this.getSubChats()
-            .leftJoin('chats.keys', 'userKey', { 'userKey.publicKeyHash': publicKeyHash })
+            .leftJoin('chats.keys', 'userKey', { 'userKey.userId': userId })
             .where({ id: { $nin: notFavoriteChatIds } })
             .andWhere({
                 $or: [
                     { 'chats.type': { $in: [ChatTypeEnum.IS_OPEN, ChatTypeEnum.IS_SYSTEM] } },
-                    { 'userKey.publicKeyHash': publicKeyHash },
+                    { 'userKey.userId': userId },
                 ],
             })
             .orderBy({
@@ -38,9 +38,9 @@ export class ChatsRepository extends SqlEntityRepository<ChatEntity> {
                     arrayWords,
                     { 'chats.name': search },
                     {
-                        'publicKey.name': search,
+                        'user.name': search,
                         'chats.type': ChatTypeEnum.IS_DIALOGUE,
-                        'publicKey.publicKeyHash': { $ne: publicKeyHash },
+                        'user.id': { $ne: userId },
                     },
                 ],
             });
@@ -49,9 +49,9 @@ export class ChatsRepository extends SqlEntityRepository<ChatEntity> {
         return qb.getResult();
     }
 
-    public async findChatByName(name: string, publicKeyHash?: string): Promise<ChatEntity | null> {
+    public async findChatByName(name: string, userId?: string): Promise<ChatEntity | null> {
         const qb = this.getSubChats()
-            .leftJoin('chats.keys', 'userKey', { 'userKey.publicKeyHash': publicKeyHash })
+            .leftJoin('chats.keys', 'userKey', { 'userKey.userId': userId })
             .where('chats.name = ?', [name])
             .orderBy({
                 message: {
@@ -60,12 +60,12 @@ export class ChatsRepository extends SqlEntityRepository<ChatEntity> {
                 },
             });
 
-        if (publicKeyHash)
+        if (userId)
             qb.andWhere({
                 $or: [
                     { type: { $nin: [ChatTypeEnum.IS_DIALOGUE, ChatTypeEnum.IS_FAVORITES] } },
                     {
-                        'userKey.publicKeyHash': publicKeyHash,
+                        'userKey.userId': userId,
                     },
                 ],
             });
@@ -85,10 +85,10 @@ export class ChatsRepository extends SqlEntityRepository<ChatEntity> {
             .getResult();
     }
 
-    public async getDialogueByKeys(keys: KeyDto[]): Promise<ChatEntity | null> {
+    public async getDialogueByKeys(keys: Partial<ChatKeyEntity>[]): Promise<ChatEntity | null> {
         const qb = this.createQueryBuilder('chats')
             .leftJoinAndSelect('chats.keys', 'keys')
-            .leftJoinAndSelect('keys.publicKey', 'publicKey')
+            .leftJoinAndSelect('keys.user', 'user')
             .orderBy({
                 message: {
                     files: { createdAt: QueryOrder.ASC },
@@ -98,9 +98,9 @@ export class ChatsRepository extends SqlEntityRepository<ChatEntity> {
 
         if (keys.length === 1) qb.andWhere({ 'chats.type': ChatTypeEnum.IS_FAVORITES });
 
-        keys.forEach(({ publicKeyHash }, index) => {
+        keys.forEach(({ userId }, index) => {
             const alias = `key_${index}`;
-            qb.innerJoin('chats.keys', alias, { [`${alias}.public_key_hash`]: publicKeyHash });
+            qb.innerJoin('chats.keys', alias, { [`${alias}.user_id`]: userId });
         });
 
         return qb.getSingleResult();
@@ -118,9 +118,9 @@ export class ChatsRepository extends SqlEntityRepository<ChatEntity> {
         return qb.getSingleResult();
     }
 
-    public async getNotReceivedChats(publicKeyHash: string): Promise<ChatEntity[]> {
+    public async getNotReceivedChats(userId: string): Promise<ChatEntity[]> {
         return this.getSubChats()
-            .innerJoin('chats.keys', 'key', { 'key.public_key_hash': publicKeyHash, 'key.received': false })
+            .innerJoin('chats.keys', 'key', { 'key.userId': userId, 'key.received': false })
             .where({ type: ChatTypeEnum.IS_DIALOGUE })
             .orderBy({
                 message: {
@@ -135,9 +135,10 @@ export class ChatsRepository extends SqlEntityRepository<ChatEntity> {
         return this.createQueryBuilder('chats')
             .leftJoinAndSelect('chats.message', 'message', lastMessageCondition)
             .leftJoinAndSelect('message.parentMessage', 'parentMessage')
-            .leftJoinAndSelect('parentMessage.files', 'parentMessageFiles')
             .leftJoinAndSelect('message.files', 'files')
+            .leftJoinAndSelect('message.user', 'messageUser')
+            .leftJoinAndSelect('parentMessage.files', 'parentMessageFiles')
             .leftJoinAndSelect('chats.keys', 'keys')
-            .leftJoinAndSelect('keys.publicKey', 'publicKey');
+            .leftJoinAndSelect('keys.user', 'user');
     }
 }

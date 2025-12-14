@@ -1,6 +1,261 @@
 {
 	"openapi": "3.0.0",
 	"paths": {
+		"/users/{userName}": {
+			"get": {
+				"operationId": "UsersController_getUserByUserName",
+				"parameters": [
+					{
+						"name": "userName",
+						"required": true,
+						"in": "path",
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"type": "object",
+											"properties": {
+												"success": {
+													"type": "boolean",
+													"example": true
+												},
+												"data": {
+													"$ref": "#/components/schemas/GetUserDto"
+												}
+											},
+											"required": [
+												"success",
+												"data"
+											]
+										},
+										{
+											"type": "object",
+											"properties": {
+												"success": {
+													"type": "boolean",
+													"example": false
+												},
+												"data": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"success",
+												"data"
+											]
+										}
+									]
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Users"
+				]
+			}
+		},
+		"/users/me": {
+			"post": {
+				"operationId": "UsersController_getMe",
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/MeDto"
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"type": "object",
+											"properties": {
+												"success": {
+													"type": "boolean",
+													"example": true
+												},
+												"data": {
+													"$ref": "#/components/schemas/GetMeDto"
+												}
+											},
+											"required": [
+												"success",
+												"data"
+											]
+										},
+										{
+											"type": "object",
+											"properties": {
+												"success": {
+													"type": "boolean",
+													"example": false
+												},
+												"data": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"success",
+												"data"
+											]
+										}
+									]
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Users"
+				]
+			}
+		},
+		"/users/create": {
+			"post": {
+				"operationId": "UsersController_createUser",
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/CreateUserDto"
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"type": "object",
+											"properties": {
+												"success": {
+													"type": "boolean",
+													"example": true
+												},
+												"data": {
+													"$ref": "#/components/schemas/UserEntity"
+												}
+											},
+											"required": [
+												"success",
+												"data"
+											]
+										},
+										{
+											"type": "object",
+											"properties": {
+												"success": {
+													"type": "boolean",
+													"example": false
+												},
+												"data": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"success",
+												"data"
+											]
+										}
+									]
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Users"
+				]
+			}
+		},
+		"/users/update": {
+			"patch": {
+				"operationId": "UsersController_updateUser",
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/UpdateDto"
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"type": "object",
+											"properties": {
+												"success": {
+													"type": "boolean",
+													"example": true
+												},
+												"data": {
+													"type": "object"
+												}
+											},
+											"required": [
+												"success",
+												"data"
+											]
+										},
+										{
+											"type": "object",
+											"properties": {
+												"success": {
+													"type": "boolean",
+													"example": false
+												},
+												"data": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"success",
+												"data"
+											]
+										}
+									]
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Users"
+				]
+			}
+		},
 		"/chats": {
 			"post": {
 				"operationId": "ChatsController_createChat",
@@ -77,7 +332,7 @@
 				"operationId": "ChatsController_getChats",
 				"parameters": [
 					{
-						"name": "title",
+						"name": "search",
 						"required": true,
 						"in": "query",
 						"description": "Chat name",
@@ -112,6 +367,14 @@
 							"items": {
 								"type": "string"
 							}
+						}
+					},
+					{
+						"name": "x-socket-id",
+						"required": true,
+						"in": "header",
+						"schema": {
+							"type": "string"
 						}
 					}
 				],
@@ -168,14 +431,22 @@
 				]
 			}
 		},
-		"/chats/{id}": {
+		"/chats/{name}": {
 			"get": {
-				"operationId": "ChatsController_getChat",
+				"operationId": "ChatsController_getChatByName",
 				"parameters": [
 					{
-						"name": "id",
+						"name": "name",
 						"required": true,
 						"in": "path",
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"name": "x-socket-id",
+						"required": true,
+						"in": "header",
 						"schema": {
 							"type": "string"
 						}
@@ -200,6 +471,158 @@
 													"items": {
 														"$ref": "#/components/schemas/ChatEntity"
 													}
+												}
+											},
+											"required": [
+												"success",
+												"data"
+											]
+										},
+										{
+											"type": "object",
+											"properties": {
+												"success": {
+													"type": "boolean",
+													"example": false
+												},
+												"data": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"success",
+												"data"
+											]
+										}
+									]
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Chats"
+				]
+			}
+		},
+		"/chats/{id}/keys/keep": {
+			"post": {
+				"operationId": "ChatsController_keepChatKey",
+				"parameters": [
+					{
+						"name": "id",
+						"required": true,
+						"in": "path",
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"name": "x-socket-id",
+						"required": true,
+						"in": "header",
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/KeepKeyDto"
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"type": "object",
+											"properties": {
+												"success": {
+													"type": "boolean",
+													"example": true
+												},
+												"data": {
+													"type": "object"
+												}
+											},
+											"required": [
+												"success",
+												"data"
+											]
+										},
+										{
+											"type": "object",
+											"properties": {
+												"success": {
+													"type": "boolean",
+													"example": false
+												},
+												"data": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"success",
+												"data"
+											]
+										}
+									]
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Chats"
+				]
+			}
+		},
+		"/chats/{chatId}/keys/receive": {
+			"post": {
+				"operationId": "ChatsController_receiveKey",
+				"parameters": [
+					{
+						"name": "chatId",
+						"required": true,
+						"in": "path",
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"name": "x-socket-id",
+						"required": true,
+						"in": "header",
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"type": "object",
+											"properties": {
+												"success": {
+													"type": "boolean",
+													"example": true
+												},
+												"data": {
+													"type": "object"
 												}
 											},
 											"required": [
@@ -443,7 +866,16 @@
 		"/messages": {
 			"post": {
 				"operationId": "MessagesController_createMessage",
-				"parameters": [],
+				"parameters": [
+					{
+						"name": "x-socket-id",
+						"required": true,
+						"in": "header",
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
 				"requestBody": {
 					"required": true,
 					"content": {
@@ -532,6 +964,14 @@
 						"schema": {
 							"type": "number"
 						}
+					},
+					{
+						"name": "x-socket-id",
+						"required": true,
+						"in": "header",
+						"schema": {
+							"type": "string"
+						}
 					}
 				],
 				"responses": {
@@ -587,30 +1027,26 @@
 				]
 			}
 		},
-		"/transcription/{id}": {
+		"/messages/{messageId}/files/{fileId}": {
 			"get": {
-				"operationId": "TranscriptionController_getTranscriptionVoice",
+				"operationId": "MessagesController_getFile",
 				"parameters": [
 					{
-						"name": "id",
+						"name": "fileId",
 						"required": true,
 						"in": "path",
 						"schema": {
 							"type": "string"
 						}
-					}
-				],
-				"responses": {
-					"200": {
-						"description": ""
-					}
-				}
-			}
-		},
-		"/dialogues": {
-			"post": {
-				"operationId": "DialoguesController_createDialogue",
-				"parameters": [
+					},
+					{
+						"name": "messageId",
+						"required": true,
+						"in": "path",
+						"schema": {
+							"type": "string"
+						}
+					},
 					{
 						"name": "x-socket-id",
 						"required": true,
@@ -620,266 +1056,163 @@
 						}
 					}
 				],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"$ref": "#/components/schemas/CreateDialoguesDto"
-							}
-						}
-					}
-				},
 				"responses": {
 					"200": {
-						"description": "",
-						"content": {
-							"application/json": {
-								"schema": {
-									"anyOf": [
-										{
-											"type": "object",
-											"properties": {
-												"success": {
-													"type": "boolean",
-													"example": true
-												},
-												"data": {
-													"$ref": "#/components/schemas/ChatEntity"
-												}
-											},
-											"required": [
-												"success",
-												"data"
-											]
-										},
-										{
-											"type": "object",
-											"properties": {
-												"success": {
-													"type": "boolean",
-													"example": false
-												},
-												"data": {
-													"type": "string"
-												}
-											},
-											"required": [
-												"success",
-												"data"
-											]
-										}
-									]
-								}
-							}
-						}
+						"description": ""
 					}
 				},
 				"tags": [
-					"Dialogues"
+					"Messages"
 				]
-			}
-		},
-		"/keys/publicKey": {
-			"get": {
-				"operationId": "KeysController_getPublicKey",
-				"parameters": [
-					{
-						"name": "publicKeyHash",
-						"required": true,
-						"in": "query",
-						"schema": {
-							"maxLength": 128,
-							"type": "string"
-						}
-					}
-				],
-				"responses": {
-					"200": {
-						"description": "",
-						"content": {
-							"application/json": {
-								"schema": {
-									"anyOf": [
-										{
-											"type": "object",
-											"properties": {
-												"success": {
-													"type": "boolean",
-													"example": true
-												},
-												"data": {
-													"$ref": "#/components/schemas/PublicKeyDto"
-												}
-											},
-											"required": [
-												"success",
-												"data"
-											]
-										},
-										{
-											"type": "object",
-											"properties": {
-												"success": {
-													"type": "boolean",
-													"example": false
-												},
-												"data": {
-													"type": "string"
-												}
-											},
-											"required": [
-												"success",
-												"data"
-											]
-										}
-									]
-								}
-							}
-						}
-					}
-				}
-			},
-			"post": {
-				"operationId": "KeysController_keepPubicKey",
-				"parameters": [],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"$ref": "#/components/schemas/KeepPublicKeyDto"
-							}
-						}
-					}
-				},
-				"responses": {
-					"200": {
-						"description": "",
-						"content": {
-							"application/json": {
-								"schema": {
-									"anyOf": [
-										{
-											"type": "object",
-											"properties": {
-												"success": {
-													"type": "boolean",
-													"example": true
-												},
-												"data": {
-													"$ref": "#/components/schemas/PublicKeyDto"
-												}
-											},
-											"required": [
-												"success",
-												"data"
-											]
-										},
-										{
-											"type": "object",
-											"properties": {
-												"success": {
-													"type": "boolean",
-													"example": false
-												},
-												"data": {
-													"type": "string"
-												}
-											},
-											"required": [
-												"success",
-												"data"
-											]
-										}
-									]
-								}
-							}
-						}
-					}
-				}
-			}
-		},
-		"/keys/receiveKey/{chatId}": {
-			"post": {
-				"operationId": "KeysController_receiveKey",
-				"parameters": [
-					{
-						"name": "key",
-						"required": true,
-						"in": "path",
-						"schema": {
-							"type": "string"
-						}
-					}
-				],
-				"responses": {
-					"200": {
-						"description": "",
-						"content": {
-							"application/json": {
-								"schema": {
-									"anyOf": [
-										{
-											"type": "object",
-											"properties": {
-												"success": {
-													"type": "boolean",
-													"example": true
-												},
-												"data": {
-													"type": "object"
-												}
-											},
-											"required": [
-												"success",
-												"data"
-											]
-										},
-										{
-											"type": "object",
-											"properties": {
-												"success": {
-													"type": "boolean",
-													"example": false
-												},
-												"data": {
-													"type": "string"
-												}
-											},
-											"required": [
-												"success",
-												"data"
-											]
-										}
-									]
-								}
-							}
-						}
-					}
-				}
 			}
 		}
 	},
 	"info": {
-		"title": "passimx",
+		"title": "PassimX",
 		"description": "",
-		"version": "0.0.1",
+		"version": "1.1.3",
 		"contact": {},
 		"license": {
-			"name": "UNLICENSED",
-			"url": "https://github.com/ramzini22"
+			"name": "MIT LICENSE",
+			"url": "open platform for messaging"
 		}
 	},
 	"tags": [],
 	"servers": [
 		{
-			"url": "http://localhost:6020",
-			"description": "development"
+			"url": "http://localhost:7020"
 		}
 	],
 	"components": {
 		"schemas": {
+			"GetUserDto": {
+				"type": "object",
+				"properties": {
+					"name": {
+						"type": "string"
+					},
+					"userName": {
+						"type": "string"
+					},
+					"rsaPublicKey": {
+						"type": "string"
+					},
+					"createdAt": {
+						"format": "date-time",
+						"type": "string"
+					}
+				},
+				"required": [
+					"name",
+					"userName",
+					"rsaPublicKey",
+					"createdAt"
+				]
+			},
+			"GetMeDto": {
+				"type": "object",
+				"properties": {
+					"encryptedRsaPrivateKey": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"encryptedRsaPrivateKey"
+				]
+			},
+			"MeDto": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"seedPhraseHash": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"id",
+					"seedPhraseHash"
+				]
+			},
+			"UserEntity": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"name": {
+						"type": "string"
+					},
+					"userName": {
+						"type": "string"
+					},
+					"rsaPublicKey": {
+						"type": "string"
+					},
+					"encryptedRsaPrivateKey": {
+						"type": "string"
+					},
+					"createdAt": {
+						"format": "date-time",
+						"type": "string"
+					}
+				},
+				"required": [
+					"id",
+					"name",
+					"userName",
+					"rsaPublicKey",
+					"encryptedRsaPrivateKey",
+					"createdAt"
+				]
+			},
+			"CreateUserDto": {
+				"type": "object",
+				"properties": {
+					"name": {
+						"type": "string"
+					},
+					"rsaPublicKey": {
+						"type": "string"
+					},
+					"encryptedRsaPrivateKey": {
+						"type": "string"
+					},
+					"passwordHash": {
+						"type": "string"
+					},
+					"seedPhraseHash": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"name",
+					"rsaPublicKey",
+					"encryptedRsaPrivateKey",
+					"passwordHash",
+					"seedPhraseHash"
+				]
+			},
+			"UpdateDto": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"seedPhraseHash": {
+						"type": "string"
+					},
+					"name": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"id",
+					"seedPhraseHash",
+					"name"
+				]
+			},
 			"ChatKeyEntity": {
 				"type": "object",
 				"properties": {
@@ -893,27 +1226,32 @@
 					"chatId": {
 						"type": "string"
 					},
-					"publicKeyHash": {
+					"userId": {
 						"type": "string"
 					},
 					"encryptionKey": {
-						"type": "string"
+						"type": "string",
+						"nullable": true
 					},
 					"received": {
 						"type": "boolean"
 					},
 					"chat": {
 						"$ref": "#/components/schemas/ChatEntity"
+					},
+					"user": {
+						"$ref": "#/components/schemas/UserEntity"
 					}
 				},
 				"required": [
 					"id",
 					"createdAt",
 					"chatId",
-					"publicKeyHash",
+					"userId",
 					"encryptionKey",
 					"received",
-					"chat"
+					"chat",
+					"user"
 				]
 			},
 			"ChatEntity": {
@@ -925,6 +1263,11 @@
 					"createdAt": {
 						"format": "date-time",
 						"type": "string"
+					},
+					"name": {
+						"type": "string",
+						"nullable": true,
+						"maxLength": 64
 					},
 					"title": {
 						"type": "string"
@@ -955,12 +1298,31 @@
 				"required": [
 					"id",
 					"createdAt",
+					"name",
 					"title",
 					"countMessages",
 					"type",
 					"maxUsersOnline",
 					"keys"
 				]
+			},
+			"Metadata": {
+				"type": "object",
+				"properties": {
+					"duration": {
+						"type": "number"
+					},
+					"loudnessData": {
+						"type": "array",
+						"items": {
+							"type": "string"
+						}
+					},
+					"transcriptionVoice": {
+						"type": "object",
+						"nullable": true
+					}
+				}
 			},
 			"FileEntity": {
 				"type": "object",
@@ -994,7 +1356,7 @@
 						"type": "string"
 					},
 					"metadata": {
-						"type": "object"
+						"$ref": "#/components/schemas/Metadata"
 					},
 					"message": {
 						"$ref": "#/components/schemas/FileEntity"
@@ -1041,8 +1403,19 @@
 					"type": {
 						"type": "string"
 					},
+					"userId": {
+						"type": "string"
+					},
 					"chat": {
 						"$ref": "#/components/schemas/ChatEntity"
+					},
+					"user": {
+						"nullable": true,
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/ChatEntity"
+							}
+						]
 					},
 					"parentMessage": {
 						"$ref": "#/components/schemas/MessageEntity"
@@ -1061,7 +1434,8 @@
 					"number",
 					"message",
 					"parentMessageId",
-					"type"
+					"type",
+					"userId"
 				]
 			},
 			"CreateOpenChatDto": {
@@ -1074,6 +1448,39 @@
 				},
 				"required": [
 					"title"
+				]
+			},
+			"KeyDto": {
+				"type": "object",
+				"properties": {
+					"userId": {
+						"type": "string",
+						"description": "Публичный ключ",
+						"maxLength": 64
+					},
+					"encryptionKey": {
+						"type": "string",
+						"description": "Зашифрованный ключ шифрования для чата",
+						"maxLength": 8192
+					}
+				},
+				"required": [
+					"userId",
+					"encryptionKey"
+				]
+			},
+			"KeepKeyDto": {
+				"type": "object",
+				"properties": {
+					"keys": {
+						"type": "array",
+						"items": {
+							"$ref": "#/components/schemas/KeyDto"
+						}
+					}
+				},
+				"required": [
+					"keys"
 				]
 			},
 			"ChatDto": {
@@ -1127,20 +1534,6 @@
 				"required": [
 					"chatIds"
 				]
-			},
-			"Metadata": {
-				"type": "object",
-				"properties": {
-					"duration": {
-						"type": "number"
-					},
-					"loudnessData": {
-						"type": "array",
-						"items": {
-							"type": "string"
-						}
-					}
-				}
 			},
 			"CreateFileDto": {
 				"type": "object",
@@ -1245,60 +1638,6 @@
 					"to",
 					"event",
 					"data"
-				]
-			},
-			"CreateDialogueKeyDto": {
-				"type": "object",
-				"properties": {
-					"publicKeyHash": {
-						"type": "string",
-						"description": "Публичный ключ"
-					},
-					"encryptionKey": {
-						"type": "string",
-						"description": "Зашифрованный общий ключ шифрования для чата"
-					}
-				},
-				"required": [
-					"publicKeyHash",
-					"encryptionKey"
-				]
-			},
-			"CreateDialoguesDto": {
-				"type": "object",
-				"properties": {
-					"keys": {
-						"type": "array",
-						"items": {
-							"$ref": "#/components/schemas/CreateDialogueKeyDto"
-						}
-					}
-				},
-				"required": [
-					"keys"
-				]
-			},
-			"PublicKeyDto": {
-				"type": "object",
-				"properties": {
-					"publicKey": {
-						"type": "string"
-					}
-				},
-				"required": [
-					"publicKey"
-				]
-			},
-			"KeepPublicKeyDto": {
-				"type": "object",
-				"properties": {
-					"publicKey": {
-						"type": "string",
-						"maxLength": 4096
-					}
-				},
-				"required": [
-					"publicKey"
 				]
 			}
 		}

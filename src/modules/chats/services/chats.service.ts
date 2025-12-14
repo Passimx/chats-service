@@ -16,9 +16,9 @@ import { MessageTypeEnum } from '../types/message-type.enum';
 import { SystemMessageLanguageEnum } from '../types/system-message-language.enum';
 import { ChatTypeEnum } from '../types/chat-type.enum';
 import { Mutable } from '../../../common/types/mutable.type';
-import { PublicKeyEntity } from '../../keys/entities/public-key.entity';
-import { ChatKeyEntity } from '../../keys/entities/chat-key.entity';
-import { KeepKeyDto, KeyDto } from '../dto/requests/keep-key.dto';
+import { ChatKeyEntity } from '../entities/chat-key.entity';
+import { KeepKeyDto } from '../dto/requests/keep-key.dto';
+import { UsersRepository } from '../../users/repositories/users.repository';
 import { MessagesService } from './messages.service';
 
 @Injectable()
@@ -26,12 +26,11 @@ export class ChatsService {
     constructor(
         @InjectRepository(MessageEntity)
         readonly messageRepository: EntityRepository<MessageEntity>,
-        @InjectRepository(PublicKeyEntity)
-        private readonly publicKeysRepository: EntityRepository<PublicKeyEntity>,
         @InjectRepository(ChatKeyEntity)
         private readonly chatKeysRepository: EntityRepository<ChatKeyEntity>,
         private readonly queueService: QueueService,
         private readonly messagesService: MessagesService,
+        private readonly usersRepository: UsersRepository,
         readonly chatsRepository: ChatsRepository,
     ) {}
 
@@ -91,17 +90,14 @@ export class ChatsService {
         return new DataResponse(chat);
     }
 
-    public async getPublicKeyAsDialogue(publicKeyHash: string, name: string) {
-        const dialogue = await this.chatsRepository.getDialogueByKeys([
-            { publicKeyHash },
-            { publicKeyHash: name },
-        ] as KeyDto[]);
+    public async getPublicKeyAsDialogue(userId: string, secondUserId: string) {
+        const dialogue = await this.chatsRepository.getDialogueByKeys([{ userId }, { userId: secondUserId }]);
 
-        if (dialogue) return this.prepareDialogue(publicKeyHash, dialogue);
+        if (dialogue) return this.prepareDialogue(userId, dialogue);
 
-        const publicKey = await this.publicKeysRepository.findOne({ name, publicKeyHash: { $ne: publicKeyHash } });
+        const user = await this.usersRepository.findOne({ $and: [{ id: { $ne: userId } }, { id: secondUserId }] });
 
-        if (!publicKey) return null;
+        if (!user) return null;
 
         const chatEntity = new ChatEntity({ type: ChatTypeEnum.IS_DIALOGUE });
         await this.chatsRepository.insert(chatEntity);
@@ -109,14 +105,14 @@ export class ChatsService {
         await this.chatKeysRepository.insertMany([
             {
                 chatId: chatEntity.id,
-                publicKeyHash,
+                userId,
             },
-            { publicKeyHash: publicKey.publicKeyHash, chatId: chatEntity.id },
+            { userId: user.id, chatId: chatEntity.id },
         ] as ChatKeyEntity[]);
 
         const chatWithKeys = await this.chatsRepository.getChatById(chatEntity.id);
 
-        return this.prepareDialogue(publicKeyHash, chatWithKeys!);
+        return this.prepareDialogue(userId, chatWithKeys!);
     }
 
     public async join(chats: ChatDto[], socketId: string): Promise<DataResponse<string | ChatEntity[]>> {
@@ -199,34 +195,38 @@ export class ChatsService {
     public prepareDialogue(socketId: string, chat: ChatEntity): ChatEntity {
         if (chat.type !== ChatTypeEnum.IS_DIALOGUE) return chat;
 
-        const chatKey = chat.keys.find((key) => key.publicKeyHash !== socketId);
+        const chatKey = chat.keys.find((key) => key.userId !== socketId);
 
         if (!chatKey) return chat;
 
         const payload: Mutable<ChatEntity> = { ...chat };
 
-        payload.title = chatKey.publicKey.metadata.name;
-        payload.name = chatKey.publicKey.name;
+        payload.title = chatKey.user.name;
+        payload.name = chatKey.user.name;
 
         return payload;
     }
 
-    public async keepChatKey(publicKeyHash: string, chatId: string, body: KeepKeyDto): Promise<void> {
+    public async receiveKey(chatId: string, userId: string): Promise<void> {
+        await this.chatKeysRepository.nativeUpdate({ chatId, userId }, { received: true });
+    }
+
+    public async keepChatKey(userId: string, chatId: string, body: KeepKeyDto): Promise<void> {
         await this.chatKeysRepository.findOneOrFail(
-            { publicKeyHash, chatId, chat: { type: { $in: [ChatTypeEnum.IS_FAVORITES, ChatTypeEnum.IS_DIALOGUE] } } },
+            { userId, chatId, chat: { type: { $in: [ChatTypeEnum.IS_FAVORITES, ChatTypeEnum.IS_DIALOGUE] } } },
             { populate: ['chat'] },
         );
 
         const tasks: Promise<unknown>[] = [];
 
-        body.keys.forEach(({ publicKeyHash, encryptionKey }) => {
+        body.keys.forEach(({ userId, encryptionKey }) => {
             tasks.push(
-                this.chatKeysRepository.nativeUpdate({ chatId, publicKeyHash, encryptionKey: null }, { encryptionKey }),
+                this.chatKeysRepository.nativeUpdate({ chatId, userId, encryptionKey: null }, { encryptionKey }),
             );
             tasks.push(
                 this.queueService.sendMessage(
                     TopicsEnum.JOIN,
-                    publicKeyHash,
+                    userId,
                     EventsEnum.JOIN_CHAT,
                     new DataResponse<string[]>([chatId]),
                 ),

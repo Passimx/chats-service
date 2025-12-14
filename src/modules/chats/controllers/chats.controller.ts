@@ -46,7 +46,7 @@ export class ChatsController {
         return this.chatsService.findChatByName(name, socketId);
     }
 
-    @Post(':id/keep_chat_key')
+    @Post(':id/keys/keep')
     @ApiDataEmpty()
     keepChatKey(
         @Param('id') chatId: string,
@@ -54,6 +54,12 @@ export class ChatsController {
         @Body() body: KeepKeyDto,
     ): Promise<void> {
         return this.chatsService.keepChatKey(socketId, chatId, body);
+    }
+
+    @Post(':chatId/keys/receive')
+    @ApiDataEmpty()
+    receiveKey(@Param('chatId') chatId: string, @Headers('x-socket-id') socketId: string) {
+        return this.chatsService.receiveKey(chatId, socketId);
     }
 
     @Post('join')

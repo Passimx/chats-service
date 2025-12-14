@@ -1,8 +1,9 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Collection, Entity, Enum, Index, OneToMany, OneToOne, Property } from '@mikro-orm/core';
+import { Collection, Entity, Enum, Index, ManyToOne, OneToMany, OneToOne, Property } from '@mikro-orm/core';
 import { CreatedEntity } from '../../../common/entities/created.entity';
 import { MessageTypeEnum } from '../types/message-type.enum';
 import { MessagesRepository } from '../repositories/messages.repository';
+import { UserEntity } from '../../users/entities/user.entity';
 import { FileEntity } from './file.entity';
 import { ChatEntity } from './chat.entity';
 
@@ -40,12 +41,20 @@ export class MessageEntity extends CreatedEntity {
     })
     readonly type!: MessageTypeEnum;
 
+    @ApiProperty()
+    @Property({ persist: false, hidden: true })
+    readonly userId!: string;
+
     @ApiPropertyOptional({ type: () => ChatEntity, isArray: false })
     @OneToOne(() => ChatEntity, { type: 'uuid', unique: false, hidden: true })
     readonly chat!: ChatEntity;
 
+    @ApiPropertyOptional({ type: () => ChatEntity, nullable: true })
+    @ManyToOne(() => UserEntity, { nullable: true })
+    readonly user!: UserEntity;
+
     @ApiPropertyOptional({ type: () => MessageEntity, isArray: false })
-    @OneToOne(() => MessageEntity, { type: 'uuid', nullable: true, unique: false })
+    @ManyToOne(() => MessageEntity, { type: 'uuid', nullable: true })
     readonly parentMessage!: MessageEntity;
 
     @ApiPropertyOptional({ type: () => FileEntity, isArray: true })

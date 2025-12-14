@@ -7,4 +7,6 @@ export enum MessageErrorEnum {
     INVALID_DATA = 'invalid_data',
     INVALID_PUBLIC_KEYS = 'invalid_public_keys',
     PUBLIC_KEY_NOT_FOUND = 'public_key_not_found',
+    USER_NOT_FOUND = 'user_not_found',
+    USER_ALREADY_EXISTS = 'user_already_exists',
 }

@@ -6,7 +6,7 @@ import projectInfo from '../../../package.json';
 
 export function useSwagger(app: NestFastifyApplication): void {
     const documentBuilder = new DocumentBuilder();
-    documentBuilder.addServer(Envs.swagger.url, Envs.swagger.description);
+    documentBuilder.addServer(Envs.swagger.url);
 
     const config = documentBuilder
         .setTitle(projectInfo.name)

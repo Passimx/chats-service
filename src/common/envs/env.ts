@@ -26,8 +26,7 @@ export const Envs = {
     swagger: {
         path: process.env.SWAGGER_PATH || 'docs',
         isWriteConfig: BooleanUtils.strToBoolWithDefault(process.env.SWAGGER_IS_WRITE_CONFIG, false),
-        url: `http://localhost:${process.env.APP_PORT ?? 3000}`,
-        description: 'development',
+        url: `http://localhost:${process.env.CHATS_SERVICE_APP_PORT ?? 3000}`,
     },
 
     kafka: {

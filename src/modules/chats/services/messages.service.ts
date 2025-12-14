@@ -17,6 +17,7 @@ import { ChatsRepository } from '../repositories/chats.repository';
 import { MessagesRepository } from '../repositories/messages.repository';
 import { FilesRepository } from '../repositories/files.repository';
 import { QueryGetMessagesDto } from '../dto/requests/query-get-messages.dto';
+import { UserEntity } from '../../users/entities/user.entity';
 import { ChatsService } from './chats.service';
 
 @Injectable()
@@ -48,6 +49,8 @@ export class MessagesService {
                 ? await fork.findOneOrFail(MessageEntity, { id: parentMessageId, chatId })
                 : undefined;
 
+            const user = await fork.findOneOrFail(UserEntity, { id: payload.userId });
+
             await fork.nativeUpdate(
                 ChatEntity,
                 { id: chatId, type: { $ne: ChatTypeEnum.IS_SYSTEM } },
@@ -60,6 +63,7 @@ export class MessagesService {
                 ...payload,
                 chat: chat,
                 number: chat.countMessages,
+                user,
                 parentMessage: parentMessage ?? undefined,
             });
 
@@ -91,7 +95,7 @@ export class MessagesService {
             const newMessageEntity: MessageEntity | null = await this.messageRepository.findOne(
                 { id: messageEntity.id },
                 {
-                    populate: ['parentMessage', 'files', 'parentMessage.files'],
+                    populate: ['parentMessage', 'files', 'parentMessage.files', 'user'],
                     orderBy: { files: { createdAt: 'ASC' }, parentMessage: { files: { createdAt: 'ASC' } } },
                 },
             );
@@ -112,17 +116,10 @@ export class MessagesService {
             if (newMessageEntity.number === 1) {
                 const chat = await this.chatsRepository.getChatById(chatId!);
 
-                const tasks: Promise<unknown>[] = chat!.keys.map(({ publicKeyHash }) => {
-                    const response = new DataResponse<ChatEntity>(
-                        this.chatsService.prepareDialogue(publicKeyHash, chat!),
-                    );
+                const tasks: Promise<unknown>[] = chat!.keys.map(({ userId }) => {
+                    const response = new DataResponse<ChatEntity>(this.chatsService.prepareDialogue(userId, chat!));
 
-                    return this.queueService.sendMessage(
-                        TopicsEnum.EMIT,
-                        publicKeyHash,
-                        EventsEnum.CREATE_DIALOGUE,
-                        response,
-                    );
+                    return this.queueService.sendMessage(TopicsEnum.EMIT, userId, EventsEnum.CREATE_DIALOGUE, response);
                 });
                 await Promise.all(tasks);
             } else
