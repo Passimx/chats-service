@@ -31,7 +31,7 @@ export class UserEntity {
     readonly seedPhraseHash?: string;
 
     @ApiProperty()
-    @Property({ defaultRaw: 'NOW()', hidden: true })
+    @Property({ defaultRaw: 'NOW()' })
     readonly createdAt!: Date;
 
     constructor(payload: Partial<UserEntity>) {
