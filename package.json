@@ -1,7 +1,7 @@
 {
   "name": "PassimX",
   "description": "open platform for messaging",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "type": "commonjs",
   "private": false,
   "license": "MIT LICENSE",
