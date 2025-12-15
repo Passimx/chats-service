@@ -45,6 +45,7 @@ export class ChatsService {
             chatId: chatEntity.id,
             type: MessageTypeEnum.IS_CREATED_CHAT,
             message: SystemMessageLanguageEnum.CHAT_IS_CREATE,
+            userId: socketId,
         });
 
         if (!messageResponse.success) return new DataResponse<ChatEntity>(MessageErrorEnum.MESSAGE_NOT_FOUND);
@@ -52,10 +53,10 @@ export class ChatsService {
         const createChat = await this.chatsRepository.findOne({ id: chatEntity.id }, { populate: ['message'] });
 
         const response = new DataResponse<ChatEntity>(createChat!);
-        this.queueService.sendMessage(TopicsEnum.EMIT, socketId, EventsEnum.CREATE_CHAT, response);
+        await this.queueService.sendMessage(TopicsEnum.EMIT, socketId, EventsEnum.CREATE_CHAT, response);
         const chatId: string[] = [chatEntity.id];
 
-        this.queueService.sendMessage(
+        await this.queueService.sendMessage(
             TopicsEnum.JOIN,
             socketId,
             EventsEnum.JOIN_CHAT,
