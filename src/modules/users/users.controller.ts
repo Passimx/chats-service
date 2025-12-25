@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Get, Headers, Param, Patch, Post } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { ApiData } from '../../common/swagger/api-data.decorator';
 import { ApiDataEmpty } from '../../common/swagger/api-data-empty.decorator';
@@ -35,7 +35,7 @@ export class UsersController {
 
     @Patch('update')
     @ApiDataEmpty()
-    updateUser(@Body() body: UpdateDto) {
-        return this.usersService.updateUser(body);
+    updateUser(@Headers('x-socket-id') userId: string, @Body() body: UpdateDto) {
+        return this.usersService.updateUser({ id: userId, ...body });
     }
 }

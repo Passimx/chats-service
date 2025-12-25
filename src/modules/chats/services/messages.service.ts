@@ -119,12 +119,17 @@ export class MessagesService {
                 const tasks: Promise<unknown>[] = chat!.keys.map(({ userId }) => {
                     const response = new DataResponse<ChatEntity>(this.chatsService.prepareDialogue(userId, chat!));
 
-                    return this.queueService.sendMessage(TopicsEnum.EMIT, userId, EventsEnum.CREATE_DIALOGUE, response);
+                    return this.queueService.sendMessage(
+                        TopicsEnum.EMIT_TO_USER_ROOM,
+                        userId,
+                        EventsEnum.CREATE_DIALOGUE,
+                        response,
+                    );
                 });
                 await Promise.all(tasks);
             } else
                 await this.queueService.sendMessage(
-                    TopicsEnum.EMIT,
+                    TopicsEnum.EMIT_TO_CHAT,
                     String(chatId),
                     EventsEnum.CREATE_MESSAGE,
                     response,

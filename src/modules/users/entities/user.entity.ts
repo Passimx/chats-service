@@ -25,10 +25,10 @@ export class UserEntity {
     readonly encryptedRsaPrivateKey!: string;
 
     @Property({ length: 2 ** 6, hidden: true })
-    readonly passwordHash?: string;
+    readonly passwordHash!: string;
 
     @Property({ length: 2 ** 6, hidden: true })
-    readonly seedPhraseHash?: string;
+    readonly seedPhraseHash!: string;
 
     @ApiProperty()
     @Property({ defaultRaw: 'NOW()' })

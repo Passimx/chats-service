@@ -34,7 +34,7 @@ export class ChatsService {
         readonly chatsRepository: ChatsRepository,
     ) {}
 
-    public async createChat(socketId: string, { title }: CreateOpenChatDto): Promise<DataResponse<ChatEntity>> {
+    public async createChat(userId: string, { title }: CreateOpenChatDto): Promise<DataResponse<ChatEntity>> {
         const chatEntity = new ChatEntity({ title });
 
         await this.chatsRepository.insert(chatEntity);
@@ -45,7 +45,7 @@ export class ChatsService {
             chatId: chatEntity.id,
             type: MessageTypeEnum.IS_CREATED_CHAT,
             message: SystemMessageLanguageEnum.CHAT_IS_CREATE,
-            userId: socketId,
+            userId,
         });
 
         if (!messageResponse.success) return new DataResponse<ChatEntity>(MessageErrorEnum.MESSAGE_NOT_FOUND);
@@ -53,15 +53,16 @@ export class ChatsService {
         const createChat = await this.chatsRepository.findOne({ id: chatEntity.id }, { populate: ['message'] });
 
         const response = new DataResponse<ChatEntity>(createChat!);
-        await this.queueService.sendMessage(TopicsEnum.EMIT, socketId, EventsEnum.CREATE_CHAT, response);
         const chatId: string[] = [chatEntity.id];
 
         await this.queueService.sendMessage(
             TopicsEnum.JOIN,
-            socketId,
+            userId,
             EventsEnum.JOIN_CHAT,
             new DataResponse<string[]>(chatId),
         );
+
+        await this.queueService.sendMessage(TopicsEnum.EMIT_TO_USER_ROOM, userId, EventsEnum.CREATE_CHAT, response);
 
         return response;
     }

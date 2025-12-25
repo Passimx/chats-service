@@ -1,5 +1,6 @@
 export enum TopicsEnum {
-    EMIT = 'emit',
+    EMIT_TO_CHAT = 'emit_to_chat',
+    EMIT_TO_USER_ROOM = 'emit_to_user_room',
     JOIN = 'join',
     LEAVE = 'leave',
     ONLINE = 'online',

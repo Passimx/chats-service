@@ -11,7 +11,6 @@ import { FavoriteChatsDto } from '../dto/requests/post-favorites-chat.dto';
 import { LeaveChatsDto } from '../dto/requests/post-leave-chat.dto';
 import { ApiDataEmpty } from '../../../common/swagger/api-data-empty.decorator';
 import { TopicsEnum } from '../../queue/types/topics.enum';
-import { OnlineCountUsers } from '../types/max-online-users';
 import { KeepKeyDto } from '../dto/requests/keep-key.dto';
 
 @ApiTags('Chats')
@@ -23,9 +22,9 @@ export class ChatsController {
     @ApiData(ChatEntity)
     createChat(
         @Body() body: CreateOpenChatDto,
-        @Headers('x-socket-id') socketId: string,
+        @Headers('x-socket-id') userId: string,
     ): Promise<DataResponse<string | ChatEntity>> {
-        return this.chatsService.createChat(socketId, body);
+        return this.chatsService.createChat(userId, body);
     }
 
     @Get()
@@ -80,11 +79,11 @@ export class ChatsController {
         return this.chatsService.leave(leaveChatsDto.chatIds, socketId);
     }
 
-    @MessagePattern(TopicsEnum.ONLINE)
-    onlineCountUsers(message: OnlineCountUsers) {
-        const { roomName, onlineUsers } = message.data;
-        this.chatsService.updateMaxUsersOnline(roomName, onlineUsers);
-    }
+    // @MessagePattern(TopicsEnum.ONLINE)
+    // onlineCountUsers(message: OnlineCountUsers) {
+    //     const { roomName, onlineUsers } = message.data;
+    //     this.chatsService.updateMaxUsersOnline(roomName, onlineUsers);
+    // }
 
     @MessagePattern(TopicsEnum.PUT_SYSTEM_CHATS)
     putSystemChats() {

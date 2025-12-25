@@ -23,7 +23,7 @@ export class ChatKeyEntity extends CreatedEntity {
     readonly userId!: string;
 
     @ApiProperty({ nullable: true })
-    @Property({ length: 4096, nullable: true })
+    @Property({ length: 2 ** 12, nullable: true })
     readonly encryptionKey!: string;
 
     @ApiProperty()
