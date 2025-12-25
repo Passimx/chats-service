@@ -17,4 +17,18 @@ export class FilesService {
             { metadata: { ...(file.metadata || {}), transcriptionVoice } },
         );
     }
+
+    public async getFilesByMediaType(
+        userId: string,
+        query: QueryGetFilesDto,
+    ): Promise<{ files: Array<{ fileId: string; chatId: string }>; nextOffset?: string }> {
+        const result = await this.fileRepository.findFilesByMediaType(userId, query)
+
+        //дописать логику
+
+        return {
+            files: result,
+            nextOffset
+        }
+    }
 }

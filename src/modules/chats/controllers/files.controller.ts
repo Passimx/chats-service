@@ -4,6 +4,9 @@ import { FilesService } from '../services/files.service';
 import { MessageDto } from '../../queue/dto/message.dto';
 import { TranscriptionResponseDto } from '../dto/response/transcription-response.dto';
 import { TopicsEnum } from '../../queue/types/topics.enum';
+import { ApiData } from '../../../common/swagger/api-data.decorator';
+import { QueryGetFilesDto } from '../dto/requests/query-get-files.dto';
+import { DataResponse } from '../../../common/swagger/data-response.dto';
 
 @Controller('transcription')
 export class FilesController {
@@ -16,5 +19,13 @@ export class FilesController {
         const response = body.data.data as TranscriptionResponseDto;
 
         return this.filesService.addTranscriptionVoice(response.fileId, response.transcription);
+    }
+    
+    @Get('media')
+    @ApiOperation({ summary: 'Get files from media type' })
+    @ApiData(Object, false)
+    async getFilesMediaType(@Query() query: QueryGetFilesDto, @Headers('x-socket-id') userId: string): Promise<DataResponse<{files: Array<{fileId: string; chatId: string}>; nextOffset?: string}>>{
+        const result = await this.filesService.getFilesByMediaType(userId, query)
+        return new DataResponse(result)
     }
 }
