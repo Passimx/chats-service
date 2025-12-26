@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { FilesRepository } from '../repositories/files.repository';
+import { QueryGetFilesDto } from '../dto/requests/query-get-files.dto';
 
 @Injectable()
 export class FilesService {
@@ -22,13 +23,18 @@ export class FilesService {
         userId: string,
         query: QueryGetFilesDto,
     ): Promise<{ files: Array<{ fileId: string; chatId: string }>; nextOffset?: string }> {
-        const result = await this.fileRepository.findFilesByMediaType(userId, query)
+        const files = await this.fileRepository.findFilesByMediaType(userId, query);
 
-        //дописать логику
+        const result = files.map((file) => ({
+            fileId: file.key,
+            chatId: file.chatId,
+        }));
+
+        const nextOffset = files.length === query.limit && files.length > 0 ? files[files.length - 1].id : undefined;
 
         return {
             files: result,
-            nextOffset
-        }
+            nextOffset,
+        };
     }
 }

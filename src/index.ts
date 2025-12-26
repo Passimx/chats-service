@@ -23,8 +23,7 @@ export class App {
 
         if (Envs.postgres.migrationsRun) {
             const migrationService = app.get(MigrationService);
-
-            if (Envs.postgres.migrationsRun) await migrationService.migrate();
+            await migrationService.migrate();
         }
 
         app.enableCors({

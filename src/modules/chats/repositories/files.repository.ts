@@ -1,12 +1,14 @@
 import { SqlEntityRepository, QueryOrder } from '@mikro-orm/postgresql';
 import { FileEntity } from '../entities/file.entity';
-import { QueryGetFilesDto, MediaTypeEnum } from '../dto/requests/query-get-files.dto';
+import { QueryGetFilesDto } from '../dto/requests/query-get-files.dto';
 import { ChatTypeEnum } from '../types/chat-type.enum';
+import { FileEnum } from '../types/file.enum';
 
 export class FilesRepository extends SqlEntityRepository<FileEntity> {
     getFile(publicKeyHash: string, body: Partial<FileEntity>): Promise<FileEntity | null> {
         const qb = this.createQueryBuilder('file');
         qb.andWhere(body);
+
         return qb.getSingleResult();
     }
 
@@ -27,11 +29,11 @@ export class FilesRepository extends SqlEntityRepository<FileEntity> {
             .limit(limit);
 
         // Фильтрация по mimeType
-        if (mediaType === MediaTypeEnum.PHOTO) {
+        if (mediaType === FileEnum.IS_PHOTO) {
             qb.andWhere({ 'file.mimeType': { $like: 'image/%' } });
-        } else if (mediaType === MediaTypeEnum.VIDEO) {
+        } else if (mediaType === FileEnum.IS_VIDEO) {
             qb.andWhere({ 'file.mimeType': { $like: 'video/%' } });
-        } else if (mediaType === MediaTypeEnum.AUDIO) {
+        } else if (mediaType === FileEnum.IS_AUDIO) {
             qb.andWhere({ 'file.mimeType': { $like: 'audio/%' } });
         }
 

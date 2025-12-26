@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsString, IsNumber, IsOptional, IsEnum } from 'class-validator';
 import { FileEnum } from '../../types/file.enum';
 
@@ -7,15 +7,17 @@ export class QueryGetFilesDto {
     @IsString()
     readonly chatId!: string;
 
-    @ApiProperty({ enum: FileEnum })
+    @ApiPropertyOptional({ enum: FileEnum })
+    @IsOptional()
     @IsEnum(FileEnum)
-    readonly mediaType!: FileEnum;
+    readonly mediaType?: FileEnum;
 
-    @ApiProperty()
+    @ApiPropertyOptional()
+    @IsOptional()
     @IsNumber()
-    readonly limit!: number;
+    readonly limit?: number;
 
-    @ApiProperty({ required: false })
+    @ApiPropertyOptional()
     @IsOptional()
     @IsString()
     readonly offset?: string;
