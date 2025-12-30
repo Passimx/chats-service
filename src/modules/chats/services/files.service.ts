@@ -20,17 +20,15 @@ export class FilesService {
     }
 
     public async getFilesByMediaType(
-        userId: string,
         query: QueryGetFilesDto,
-    ): Promise<{ files: Array<{ fileId: string; chatId: string }>; nextOffset?: string }> {
-        const files = await this.fileRepository.findFilesByMediaType(userId, query);
+    ): Promise<{ files: Array<{ fileId: string }>; nextOffset?: number }> {
+        const files = await this.fileRepository.findFilesByMediaType(query);
 
         const result = files.map((file) => ({
             fileId: file.key,
-            chatId: file.chatId,
         }));
 
-        const nextOffset = files.length === query.limit && files.length > 0 ? files[files.length - 1].id : undefined;
+        const nextOffset = files.length === query.limit && query.limit ? (query.offset || 0) + query.limit : undefined;
 
         return {
             files: result,

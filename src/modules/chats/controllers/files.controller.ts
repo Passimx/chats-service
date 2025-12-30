@@ -1,4 +1,4 @@
-import { Controller, Get, Query, Headers } from '@nestjs/common';
+import { Controller, Get, Query } from '@nestjs/common';
 import { EventPattern, Payload } from '@nestjs/microservices';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { FilesService } from '../services/files.service';
@@ -28,9 +28,8 @@ export class FilesController {
     @ApiData(Object, false)
     async getFilesMediaType(
         @Query() query: QueryGetFilesDto,
-        @Headers('x-socket-id') userId: string,
-    ): Promise<DataResponse<{ files: Array<{ fileId: string; chatId: string }>; nextOffset?: string }>> {
-        const result = await this.filesService.getFilesByMediaType(userId, query);
+    ): Promise<DataResponse<{ files: Array<{ fileId: string }>; nextOffset?: number }>> {
+        const result = await this.filesService.getFilesByMediaType(query);
 
         return new DataResponse(result);
     }

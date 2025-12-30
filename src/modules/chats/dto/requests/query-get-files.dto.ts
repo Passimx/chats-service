@@ -19,6 +19,6 @@ export class QueryGetFilesDto {
 
     @ApiPropertyOptional()
     @IsOptional()
-    @IsString()
-    readonly offset?: string;
+    @IsNumber()
+    readonly offset?: number;
 }
