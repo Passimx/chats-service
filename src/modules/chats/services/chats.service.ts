@@ -92,7 +92,7 @@ export class ChatsService {
         return new DataResponse(chat);
     }
 
-    public async getPublicKeyAsDialogue(userId: string, secondUserId: string) {
+    public async getPublicKeyAsDialogue(userId: string, secondUserId?: string) {
         const dialogue = await this.chatsRepository.getDialogueByKeys([{ userId }, { userId: secondUserId }]);
 
         if (dialogue) return this.prepareDialogue(userId, dialogue);
@@ -204,7 +204,7 @@ export class ChatsService {
         const payload: Mutable<ChatEntity> = { ...chat };
 
         payload.title = chatKey.user.name;
-        payload.name = chatKey.user.name;
+        payload.name = chatKey.user.userName;
 
         return payload;
     }

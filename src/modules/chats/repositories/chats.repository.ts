@@ -10,7 +10,7 @@ const lastMessageCondition = { 'chats.count_messages': raw('"message".number') }
 export class ChatsRepository extends SqlEntityRepository<ChatEntity> {
     public findChats(
         userId: string,
-        { search, limit, offset, notFavoriteChatIds }: QueryGetChatsDto,
+        { search, limit, offset, chatIds, notFavoriteChatIds }: QueryGetChatsDto,
     ): Promise<ChatEntity[]> {
         const qb = this.getSubChats()
             .leftJoin('chats.keys', 'userKey', { 'userKey.userId': userId })
@@ -27,6 +27,10 @@ export class ChatsRepository extends SqlEntityRepository<ChatEntity> {
             })
             .limit(limit)
             .offset(offset);
+
+        if (chatIds?.length) {
+            qb.andWhere('chats.id IN (?)', [chatIds]);
+        }
 
         if (search?.length) {
             const queryWords = search.toLowerCase().split(' ');
