@@ -90,17 +90,15 @@ export class ChatsRepository extends SqlEntityRepository<ChatEntity> {
     }
 
     public async getDialogueByKeys(keys: Partial<ChatKeyEntity>[]): Promise<ChatEntity | null> {
-        const qb = this.createQueryBuilder('chats')
-            .leftJoinAndSelect('chats.keys', 'keys')
-            .leftJoinAndSelect('keys.user', 'user')
-            .orderBy({
-                message: {
-                    files: { createdAt: QueryOrder.ASC },
-                    parentMessage: { files: { createdAt: QueryOrder.ASC } },
-                },
-            });
+        const qb = this.getSubChats().orderBy({
+            message: {
+                files: { createdAt: QueryOrder.ASC },
+                parentMessage: { files: { createdAt: QueryOrder.ASC } },
+            },
+        });
 
-        if (keys.length === 1) qb.andWhere({ 'chats.type': ChatTypeEnum.IS_FAVORITES });
+        if (keys.length === 1 || keys[0]?.userId === keys[1]?.userId)
+            qb.andWhere({ 'chats.type': ChatTypeEnum.IS_FAVORITES });
 
         keys.forEach(({ userId }, index) => {
             const alias = `key_${index}`;

@@ -72,7 +72,7 @@ export class ChatsService {
         const data = chats.map((chat) => this.prepareDialogue(socketId, chat));
 
         if (!chats.length) {
-            const chat = await this.getPublicKeyAsDialogue(socketId, query.search);
+            const chat = await this.getDialogueByKeys(socketId, query.search);
 
             if (chat && !query.notFavoriteChatIds?.includes(chat.id)) data.push(chat);
         }
@@ -85,14 +85,14 @@ export class ChatsService {
 
         if (chat) return new DataResponse(this.prepareDialogue(publicKeyHash, chat));
 
-        chat = await this.getPublicKeyAsDialogue(publicKeyHash, name);
+        chat = await this.getDialogueByKeys(publicKeyHash, name);
 
         if (!chat) return new DataResponse(MessageErrorEnum.CHAT_WITH_ID_NOT_FOUND);
 
         return new DataResponse(chat);
     }
 
-    public async getPublicKeyAsDialogue(userId: string, secondUserId?: string) {
+    public async getDialogueByKeys(userId: string, secondUserId?: string) {
         const dialogue = await this.chatsRepository.getDialogueByKeys([{ userId }, { userId: secondUserId }]);
 
         if (dialogue) return this.prepareDialogue(userId, dialogue);
@@ -215,7 +215,12 @@ export class ChatsService {
 
     public async keepChatKey(userId: string, chatId: string, body: KeepKeyDto): Promise<void> {
         await this.chatKeysRepository.findOneOrFail(
-            { userId, chatId, chat: { type: { $in: [ChatTypeEnum.IS_FAVORITES, ChatTypeEnum.IS_DIALOGUE] } } },
+            {
+                userId,
+                chatId,
+                chat: { type: { $in: [ChatTypeEnum.IS_FAVORITES, ChatTypeEnum.IS_DIALOGUE] } },
+                encryptionKey: null,
+            },
             { populate: ['chat'] },
         );
 
