@@ -30,6 +30,14 @@ export class ChatKeyEntity extends CreatedEntity {
     @Property({ default: false })
     readonly received!: boolean;
 
+    @ApiProperty()
+    @Property({ default: false })
+    readonly isMember!: boolean;
+
+    @ApiProperty()
+    @Property({ default: 0 })
+    readonly readMessageNumber!: number;
+
     @ApiProperty({ type: () => ChatEntity })
     @ManyToOne(() => ChatEntity, { lazy: true })
     readonly chat!: ChatEntity;

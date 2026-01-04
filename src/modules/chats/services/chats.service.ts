@@ -11,7 +11,6 @@ import { MessageEntity } from '../entities/message.entity';
 import { ChatsRepository } from '../repositories/chats.repository';
 import { QueryGetChatsDto } from '../dto/requests/query-get-chats.dto';
 import { CreateOpenChatDto } from '../dto/requests/create-open-chat.dto';
-import { ChatDto } from '../dto/requests/post-favorites-chat.dto';
 import { MessageTypeEnum } from '../types/message-type.enum';
 import { SystemMessageLanguageEnum } from '../types/system-message-language.enum';
 import { ChatTypeEnum } from '../types/chat-type.enum';
@@ -19,6 +18,7 @@ import { Mutable } from '../../../common/types/mutable.type';
 import { ChatKeyEntity } from '../entities/chat-key.entity';
 import { KeepKeyDto } from '../dto/requests/keep-key.dto';
 import { UsersRepository } from '../../users/repositories/users.repository';
+import { UpdateReadChatType } from '../dto/response/update-read-chat.dto';
 import { MessagesService } from './messages.service';
 
 @Injectable()
@@ -39,6 +39,7 @@ export class ChatsService {
 
         await this.chatsRepository.insert(chatEntity);
         await this.chatsRepository.nativeUpdate({ id: chatEntity.id }, { name: chatEntity.id });
+        await this.chatKeysRepository.insert({ chatId: chatEntity.id, userId } as ChatKeyEntity);
 
         const messageResponse = await this.messagesService.createMessage({
             chat: chatEntity,
@@ -52,19 +53,9 @@ export class ChatsService {
 
         const createChat = await this.chatsRepository.findOne({ id: chatEntity.id }, { populate: ['message'] });
 
-        const response = new DataResponse<ChatEntity>(createChat!);
-        const chatId: string[] = [chatEntity.id];
+        await this.joinUserToChat(userId, chatEntity.id);
 
-        await this.queueService.sendMessage(
-            TopicsEnum.JOIN,
-            userId,
-            EventsEnum.JOIN_CHAT,
-            new DataResponse<string[]>(chatId),
-        );
-
-        await this.queueService.sendMessage(TopicsEnum.EMIT_TO_USER_ROOM, userId, EventsEnum.CREATE_CHAT, response);
-
-        return response;
+        return new DataResponse<ChatEntity>(createChat!);
     }
 
     public async getChats(socketId: string, query: QueryGetChatsDto): Promise<DataResponse<ChatEntity[]>> {
@@ -92,6 +83,18 @@ export class ChatsService {
         return new DataResponse(chat);
     }
 
+    public async listenChats(userId: string) {
+        const chats = await this.chatsRepository.getUserChats(userId);
+        const chatIds = chats?.map((chat) => chat.id);
+
+        await this.queueService.sendMessage(
+            TopicsEnum.JOIN_USER_TO_CHAT,
+            userId,
+            EventsEnum.JOIN_CHAT,
+            new DataResponse<string[]>(chatIds),
+        );
+    }
+
     public async getDialogueByKeys(userId: string, secondUserId?: string) {
         const dialogue = await this.chatsRepository.getDialogueByKeys([{ userId }, { userId: secondUserId }]);
 
@@ -117,81 +120,12 @@ export class ChatsService {
         return this.prepareDialogue(userId, chatWithKeys!);
     }
 
-    public async join(chats: ChatDto[], socketId: string): Promise<DataResponse<string | ChatEntity[]>> {
-        const response: ChatEntity[] = [];
-        const chatIdsSet = new Set<string>();
-
-        // новые чаты
-        const notReceivedChats = await this.chatsRepository.getNotReceivedChats(socketId);
-        notReceivedChats?.forEach((chat) => {
-            response.push(this.prepareDialogue(socketId, chat));
-            chatIdsSet.add(chat.id);
-        });
-
-        const promises = chats.map(async ({ chatId, lastMessage, maxUsersOnline }) => {
-            const chat = await this.chatsRepository.getChatById(chatId);
-
-            if (!chat || chatIdsSet.has(chat?.id)) return;
-
-            if (chat) chatIdsSet.add(chat.id);
-
-            if (chat && (chat.countMessages > lastMessage || chat.maxUsersOnline > maxUsersOnline)) {
-                response.push(this.prepareDialogue(socketId, chat));
-            }
-        });
-
-        await Promise.allSettled(promises);
-
-        const responseChats = new DataResponse<string[]>(Array.from(chatIdsSet));
-        this.queueService.sendMessage(TopicsEnum.JOIN, socketId, EventsEnum.JOIN_CHAT, responseChats);
-
-        return new DataResponse<ChatEntity[]>(response);
-    }
-
-    public async leave(chatIds: string[], socketId: string): Promise<DataResponse<object>> {
-        const filterLeaveChat = await this.chatsRepository.find({
-            id: { $in: chatIds },
-        });
-
-        const chatIdsFound = filterLeaveChat.map((chat) => chat.id);
-        const response: DataResponse<string[]> = new DataResponse<string[]>(chatIdsFound);
-        this.queueService.sendMessage(TopicsEnum.LEAVE, socketId, EventsEnum.LEAVE_CHAT, response);
-
-        return new DataResponse<object>({});
-    }
-
-    public updateMaxUsersOnline(chatId: string, maxOnline: number): Promise<number> {
-        return this.chatsRepository.nativeUpdate(
-            {
-                id: chatId,
-                maxUsersOnline: { $lt: maxOnline },
-            },
-            { maxUsersOnline: maxOnline },
-        );
-    }
-
     public async getSystemChats(): Promise<DataResponse<string | ChatEntity[]>> {
         const systemChats = await this.chatsRepository.getSystemChats();
 
         if (!systemChats) return new DataResponse(MessageErrorEnum.CHAT_WITH_ID_NOT_FOUND);
 
         return new DataResponse<ChatEntity[]>(systemChats);
-    }
-
-    public async putSystemcChats() {
-        const response = await this.getSystemChats();
-
-        if (typeof response.data === 'string') {
-            return;
-        }
-
-        const chatIds = response.data.map((chat) => chat.id);
-        await this.queueService.sendMessage(
-            TopicsEnum.SYSTEM_CHATS,
-            undefined,
-            EventsEnum.GET_SYSTEM_CHAT,
-            new DataResponse(chatIds),
-        );
     }
 
     public prepareDialogue(socketId: string, chat: ChatEntity): ChatEntity {
@@ -213,6 +147,46 @@ export class ChatsService {
         await this.chatKeysRepository.nativeUpdate({ chatId, userId }, { received: true });
     }
 
+    public async readMessage(userId: string, chatId: string, readMessageNumber: number): Promise<void> {
+        await this.chatKeysRepository.nativeUpdate(
+            { chatId, userId, readMessageNumber: { $lt: readMessageNumber } },
+            { readMessageNumber },
+        );
+
+        await this.queueService.sendMessage(
+            TopicsEnum.EMIT_TO_USER_ROOM,
+            userId,
+            EventsEnum.UPDATE_CHAT,
+            new DataResponse<UpdateReadChatType>({ id: chatId, readMessage: readMessageNumber }),
+        );
+    }
+
+    public async joinConnectionToChat(connectionsName: string, chatId: string) {
+        await this.queueService.sendMessage(
+            TopicsEnum.JOIN_CONNECTION_TO_CHAT,
+            connectionsName,
+            EventsEnum.JOIN_CHAT,
+            new DataResponse([chatId]),
+        );
+    }
+    public async leaveConnectionFromChat(connectionsName: string, chatId: string) {
+        await this.queueService.sendMessage(
+            TopicsEnum.LEAVE_CONNECTION_FROM_CHAT,
+            connectionsName,
+            EventsEnum.LEAVE_CHAT,
+            new DataResponse([chatId]),
+        );
+    }
+
+    public async leaveConnection(connectionsName: string, chatId: string) {
+        await this.queueService.sendMessage(
+            TopicsEnum.LEAVE_CONNECTION_FROM_CHAT,
+            connectionsName,
+            EventsEnum.LEAVE_CHAT,
+            new DataResponse([chatId]),
+        );
+    }
+
     public async keepChatKey(userId: string, chatId: string, body: KeepKeyDto): Promise<void> {
         await this.chatKeysRepository.findOneOrFail(
             {
@@ -232,7 +206,7 @@ export class ChatsService {
             );
             tasks.push(
                 this.queueService.sendMessage(
-                    TopicsEnum.JOIN,
+                    TopicsEnum.JOIN_USER_TO_CHAT,
                     userId,
                     EventsEnum.JOIN_CHAT,
                     new DataResponse<string[]>([chatId]),
@@ -241,5 +215,69 @@ export class ChatsService {
         });
 
         await Promise.all(tasks);
+    }
+
+    public async joinUserToChat(userId: string, chatId: string): Promise<void> {
+        const [chat] = await this.chatsRepository.findChats(userId, { chatIds: [chatId] });
+
+        if (!chat) return;
+
+        const chatKey = await this.chatKeysRepository.upsert(
+            { chatId, userId, readMessageNumber: chat.countMessages, isMember: true } as ChatKeyEntity,
+            {
+                onConflictFields: ['userId', 'chatId'],
+            },
+        );
+        chat.keys.add(chatKey);
+
+        await this.queueService.sendMessage(
+            TopicsEnum.EMIT_TO_USER_ROOM,
+            userId,
+            EventsEnum.JOIN_CHAT,
+            new DataResponse<ChatEntity>(this.prepareDialogue(userId, chat)),
+        );
+        await this.queueService.sendMessage(
+            TopicsEnum.JOIN_USER_TO_CHAT,
+            userId,
+            EventsEnum.JOIN_CHAT,
+            new DataResponse<string[]>([chatId]),
+        );
+    }
+
+    public async leaveUserAllChats(userId: string): Promise<void> {
+        const chats = await this.chatsRepository.getUserChats(userId);
+        const chatIds = chats?.map((chat) => chat.id);
+
+        await this.chatKeysRepository.nativeUpdate({ userId, isMember: true }, { isMember: false });
+
+        await this.queueService.sendMessage(
+            TopicsEnum.EMIT_TO_USER_ROOM,
+            userId,
+            EventsEnum.LEAVE_CHAT,
+            new DataResponse<string[]>(chatIds),
+        );
+        await this.queueService.sendMessage(
+            TopicsEnum.LEAVE_USER_FROM_CHAT,
+            userId,
+            EventsEnum.LEAVE_CHAT,
+            new DataResponse<string[]>(chatIds),
+        );
+    }
+
+    public async leaveUserFromChat(userId: string, chatId: string): Promise<void> {
+        await this.chatKeysRepository.nativeUpdate({ chatId, userId, isMember: true }, { isMember: false });
+
+        await this.queueService.sendMessage(
+            TopicsEnum.EMIT_TO_USER_ROOM,
+            userId,
+            EventsEnum.LEAVE_CHAT,
+            new DataResponse<string[]>([chatId]),
+        );
+        await this.queueService.sendMessage(
+            TopicsEnum.LEAVE_USER_FROM_CHAT,
+            userId,
+            EventsEnum.LEAVE_CHAT,
+            new DataResponse<string[]>([chatId]),
+        );
     }
 }

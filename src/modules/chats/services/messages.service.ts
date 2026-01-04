@@ -92,7 +92,7 @@ export class MessagesService {
 
             await fork.commit();
 
-            const newMessageEntity: MessageEntity | null = await this.messageRepository.findOne(
+            const newMessageEntity: MessageEntity | null = await this.messageRepository.findOneOrFail(
                 { id: messageEntity.id },
                 {
                     populate: ['parentMessage', 'files', 'parentMessage.files', 'user'],
@@ -100,19 +100,13 @@ export class MessagesService {
                 },
             );
 
-            if (!newMessageEntity) {
-                await fork.rollback();
-
-                return new DataResponse(MessageErrorEnum.MESSAGE_NOT_FOUND);
-            }
-
             const response = new DataResponse<MessageEntity | string>(newMessageEntity);
 
             // Отправляем запросы на транскрипцию для голосовых файлов
-            if (transcriptionVoice !== null) {
-                await this.sendTranscriptionRequests(messageEntity.files.getItems());
-            }
+            if (transcriptionVoice !== null) await this.sendTranscriptionRequests(messageEntity.files.getItems());
 
+            // todo
+            // переделать код - какая-то дич
             if (newMessageEntity.number === 1) {
                 const chat = await this.chatsRepository.getChatById(chatId!);
 
@@ -122,7 +116,7 @@ export class MessagesService {
                     return this.queueService.sendMessage(
                         TopicsEnum.EMIT_TO_USER_ROOM,
                         userId,
-                        EventsEnum.CREATE_DIALOGUE,
+                        EventsEnum.JOIN_CHAT,
                         response,
                     );
                 });

@@ -90,12 +90,14 @@ export class ChatsRepository extends SqlEntityRepository<ChatEntity> {
     }
 
     public async getDialogueByKeys(keys: Partial<ChatKeyEntity>[]): Promise<ChatEntity | null> {
-        const qb = this.getSubChats().orderBy({
-            message: {
-                files: { createdAt: QueryOrder.ASC },
-                parentMessage: { files: { createdAt: QueryOrder.ASC } },
-            },
-        });
+        const qb = this.getSubChats()
+            .andWhere('chats.type IN (?)', [[ChatTypeEnum.IS_FAVORITES, ChatTypeEnum.IS_DIALOGUE]])
+            .orderBy({
+                message: {
+                    files: { createdAt: QueryOrder.ASC },
+                    parentMessage: { files: { createdAt: QueryOrder.ASC } },
+                },
+            });
 
         if (keys.length === 1 || keys[0]?.userId === keys[1]?.userId)
             qb.andWhere({ 'chats.type': ChatTypeEnum.IS_FAVORITES });
@@ -120,20 +122,14 @@ export class ChatsRepository extends SqlEntityRepository<ChatEntity> {
         return qb.getSingleResult();
     }
 
-    public async getNotReceivedChats(userId: string): Promise<ChatEntity[]> {
+    getUserChats(userId: string) {
         return this.getSubChats()
-            .innerJoin('chats.keys', 'key', { 'key.userId': userId, 'key.received': false })
-            .where({ type: ChatTypeEnum.IS_DIALOGUE })
-            .orderBy({
-                message: {
-                    files: { createdAt: QueryOrder.ASC },
-                    parentMessage: { files: { createdAt: QueryOrder.ASC } },
-                },
-            })
-            .getResult();
+            .select('chats.id')
+            .andWhere('"keys".user_id = ?', [userId])
+            .andWhere('"keys".is_member IS ?', [true]);
     }
 
-    public getSubChats(): SelectQueryBuilder<ChatEntity> {
+    private getSubChats(): SelectQueryBuilder<ChatEntity> {
         return this.createQueryBuilder('chats')
             .leftJoinAndSelect('chats.message', 'message', lastMessageCondition)
             .leftJoinAndSelect('message.parentMessage', 'parentMessage')

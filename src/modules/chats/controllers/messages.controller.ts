@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Headers, Param, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Headers, Param, ParseUUIDPipe, Post, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { CreateMessageDto } from '../dto/requests/create-post-message.dto';
 import { MessagesService } from '../services/messages.service';
@@ -38,7 +38,7 @@ export class MessagesController {
     @Get(':messageId/files/:fileId')
     getFile(
         @Param('fileId') fileId: string,
-        @Param('messageId') messageId: string,
+        @Param('messageId', ParseUUIDPipe) messageId: string,
         @Headers('x-socket-id') socketId: string,
     ): Promise<DataResponse<FileEntity | string>> {
         return this.messagesService.getFile(socketId, messageId, fileId);
