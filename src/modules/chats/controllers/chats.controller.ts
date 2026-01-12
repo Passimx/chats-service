@@ -41,34 +41,34 @@ export class ChatsController {
     @ApiData(ChatEntity, true)
     getChats(
         @Query() query: QueryGetChatsDto,
-        @Headers('x-socket-id') socketId: string,
+        @Headers('x-socket-id') userId: string,
     ): Promise<DataResponse<ChatEntity[]>> {
-        return this.chatsService.getChats(socketId, query);
+        return this.chatsService.getChats(userId, query);
     }
 
     @Get(':name')
     @ApiData(ChatEntity, true)
     getChatByName(
         @Param('name') name: string,
-        @Headers('x-socket-id') socketId: string,
+        @Headers('x-socket-id') userId: string,
     ): Promise<DataResponse<string | ChatEntity>> {
-        return this.chatsService.findChatByName(name, socketId);
+        return this.chatsService.findChatByName(name, userId);
     }
 
     @Post(':id/keys/keep')
     @ApiDataEmpty()
     keepChatKey(
         @Param('id', ParseUUIDPipe) chatId: string,
-        @Headers('x-socket-id') socketId: string,
+        @Headers('x-socket-id') userId: string,
         @Body() body: KeepKeyDto,
     ): Promise<void> {
-        return this.chatsService.keepChatKey(socketId, chatId, body);
+        return this.chatsService.keepChatKey(userId, chatId, body);
     }
 
     @Post(':chatId/keys/receive')
     @ApiDataEmpty()
-    receiveKey(@Param('chatId', ParseUUIDPipe) chatId: string, @Headers('x-socket-id') socketId: string) {
-        return this.chatsService.receiveKey(chatId, socketId);
+    receiveKey(@Param('chatId', ParseUUIDPipe) chatId: string, @Headers('x-socket-id') userId: string) {
+        return this.chatsService.receiveKey(chatId, userId);
     }
 
     @Post(':chatId/listen')

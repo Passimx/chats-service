@@ -8,23 +8,16 @@ import { ChatKeyEntity } from '../entities/chat-key.entity';
 const lastMessageCondition = { 'chats.count_messages': raw('"message".number') };
 
 export class ChatsRepository extends SqlEntityRepository<ChatEntity> {
-    public findChats(
-        userId: string,
-        { search, limit, offset, chatIds, notFavoriteChatIds }: QueryGetChatsDto,
-    ): Promise<ChatEntity[]> {
+    public findChats(userId: string, { search, limit, offset, chatIds }: QueryGetChatsDto): Promise<ChatEntity[]> {
         const qb = this.getSubChats()
-            .leftJoin('chats.keys', 'userKey', { 'userKey.userId': userId })
-            .where({ id: { $nin: notFavoriteChatIds } })
-            .andWhere({
-                $or: [
-                    { 'chats.type': { $in: [ChatTypeEnum.IS_OPEN, ChatTypeEnum.IS_SYSTEM] } },
-                    { 'userKey.userId': userId },
-                ],
-            })
             .orderBy({
                 maxUsersOnline: QueryOrder.DESC_NULLS_LAST,
                 message: { createdAt: QueryOrder.DESC },
             })
+            .andWhere(
+                'NOT EXISTS(SELECT * FROM chat_keys WHERE user_id = ? AND chat_id = "chats".id AND is_member IS ?)',
+                [userId, true],
+            )
             .limit(limit)
             .offset(offset);
 
@@ -34,44 +27,41 @@ export class ChatsRepository extends SqlEntityRepository<ChatEntity> {
 
         if (search?.length) {
             const queryWords = search.toLowerCase().split(' ');
-            const arrayWords = queryWords.map((word) => ({
-                $or: [{ title: { $ilike: `${word}%` } }, { title: { $ilike: `% ${word}%` } }],
-            }));
+            const arrayWords = queryWords.map((word) => [
+                {
+                    title: { $ilike: `${word}%` },
+                },
+                { title: { $ilike: `% ${word}%` } },
+            ]);
             qb.andWhere({
-                $or: [
-                    arrayWords,
-                    { 'chats.name': search },
-                    {
-                        'user.name': search,
-                        'chats.type': ChatTypeEnum.IS_DIALOGUE,
-                        'user.id': { $ne: userId },
-                    },
-                ],
+                'chats.type': { $in: [ChatTypeEnum.IS_OPEN] },
+                $or: arrayWords,
             });
         }
 
         return qb.getResult();
     }
 
-    public async findChatByName(name: string, userId?: string): Promise<ChatEntity | null> {
+    public async findChatByName(userId: string, name: string): Promise<ChatEntity | null> {
         const qb = this.getSubChats()
-            .leftJoin('chats.keys', 'userKey', { 'userKey.userId': userId })
             .where('chats.name = ?', [name])
+            .andWhere({
+                $or: [
+                    { type: { $in: [ChatTypeEnum.IS_OPEN] } },
+                    {
+                        'keys.userId': userId,
+                    },
+                ],
+            })
+            .andWhere(
+                'NOT EXISTS(SELECT * FROM chat_keys WHERE user_id = ? AND chat_id = "chats".id AND is_member IS ?)',
+                [userId, true],
+            )
             .orderBy({
                 message: {
                     files: { createdAt: QueryOrder.ASC },
                     parentMessage: { files: { createdAt: QueryOrder.ASC } },
                 },
-            });
-
-        if (userId)
-            qb.andWhere({
-                $or: [
-                    { type: { $nin: [ChatTypeEnum.IS_DIALOGUE, ChatTypeEnum.IS_FAVORITES] } },
-                    {
-                        'userKey.userId': userId,
-                    },
-                ],
             });
 
         return qb.getSingleResult();
@@ -100,7 +90,7 @@ export class ChatsRepository extends SqlEntityRepository<ChatEntity> {
             });
 
         if (keys.length === 1 || keys[0]?.userId === keys[1]?.userId)
-            qb.andWhere({ 'chats.type': ChatTypeEnum.IS_FAVORITES });
+            qb.andWhere({ 'chats.type': ChatTypeEnum.IS_FAVORITES, 'keys.userId': keys[0]?.userId });
 
         keys.forEach(({ userId }, index) => {
             const alias = `key_${index}`;
@@ -122,21 +112,34 @@ export class ChatsRepository extends SqlEntityRepository<ChatEntity> {
         return qb.getSingleResult();
     }
 
-    getUserChats(userId: string) {
+    public getUserChats(userId: string): Promise<ChatEntity[]> {
         return this.getSubChats()
-            .select('chats.id')
-            .andWhere('"keys".user_id = ?', [userId])
-            .andWhere('"keys".is_member IS ?', [true]);
+            .andWhere({
+                $or: [{ 'chats.type': { $in: [ChatTypeEnum.IS_DIALOGUE] } }, { 'keys.userId': userId }],
+            })
+            .addSelect(raw('GREATEST(message.created_at, keys.created_at) AS "max_date"'))
+            .innerJoin('chats.keys', 'userKey', { 'userKey.userId': userId, 'userKey.isMember': true })
+            .orderBy({
+                maxDate: QueryOrder.DESC,
+                message: {
+                    createdAt: QueryOrder.DESC,
+                    files: { createdAt: QueryOrder.ASC },
+                    parentMessage: { files: { createdAt: QueryOrder.ASC } },
+                },
+            })
+            .getResultList();
     }
 
     private getSubChats(): SelectQueryBuilder<ChatEntity> {
-        return this.createQueryBuilder('chats')
+        const qb = this.createQueryBuilder('chats')
             .leftJoinAndSelect('chats.message', 'message', lastMessageCondition)
             .leftJoinAndSelect('message.parentMessage', 'parentMessage')
             .leftJoinAndSelect('message.files', 'files')
             .leftJoinAndSelect('message.user', 'messageUser')
             .leftJoinAndSelect('parentMessage.files', 'parentMessageFiles')
             .leftJoinAndSelect('chats.keys', 'keys')
-            .leftJoinAndSelect('keys.user', 'user');
+            .leftJoinAndSelect('keys.user', 'keyUser');
+
+        return qb;
     }
 }

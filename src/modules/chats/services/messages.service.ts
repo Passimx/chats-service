@@ -18,6 +18,7 @@ import { MessagesRepository } from '../repositories/messages.repository';
 import { FilesRepository } from '../repositories/files.repository';
 import { QueryGetMessagesDto } from '../dto/requests/query-get-messages.dto';
 import { UserEntity } from '../../users/entities/user.entity';
+import { ChatKeysRepository } from '../repositories/chat-keys.repository';
 import { ChatsService } from './chats.service';
 
 @Injectable()
@@ -30,6 +31,7 @@ export class MessagesService {
         private readonly chatsService: ChatsService,
         private readonly chatsRepository: ChatsRepository,
         private readonly filesRepository: FilesRepository,
+        private readonly chatKeysRepository: ChatKeysRepository,
     ) {}
 
     public async createMessage(
@@ -105,9 +107,8 @@ export class MessagesService {
             // Отправляем запросы на транскрипцию для голосовых файлов
             if (transcriptionVoice !== null) await this.sendTranscriptionRequests(messageEntity.files.getItems());
 
-            // todo
-            // переделать код - какая-то дич
             if (newMessageEntity.number === 1) {
+                await this.chatKeysRepository.nativeUpdate({ chatId, isMember: false }, { isMember: true });
                 const chat = await this.chatsRepository.getChatById(chatId!);
 
                 const tasks: Promise<unknown>[] = chat!.keys.map(({ userId }) => {
@@ -138,8 +139,8 @@ export class MessagesService {
         }
     }
 
-    public async getMessages(socketId: string, query: QueryGetMessagesDto): Promise<DataResponse<MessageEntity[]>> {
-        const messages = await this.messageRepository.findMessages(socketId, query);
+    public async getMessages(userId: string, query: QueryGetMessagesDto): Promise<DataResponse<MessageEntity[]>> {
+        const messages = await this.messageRepository.findMessages(userId, query);
 
         return new DataResponse(messages);
     }
