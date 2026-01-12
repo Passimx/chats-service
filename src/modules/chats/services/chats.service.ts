@@ -19,6 +19,7 @@ import { ChatKeyEntity } from '../entities/chat-key.entity';
 import { KeepKeyDto } from '../dto/requests/keep-key.dto';
 import { UsersRepository } from '../../users/repositories/users.repository';
 import { UpdateReadChatType } from '../dto/response/update-read-chat.dto';
+import { ChatKeysRepository } from '../repositories/chat-keys.repository';
 import { MessagesService } from './messages.service';
 
 @Injectable()
@@ -26,12 +27,11 @@ export class ChatsService {
     constructor(
         @InjectRepository(MessageEntity)
         readonly messageRepository: EntityRepository<MessageEntity>,
-        @InjectRepository(ChatKeyEntity)
-        private readonly chatKeysRepository: EntityRepository<ChatKeyEntity>,
+        private readonly chatKeysRepository: ChatKeysRepository,
         private readonly queueService: QueueService,
         private readonly messagesService: MessagesService,
         private readonly usersRepository: UsersRepository,
-        readonly chatsRepository: ChatsRepository,
+        private readonly chatsRepository: ChatsRepository,
     ) {}
 
     public async createChat(userId: string, { title }: CreateOpenChatDto): Promise<DataResponse<ChatEntity>> {
@@ -58,25 +58,26 @@ export class ChatsService {
         return new DataResponse<ChatEntity>(createChat!);
     }
 
-    public async getChats(socketId: string, query: QueryGetChatsDto): Promise<DataResponse<ChatEntity[]>> {
-        const chats = await this.chatsRepository.findChats(socketId, query);
-        const data = chats.map((chat) => this.prepareDialogue(socketId, chat));
+    public async getChats(userId: string, query: QueryGetChatsDto): Promise<DataResponse<ChatEntity[]>> {
+        const chats = await this.chatsRepository.findChats(userId, query);
+        const data = chats.map((chat) => this.prepareDialogue(userId, chat));
 
-        if (!chats.length) {
-            const chat = await this.getDialogueByKeys(socketId, query.search);
+        if (!data.length) {
+            const chat = await this.getDialogueByKeys(userId, query.search);
+            const userKey = chat?.keys.getItems().find((chetKey) => chetKey.userId === userId);
 
-            if (chat && !query.notFavoriteChatIds?.includes(chat.id)) data.push(chat);
+            if (chat && !userKey?.isMember) data.push(chat);
         }
 
         return new DataResponse(data);
     }
 
-    public async findChatByName(name: string, publicKeyHash: string): Promise<DataResponse<string | ChatEntity>> {
-        let chat = await this.chatsRepository.findChatByName(name, publicKeyHash);
+    public async findChatByName(name: string, userId: string): Promise<DataResponse<string | ChatEntity>> {
+        let chat = await this.chatsRepository.findChatByName(userId, name);
 
-        if (chat) return new DataResponse(this.prepareDialogue(publicKeyHash, chat));
+        if (chat) return new DataResponse(this.prepareDialogue(userId, chat));
 
-        chat = await this.getDialogueByKeys(publicKeyHash, name);
+        chat = await this.getDialogueByKeys(userId, name);
 
         if (!chat) return new DataResponse(MessageErrorEnum.CHAT_WITH_ID_NOT_FOUND);
 
@@ -84,8 +85,9 @@ export class ChatsService {
     }
 
     public async listenChats(userId: string) {
-        const chats = await this.chatsRepository.getUserChats(userId);
-        const chatIds = chats?.map((chat) => chat.id);
+        const chatEntities = await this.chatsRepository.getUserChats(userId);
+
+        const chatIds = chatEntities?.map((chat) => chat.id);
 
         await this.queueService.sendMessage(
             TopicsEnum.JOIN_USER_TO_CHAT,
@@ -93,6 +95,10 @@ export class ChatsService {
             EventsEnum.JOIN_CHAT,
             new DataResponse<string[]>(chatIds),
         );
+
+        const chats = chatEntities.map((chat) => this.prepareDialogue(userId, chat));
+
+        return new DataResponse<ChatEntity[]>(chats);
     }
 
     public async getDialogueByKeys(userId: string, secondUserId?: string) {
@@ -128,10 +134,10 @@ export class ChatsService {
         return new DataResponse<ChatEntity[]>(systemChats);
     }
 
-    public prepareDialogue(socketId: string, chat: ChatEntity): ChatEntity {
+    public prepareDialogue(userId: string, chat: ChatEntity): ChatEntity {
         if (chat.type !== ChatTypeEnum.IS_DIALOGUE) return chat;
 
-        const chatKey = chat.keys.find((key) => key.userId !== socketId);
+        const chatKey = chat.keys.find((key) => key.userId !== userId);
 
         if (!chatKey) return chat;
 
@@ -223,7 +229,13 @@ export class ChatsService {
         if (!chat) return;
 
         const chatKey = await this.chatKeysRepository.upsert(
-            { chatId, userId, readMessageNumber: chat.countMessages, isMember: true } as ChatKeyEntity,
+            {
+                chatId,
+                userId,
+                readMessageNumber: chat.countMessages,
+                isMember: true,
+                createdAt: 'NOW()' as unknown as Date,
+            } as ChatKeyEntity,
             {
                 onConflictFields: ['userId', 'chatId'],
             },
@@ -245,8 +257,8 @@ export class ChatsService {
     }
 
     public async leaveUserAllChats(userId: string): Promise<void> {
-        const chats = await this.chatsRepository.getUserChats(userId);
-        const chatIds = chats?.map((chat) => chat.id);
+        const chatKeys = await this.chatKeysRepository.getUserIds(userId);
+        const chatIds = chatKeys.map((chatKey) => chatKey.id!);
 
         await this.chatKeysRepository.nativeUpdate({ userId, isMember: true }, { isMember: false });
 

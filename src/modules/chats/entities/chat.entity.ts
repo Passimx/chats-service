@@ -44,4 +44,7 @@ export class ChatEntity extends CreatedEntity {
     @ApiProperty({ type: () => ChatKeyEntity, isArray: true, nullable: true })
     @OneToMany(() => ChatKeyEntity, (key) => key.chat)
     readonly keys = new Collection<ChatKeyEntity>(this);
+
+    @Property({ persist: false, hidden: true })
+    readonly maxDate!: Date;
 }

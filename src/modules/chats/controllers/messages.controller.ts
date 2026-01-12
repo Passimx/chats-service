@@ -30,17 +30,17 @@ export class MessagesController {
     @ApiData(MessageEntity, true)
     getMessages(
         @Query() query: QueryGetMessagesDto,
-        @Headers('x-socket-id') socketId: string,
+        @Headers('x-socket-id') userId: string,
     ): Promise<DataResponse<MessageEntity[]>> {
-        return this.messagesService.getMessages(socketId, query);
+        return this.messagesService.getMessages(userId, query);
     }
 
     @Get(':messageId/files/:fileId')
     getFile(
         @Param('fileId') fileId: string,
         @Param('messageId', ParseUUIDPipe) messageId: string,
-        @Headers('x-socket-id') socketId: string,
+        @Headers('x-socket-id') userId: string,
     ): Promise<DataResponse<FileEntity | string>> {
-        return this.messagesService.getFile(socketId, messageId, fileId);
+        return this.messagesService.getFile(userId, messageId, fileId);
     }
 }
