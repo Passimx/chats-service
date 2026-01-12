@@ -1,5 +1,5 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
-import { raw } from '@mikro-orm/postgresql';
+import { QueryOrder, raw, LockMode } from '@mikro-orm/postgresql';
 import { EntityManager } from '@mikro-orm/core';
 import { MessageEntity } from '../entities/message.entity';
 import { ChatEntity } from '../entities/chat.entity';
@@ -17,7 +17,8 @@ import { ChatsRepository } from '../repositories/chats.repository';
 import { MessagesRepository } from '../repositories/messages.repository';
 import { FilesRepository } from '../repositories/files.repository';
 import { QueryGetMessagesDto } from '../dto/requests/query-get-messages.dto';
-import { UserEntity } from '../../users/entities/user.entity';
+// import { UserEntity } from '../../users/entities/user.entity';
+import { getMediaTypeString, getMimePattern } from '../utils/file.utils';
 import { ChatsService } from './chats.service';
 
 @Injectable()
@@ -49,7 +50,7 @@ export class MessagesService {
                 ? await fork.findOneOrFail(MessageEntity, { id: parentMessageId, chatId })
                 : undefined;
 
-            const user = await fork.findOneOrFail(UserEntity, { id: payload.userId });
+            // const user = await fork.findOneOrFail(UserEntity, { id: payload.userId });
 
             await fork.nativeUpdate(
                 ChatEntity,
@@ -63,7 +64,7 @@ export class MessagesService {
                 ...payload,
                 chat: chat,
                 number: chat.countMessages,
-                user,
+                // user,
                 parentMessage: parentMessage ?? undefined,
             });
 
@@ -75,20 +76,48 @@ export class MessagesService {
 
             if (![ChatTypeEnum.IS_OPEN].includes(chat.type)) transcriptionVoice = null;
 
-            if (files?.length)
+            if (files?.length) {
+                const lastNumbers = new Map<string, number>();
+
+                for (const file of files) {
+                    const mediaType = getMediaTypeString(file.mimeType);
+
+                    if (!lastNumbers.has(mediaType)) {
+                        const mimePattern = getMimePattern(mediaType);
+
+                        // Используем fork с блокировкой SELECT FOR UPDATE для предотвращения race condition
+                        const lastFile = await fork.findOne(
+                            FileEntity,
+                            { chatId, mimeType: { $like: mimePattern } },
+                            {
+                                orderBy: { number: QueryOrder.DESC },
+                                lockMode: LockMode.PESSIMISTIC_WRITE,
+                            },
+                        );
+
+                        lastNumbers.set(mediaType, lastFile?.number ?? 0);
+                    }
+                }
+
+                // Создаем файлы
                 await fork.insertMany(
-                    files.map(
-                        (file, index) =>
-                            new FileEntity({
-                                ...file,
-                                chatId,
-                                chat,
-                                message: messageEntity,
-                                createdAt: new Date(Date.now() + index),
-                                metadata: { ...file.metadata, transcriptionVoice },
-                            }),
-                    ),
+                    files.map((file, index) => {
+                        const mediaType = getMediaTypeString(file.mimeType);
+                        const currentNumber = lastNumbers.get(mediaType)!;
+                        lastNumbers.set(mediaType, currentNumber + 1);
+
+                        return new FileEntity({
+                            ...file,
+                            chatId,
+                            chat,
+                            message: messageEntity,
+                            createdAt: new Date(Date.now() + index),
+                            metadata: { ...file.metadata, transcriptionVoice },
+                            number: currentNumber + 1,
+                        });
+                    }),
                 );
+            }
 
             await fork.commit();
 

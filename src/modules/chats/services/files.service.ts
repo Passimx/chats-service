@@ -1,6 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { FilesRepository } from '../repositories/files.repository';
 import { QueryGetFilesDto } from '../dto/requests/query-get-files.dto';
+import { FileEnum } from '../types/file.enum';
+import { getMediaTypeFromMimeType } from '../utils/file.utils';
 
 @Injectable()
 export class FilesService {
@@ -21,11 +23,12 @@ export class FilesService {
 
     public async getFilesByMediaType(
         query: QueryGetFilesDto,
-    ): Promise<{ files: Array<{ fileId: string }>; nextOffset?: number }> {
+    ): Promise<{ files: Array<{ fileId: string; number: number }>; nextOffset?: number }> {
         const files = await this.fileRepository.findFilesByMediaType(query);
 
         const result = files.map((file) => ({
             fileId: file.key,
+            number: file.number,
         }));
 
         const nextOffset = files.length === query.limit && query.limit ? (query.offset || 0) + query.limit : undefined;
@@ -33,6 +36,71 @@ export class FilesService {
         return {
             files: result,
             nextOffset,
+        };
+    }
+
+    public async getNextFilesByMediaType(
+        query: QueryGetFilesDto,
+    ): Promise<{ files: Array<{ fileId: string; number: number }> }> {
+        if (!query.number || !query.mediaType) {
+            return { files: [] };
+        }
+
+        const file = await this.fileRepository.findNextFile(query.chatId, query.mediaType, query.number);
+
+        if (!file) {
+            return { files: [] };
+        }
+
+        return {
+            files: [
+                {
+                    fileId: file.key,
+                    number: file.number,
+                },
+            ],
+        };
+    }
+
+    public async getPrevFilesByMediaType(
+        query: QueryGetFilesDto,
+    ): Promise<{ files: Array<{ fileId: string; number: number }> }> {
+        if (!query.number || !query.mediaType) {
+            return { files: [] };
+        }
+
+        const file = await this.fileRepository.findPrevFile(query.chatId, query.mediaType, query.number);
+
+        if (!file) {
+            return { files: [] };
+        }
+
+        return {
+            files: [
+                {
+                    fileId: file.key,
+                    number: file.number,
+                },
+            ],
+        };
+    }
+
+    public async getFileById(
+        fileId: string,
+        chatId: string,
+    ): Promise<{ fileId: string; number: number; mediaType: FileEnum }> {
+        const file = await this.fileRepository.findOne({ key: fileId, chatId });
+
+        if (!file) {
+            throw new NotFoundException('File not found');
+        }
+
+        const mediaType = getMediaTypeFromMimeType(file.mimeType);
+
+        return {
+            fileId: file.key,
+            number: file.number,
+            mediaType,
         };
     }
 }

@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsString, IsNumber, IsOptional, IsEnum } from 'class-validator';
+import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
 import { FileEnum } from '../../types/file.enum';
 
 export class QueryGetFilesDto {
@@ -21,4 +21,9 @@ export class QueryGetFilesDto {
     @IsOptional()
     @IsNumber()
     readonly offset?: number;
+
+    @ApiPropertyOptional()
+    @IsOptional()
+    @IsNumber()
+    readonly number?: number;
 }
