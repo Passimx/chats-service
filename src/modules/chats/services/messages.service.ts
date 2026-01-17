@@ -17,8 +17,8 @@ import { ChatsRepository } from '../repositories/chats.repository';
 import { MessagesRepository } from '../repositories/messages.repository';
 import { FilesRepository } from '../repositories/files.repository';
 import { QueryGetMessagesDto } from '../dto/requests/query-get-messages.dto';
-import { ChatsService } from './chats.service';
 import { UserEntity } from '../../users/entities/user.entity';
+import { ChatsService } from './chats.service';
 
 @Injectable()
 export class MessagesService {

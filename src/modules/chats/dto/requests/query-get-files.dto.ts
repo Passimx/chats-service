@@ -1,7 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsDate, IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
-import { FileEnum } from '../../types/file.enum';
 import { Type } from 'class-transformer';
+import { FileEnum } from '../../types/file.enum';
 
 export class QueryGetFilesDto {
     @ApiProperty()
