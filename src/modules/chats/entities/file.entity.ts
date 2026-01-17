@@ -47,10 +47,6 @@ export class FileEntity extends CreatedEntity {
     @Property({ type: 'jsonb', nullable: true })
     readonly metadata!: Metadata;
 
-    @ApiProperty()
-    @Property()
-    readonly number!: number;
-
     @ApiPropertyOptional({ type: () => FileEntity })
     @ManyToOne(() => MessageEntity, {
         nullable: true,

@@ -35,3 +35,20 @@ export function getMimePattern(mediaType: string): string {
 
     return '%';
 }
+
+export function getMimeTypeFilter(mediaType?: FileEnum): { mimeType: { $like: string } } | undefined {
+    if (!mediaType) {
+        return undefined;
+    }
+
+    switch (mediaType) {
+        case FileEnum.IS_PHOTO:
+            return { mimeType: { $like: 'image/%' } };
+        case FileEnum.IS_VIDEO:
+            return { mimeType: { $like: 'video/%' } };
+        case FileEnum.IS_AUDIO:
+            return { mimeType: { $like: 'audio/%' } };
+        default:
+            return undefined;
+    }
+}

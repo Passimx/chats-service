@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsDate, IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
 import { FileEnum } from '../../types/file.enum';
+import { Type } from 'class-transformer';
 
 export class QueryGetFilesDto {
     @ApiProperty()
@@ -24,6 +25,7 @@ export class QueryGetFilesDto {
 
     @ApiPropertyOptional()
     @IsOptional()
-    @IsNumber()
-    readonly number?: number;
+    @IsDate()
+    @Type(() => Date)
+    readonly createdAt?: Date;
 }

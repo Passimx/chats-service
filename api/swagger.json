@@ -1069,7 +1069,7 @@
 		"/files": {
 			"get": {
 				"operationId": "FilesController_getFilesMediaType",
-				"summary": "Get files by media type with pagination",
+				"summary": "Get files by media type (or all files) with pagination",
 				"parameters": [
 					{
 						"name": "chatId",
@@ -1112,11 +1112,12 @@
 						}
 					},
 					{
-						"name": "number",
+						"name": "createdAt",
 						"required": false,
 						"in": "query",
 						"schema": {
-							"type": "number"
+							"format": "date-time",
+							"type": "string"
 						}
 					}
 				],
@@ -1135,7 +1136,10 @@
 													"example": true
 												},
 												"data": {
-													"$ref": "#/components/schemas/Object"
+													"type": "array",
+													"items": {
+														"$ref": "#/components/schemas/FileEntity"
+													}
 												}
 											},
 											"required": [
@@ -1216,11 +1220,12 @@
 						}
 					},
 					{
-						"name": "number",
+						"name": "createdAt",
 						"required": false,
 						"in": "query",
 						"schema": {
-							"type": "number"
+							"format": "date-time",
+							"type": "string"
 						}
 					}
 				],
@@ -1239,7 +1244,7 @@
 													"example": true
 												},
 												"data": {
-													"$ref": "#/components/schemas/Object"
+													"$ref": "#/components/schemas/FileEntity"
 												}
 											},
 											"required": [
@@ -1320,11 +1325,12 @@
 						}
 					},
 					{
-						"name": "number",
+						"name": "createdAt",
 						"required": false,
 						"in": "query",
 						"schema": {
-							"type": "number"
+							"format": "date-time",
+							"type": "string"
 						}
 					}
 				],
@@ -1343,7 +1349,7 @@
 													"example": true
 												},
 												"data": {
-													"$ref": "#/components/schemas/Object"
+													"$ref": "#/components/schemas/FileEntity"
 												}
 											},
 											"required": [
@@ -1381,7 +1387,7 @@
 		"/files/{fileId}": {
 			"get": {
 				"operationId": "FilesController_getFileById",
-				"summary": "Get file by fileId with number for navigation",
+				"summary": "Get file by fileId with createdAt for navigation",
 				"parameters": [
 					{
 						"name": "fileId",
@@ -1415,7 +1421,7 @@
 													"example": true
 												},
 												"data": {
-													"$ref": "#/components/schemas/Object"
+													"$ref": "#/components/schemas/FileEntity"
 												}
 											},
 											"required": [
@@ -1742,9 +1748,6 @@
 					"metadata": {
 						"$ref": "#/components/schemas/Metadata"
 					},
-					"number": {
-						"type": "number"
-					},
 					"message": {
 						"$ref": "#/components/schemas/FileEntity"
 					},
@@ -1762,8 +1765,7 @@
 					"mimeType",
 					"fileType",
 					"messageId",
-					"metadata",
-					"number"
+					"metadata"
 				]
 			},
 			"MessageEntity": {
@@ -2031,10 +2033,6 @@
 					"event",
 					"data"
 				]
-			},
-			"Object": {
-				"type": "object",
-				"properties": {}
 			}
 		}
 	}

@@ -2,6 +2,7 @@ import { FilterQuery, QueryOrder, SqlEntityRepository } from '@mikro-orm/postgre
 import { FileEntity } from '../entities/file.entity';
 import { QueryGetFilesDto } from '../dto/requests/query-get-files.dto';
 import { FileEnum } from '../types/file.enum';
+import { getMimeTypeFilter } from '../utils/file.utils';
 
 export class FilesRepository extends SqlEntityRepository<FileEntity> {
     getFile(publicKeyHash: string, body: Partial<FileEntity>): Promise<FileEntity | null> {
@@ -9,22 +10,13 @@ export class FilesRepository extends SqlEntityRepository<FileEntity> {
     }
 
     public async findFilesByMediaType({ chatId, mediaType, limit, offset }: QueryGetFilesDto): Promise<FileEntity[]> {
-        const where: FilterQuery<FileEntity> = { chatId };
+        const where: FilterQuery<FileEntity> = {
+            chatId,
+            ...getMimeTypeFilter(mediaType),
+        };
 
-        switch (mediaType) {
-            case FileEnum.IS_PHOTO:
-                where.mimeType = { $like: 'image/%' };
-                break;
-            case FileEnum.IS_VIDEO:
-                where.mimeType = { $like: 'video/%' };
-                break;
-            case FileEnum.IS_AUDIO:
-                where.mimeType = { $like: 'audio/%' };
-                break;
-        }
-
-        const options: { orderBy: { number: QueryOrder }; limit?: number; offset?: number } = {
-            orderBy: { number: QueryOrder.ASC },
+        const options: { orderBy: { createdAt: QueryOrder }; limit?: number; offset?: number } = {
+            orderBy: { createdAt: QueryOrder.ASC },
         };
 
         if (limit) {
@@ -35,29 +27,35 @@ export class FilesRepository extends SqlEntityRepository<FileEntity> {
         return this.find(where, options);
     }
 
-    public async findFileByNumber(chatId: string, mediaType: FileEnum, number: number): Promise<FileEntity | null> {
-        const where: FilterQuery<FileEntity> = { chatId, number };
+    public async findNextFile(
+        chatId: string,
+        currentCreatedAt: Date,
+        mediaType?: FileEnum,
+    ): Promise<FileEntity | null> {
+        const where: FilterQuery<FileEntity> = {
+            chatId,
+            createdAt: { $gt: currentCreatedAt },
+            ...getMimeTypeFilter(mediaType),
+        };
 
-        switch (mediaType) {
-            case FileEnum.IS_PHOTO:
-                where.mimeType = { $like: 'image/%' };
-                break;
-            case FileEnum.IS_VIDEO:
-                where.mimeType = { $like: 'video/%' };
-                break;
-            case FileEnum.IS_AUDIO:
-                where.mimeType = { $like: 'audio/%' };
-                break;
-        }
-
-        return this.findOne(where);
+        return this.findOne(where, {
+            orderBy: { createdAt: QueryOrder.ASC },
+        });
     }
 
-    public async findNextFile(chatId: string, mediaType: FileEnum, currentNumber: number): Promise<FileEntity | null> {
-        return this.findFileByNumber(chatId, mediaType, currentNumber + 1);
-    }
+    public async findPrevFile(
+        chatId: string,
+        currentCreatedAt: Date,
+        mediaType?: FileEnum,
+    ): Promise<FileEntity | null> {
+        const where: FilterQuery<FileEntity> = {
+            chatId: chatId,
+            createdAt: { $lt: currentCreatedAt },
+            ...getMimeTypeFilter(mediaType),
+        };
 
-    public async findPrevFile(chatId: string, mediaType: FileEnum, currentNumber: number): Promise<FileEntity | null> {
-        return this.findFileByNumber(chatId, mediaType, currentNumber - 1);
+        return this.findOne(where, {
+            orderBy: { createdAt: QueryOrder.DESC },
+        });
     }
 }
