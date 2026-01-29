@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Headers, Param, ParseUUIDPipe, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseUUIDPipe, Post, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { ChatsService } from '../services/chats.service';
 import { CreateOpenChatDto } from '../dto/requests/create-open-chat.dto';
@@ -10,6 +10,8 @@ import { ApiDataEmpty } from '../../../common/swagger/api-data-empty.decorator';
 import { KeepKeyDto } from '../dto/requests/keep-key.dto';
 import { ReadMessageDto } from '../dto/requests/read-message.dto';
 import { SocketIdDto } from '../dto/requests/socket-id.dto';
+import { UserId } from '../../../common/guards/auth/user.decorator';
+import { SessionId } from '../../../common/guards/auth/session.decorator';
 
 @ApiTags('Chats')
 @Controller('chats')
@@ -18,40 +20,31 @@ export class ChatsController {
 
     @Post('listen')
     @ApiDataEmpty()
-    listenChats(@Headers('x-socket-id') userId: string) {
-        return this.chatsService.listenChats(userId);
+    listenChats(@UserId() userId: string, @SessionId() sessionId: string) {
+        return this.chatsService.listenChats(userId, sessionId);
     }
 
     @Post('all/leave')
     @ApiDataEmpty()
-    leaveUserAllChats(@Headers('x-socket-id') userId: string) {
+    leaveUserAllChats(@UserId() userId: string) {
         return this.chatsService.leaveUserAllChats(userId);
     }
 
     @Post()
     @ApiData(ChatEntity)
-    createChat(
-        @Body() body: CreateOpenChatDto,
-        @Headers('x-socket-id') userId: string,
-    ): Promise<DataResponse<string | ChatEntity>> {
+    createChat(@Body() body: CreateOpenChatDto, @UserId() userId: string): Promise<DataResponse<string | ChatEntity>> {
         return this.chatsService.createChat(userId, body);
     }
 
     @Get()
     @ApiData(ChatEntity, true)
-    getChats(
-        @Query() query: QueryGetChatsDto,
-        @Headers('x-socket-id') userId: string,
-    ): Promise<DataResponse<ChatEntity[]>> {
+    getChats(@Query() query: QueryGetChatsDto, @UserId() userId: string): Promise<DataResponse<ChatEntity[]>> {
         return this.chatsService.getChats(userId, query);
     }
 
     @Get(':name')
     @ApiData(ChatEntity, true)
-    getChatByName(
-        @Param('name') name: string,
-        @Headers('x-socket-id') userId: string,
-    ): Promise<DataResponse<string | ChatEntity>> {
+    getChatByName(@Param('name') name: string, @UserId() userId: string): Promise<DataResponse<string | ChatEntity>> {
         return this.chatsService.findChatByName(name, userId);
     }
 
@@ -59,7 +52,7 @@ export class ChatsController {
     @ApiDataEmpty()
     keepChatKey(
         @Param('id', ParseUUIDPipe) chatId: string,
-        @Headers('x-socket-id') userId: string,
+        @UserId() userId: string,
         @Body() body: KeepKeyDto,
     ): Promise<void> {
         return this.chatsService.keepChatKey(userId, chatId, body);
@@ -67,7 +60,7 @@ export class ChatsController {
 
     @Post(':chatId/keys/receive')
     @ApiDataEmpty()
-    receiveKey(@Param('chatId', ParseUUIDPipe) chatId: string, @Headers('x-socket-id') userId: string) {
+    receiveKey(@Param('chatId', ParseUUIDPipe) chatId: string, @UserId() userId: string) {
         return this.chatsService.receiveKey(chatId, userId);
     }
 
@@ -92,7 +85,7 @@ export class ChatsController {
     @Post(':chatId/messages/read')
     @ApiDataEmpty()
     readMessage(
-        @Headers('x-socket-id') userId: string,
+        @UserId() userId: string,
         @Param('chatId', ParseUUIDPipe) chatId: string,
         @Body() body: ReadMessageDto,
     ) {
@@ -101,13 +94,13 @@ export class ChatsController {
 
     @Post(':chatId/join')
     @ApiDataEmpty()
-    joinUserToChat(@Headers('x-socket-id') userId: string, @Param('chatId', ParseUUIDPipe) chatId: string) {
+    joinUserToChat(@UserId() userId: string, @Param('chatId', ParseUUIDPipe) chatId: string) {
         return this.chatsService.joinUserToChat(userId, chatId);
     }
 
     @Post(':chatId/leave')
     @ApiDataEmpty()
-    leaveUserFromChat(@Headers('x-socket-id') userId: string, @Param('chatId', ParseUUIDPipe) chatId: string) {
+    leaveUserFromChat(@UserId() userId: string, @Param('chatId', ParseUUIDPipe) chatId: string) {
         return this.chatsService.leaveUserFromChat(userId, chatId);
     }
 }

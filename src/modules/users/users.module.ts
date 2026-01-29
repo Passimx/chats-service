@@ -5,9 +5,10 @@ import { QueueModule } from '../queue/queue.module';
 import { UsersService } from './users.service';
 import { UsersController } from './users.controller';
 import { UserEntity } from './entities/user.entity';
+import { SessionEntity } from './entities/session.entity';
 
 @Module({
-    imports: [forwardRef(() => ChatsModule), MikroOrmModule.forFeature([UserEntity]), QueueModule],
+    imports: [forwardRef(() => ChatsModule), MikroOrmModule.forFeature([UserEntity, SessionEntity]), QueueModule],
     controllers: [UsersController],
     providers: [UsersService],
     exports: [UsersService, MikroOrmModule],

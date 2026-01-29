@@ -84,7 +84,7 @@ export class ChatsService {
         return new DataResponse(chat);
     }
 
-    public async listenChats(userId: string) {
+    public async listenChats(userId: string, sessionId: string): Promise<DataResponse<ChatEntity[]>> {
         const chatEntities = await this.chatsRepository.getUserChats(userId);
 
         const chatIds = chatEntities?.map((chat) => chat.id);
@@ -94,6 +94,13 @@ export class ChatsService {
             userId,
             EventsEnum.JOIN_CHAT,
             new DataResponse<string[]>(chatIds),
+        );
+
+        await this.queueService.sendMessage(
+            TopicsEnum.JOIN_CONNECTION_TO_USER_ROOM,
+            `${sessionId}${userId}`,
+            EventsEnum.JOIN_CHAT,
+            new DataResponse<string>(userId),
         );
 
         const chats = chatEntities.map((chat) => this.prepareDialogue(userId, chat));
