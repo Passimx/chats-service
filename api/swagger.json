@@ -1065,12 +1065,402 @@
 					"Messages"
 				]
 			}
+		},
+		"/files": {
+			"get": {
+				"operationId": "FilesController_getFilesMediaType",
+				"summary": "Get files by media type (or all files) with pagination",
+				"parameters": [
+					{
+						"name": "chatId",
+						"required": true,
+						"in": "query",
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"name": "mediaType",
+						"required": false,
+						"in": "query",
+						"schema": {
+							"enum": [
+								"is_voice",
+								"is_media",
+								"is_video",
+								"is_audio",
+								"is_document",
+								"is_photo"
+							],
+							"type": "string"
+						}
+					},
+					{
+						"name": "limit",
+						"required": false,
+						"in": "query",
+						"schema": {
+							"type": "number"
+						}
+					},
+					{
+						"name": "offset",
+						"required": false,
+						"in": "query",
+						"schema": {
+							"type": "number"
+						}
+					},
+					{
+						"name": "createdAt",
+						"required": false,
+						"in": "query",
+						"schema": {
+							"format": "date-time",
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"type": "object",
+											"properties": {
+												"success": {
+													"type": "boolean",
+													"example": true
+												},
+												"data": {
+													"type": "array",
+													"items": {
+														"$ref": "#/components/schemas/FileEntity"
+													}
+												}
+											},
+											"required": [
+												"success",
+												"data"
+											]
+										},
+										{
+											"type": "object",
+											"properties": {
+												"success": {
+													"type": "boolean",
+													"example": false
+												},
+												"data": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"success",
+												"data"
+											]
+										}
+									]
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Files"
+				]
+			}
+		},
+		"/files/next-file": {
+			"get": {
+				"operationId": "FilesController_getNextFilesByMediaType",
+				"summary": "Get next file by media type",
+				"parameters": [
+					{
+						"name": "chatId",
+						"required": true,
+						"in": "query",
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"name": "mediaType",
+						"required": false,
+						"in": "query",
+						"schema": {
+							"enum": [
+								"is_voice",
+								"is_media",
+								"is_video",
+								"is_audio",
+								"is_document",
+								"is_photo"
+							],
+							"type": "string"
+						}
+					},
+					{
+						"name": "limit",
+						"required": false,
+						"in": "query",
+						"schema": {
+							"type": "number"
+						}
+					},
+					{
+						"name": "offset",
+						"required": false,
+						"in": "query",
+						"schema": {
+							"type": "number"
+						}
+					},
+					{
+						"name": "createdAt",
+						"required": false,
+						"in": "query",
+						"schema": {
+							"format": "date-time",
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"type": "object",
+											"properties": {
+												"success": {
+													"type": "boolean",
+													"example": true
+												},
+												"data": {
+													"$ref": "#/components/schemas/FileEntity"
+												}
+											},
+											"required": [
+												"success",
+												"data"
+											]
+										},
+										{
+											"type": "object",
+											"properties": {
+												"success": {
+													"type": "boolean",
+													"example": false
+												},
+												"data": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"success",
+												"data"
+											]
+										}
+									]
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Files"
+				]
+			}
+		},
+		"/files/prev-file": {
+			"get": {
+				"operationId": "FilesController_getPrevByMediaType",
+				"summary": "Get previous file by media type",
+				"parameters": [
+					{
+						"name": "chatId",
+						"required": true,
+						"in": "query",
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"name": "mediaType",
+						"required": false,
+						"in": "query",
+						"schema": {
+							"enum": [
+								"is_voice",
+								"is_media",
+								"is_video",
+								"is_audio",
+								"is_document",
+								"is_photo"
+							],
+							"type": "string"
+						}
+					},
+					{
+						"name": "limit",
+						"required": false,
+						"in": "query",
+						"schema": {
+							"type": "number"
+						}
+					},
+					{
+						"name": "offset",
+						"required": false,
+						"in": "query",
+						"schema": {
+							"type": "number"
+						}
+					},
+					{
+						"name": "createdAt",
+						"required": false,
+						"in": "query",
+						"schema": {
+							"format": "date-time",
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"type": "object",
+											"properties": {
+												"success": {
+													"type": "boolean",
+													"example": true
+												},
+												"data": {
+													"$ref": "#/components/schemas/FileEntity"
+												}
+											},
+											"required": [
+												"success",
+												"data"
+											]
+										},
+										{
+											"type": "object",
+											"properties": {
+												"success": {
+													"type": "boolean",
+													"example": false
+												},
+												"data": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"success",
+												"data"
+											]
+										}
+									]
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Files"
+				]
+			}
+		},
+		"/files/{fileId}": {
+			"get": {
+				"operationId": "FilesController_getFileById",
+				"summary": "Get file by fileId with createdAt for navigation",
+				"parameters": [
+					{
+						"name": "fileId",
+						"required": true,
+						"in": "path",
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"name": "chatId",
+						"required": true,
+						"in": "query",
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"type": "object",
+											"properties": {
+												"success": {
+													"type": "boolean",
+													"example": true
+												},
+												"data": {
+													"$ref": "#/components/schemas/FileEntity"
+												}
+											},
+											"required": [
+												"success",
+												"data"
+											]
+										},
+										{
+											"type": "object",
+											"properties": {
+												"success": {
+													"type": "boolean",
+													"example": false
+												},
+												"data": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"success",
+												"data"
+											]
+										}
+									]
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Files"
+				]
+			}
 		}
 	},
 	"info": {
 		"title": "PassimX",
 		"description": "",
-		"version": "1.1.3",
+		"version": "1.2.1",
 		"contact": {},
 		"license": {
 			"name": "MIT LICENSE",
@@ -1080,7 +1470,7 @@
 	"tags": [],
 	"servers": [
 		{
-			"url": "http://localhost:7020"
+			"url": "http://localhost:6020"
 		}
 	],
 	"components": {
@@ -1545,7 +1935,11 @@
 						"type": "string",
 						"enum": [
 							"is_voice",
-							"is_media"
+							"is_media",
+							"is_video",
+							"is_audio",
+							"is_document",
+							"is_photo"
 						]
 					},
 					"size": {
