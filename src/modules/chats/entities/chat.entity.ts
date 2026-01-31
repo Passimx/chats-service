@@ -15,8 +15,8 @@ export class ChatEntity extends CreatedEntity {
         Object.assign(this, payload);
     }
 
-    @ApiProperty({ nullable: true, maxLength: 64 })
-    @Property({ length: 64, nullable: true })
+    @ApiProperty({ nullable: true, maxLength: 2 ** 6 })
+    @Property({ length: 2 ** 6, nullable: true })
     readonly name?: string;
 
     @ApiProperty()
@@ -44,4 +44,7 @@ export class ChatEntity extends CreatedEntity {
     @ApiProperty({ type: () => ChatKeyEntity, isArray: true, nullable: true })
     @OneToMany(() => ChatKeyEntity, (key) => key.chat)
     readonly keys = new Collection<ChatKeyEntity>(this);
+
+    @Property({ persist: false, hidden: true })
+    readonly maxDate!: Date;
 }

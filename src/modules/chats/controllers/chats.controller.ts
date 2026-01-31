@@ -1,99 +1,106 @@
-import { Body, Controller, Get, Headers, Param, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseUUIDPipe, Post, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { MessagePattern } from '@nestjs/microservices';
 import { ChatsService } from '../services/chats.service';
 import { CreateOpenChatDto } from '../dto/requests/create-open-chat.dto';
 import { QueryGetChatsDto } from '../dto/requests/query-get-chats.dto';
 import { ChatEntity } from '../entities/chat.entity';
 import { DataResponse } from '../../../common/swagger/data-response.dto';
 import { ApiData } from '../../../common/swagger/api-data.decorator';
-import { FavoriteChatsDto } from '../dto/requests/post-favorites-chat.dto';
-import { LeaveChatsDto } from '../dto/requests/post-leave-chat.dto';
 import { ApiDataEmpty } from '../../../common/swagger/api-data-empty.decorator';
-import { TopicsEnum } from '../../queue/types/topics.enum';
-import { OnlineCountUsers } from '../types/max-online-users';
 import { KeepKeyDto } from '../dto/requests/keep-key.dto';
+import { ReadMessageDto } from '../dto/requests/read-message.dto';
+import { SocketIdDto } from '../dto/requests/socket-id.dto';
+import { UserId } from '../../../common/guards/auth/user.decorator';
+import { SessionId } from '../../../common/guards/auth/session.decorator';
 
 @ApiTags('Chats')
 @Controller('chats')
 export class ChatsController {
     constructor(private readonly chatsService: ChatsService) {}
 
+    @Post('listen')
+    @ApiDataEmpty()
+    listenChats(@UserId() userId: string, @SessionId() sessionId: string) {
+        return this.chatsService.listenChats(userId, sessionId);
+    }
+
+    @Post('all/leave')
+    @ApiDataEmpty()
+    leaveUserAllChats(@UserId() userId: string) {
+        return this.chatsService.leaveUserAllChats(userId);
+    }
+
     @Post()
     @ApiData(ChatEntity)
-    createChat(
-        @Body() body: CreateOpenChatDto,
-        @Headers('x-socket-id') socketId: string,
-    ): Promise<DataResponse<string | ChatEntity>> {
-        return this.chatsService.createChat(socketId, body);
+    createChat(@Body() body: CreateOpenChatDto, @UserId() userId: string): Promise<DataResponse<string | ChatEntity>> {
+        return this.chatsService.createChat(userId, body);
     }
 
     @Get()
     @ApiData(ChatEntity, true)
-    getChats(
-        @Query() query: QueryGetChatsDto,
-        @Headers('x-socket-id') socketId: string,
-    ): Promise<DataResponse<ChatEntity[]>> {
-        return this.chatsService.getChats(socketId, query);
+    getChats(@Query() query: QueryGetChatsDto, @UserId() userId: string): Promise<DataResponse<ChatEntity[]>> {
+        return this.chatsService.getChats(userId, query);
     }
 
     @Get(':name')
     @ApiData(ChatEntity, true)
-    getChatByName(
-        @Param('name') name: string,
-        @Headers('x-socket-id') socketId: string,
-    ): Promise<DataResponse<string | ChatEntity>> {
-        return this.chatsService.findChatByName(name, socketId);
+    getChatByName(@Param('name') name: string, @UserId() userId: string): Promise<DataResponse<string | ChatEntity>> {
+        return this.chatsService.findChatByName(name, userId);
     }
 
     @Post(':id/keys/keep')
     @ApiDataEmpty()
     keepChatKey(
-        @Param('id') chatId: string,
-        @Headers('x-socket-id') socketId: string,
+        @Param('id', ParseUUIDPipe) chatId: string,
+        @UserId() userId: string,
         @Body() body: KeepKeyDto,
     ): Promise<void> {
-        return this.chatsService.keepChatKey(socketId, chatId, body);
+        return this.chatsService.keepChatKey(userId, chatId, body);
     }
 
     @Post(':chatId/keys/receive')
     @ApiDataEmpty()
-    receiveKey(@Param('chatId') chatId: string, @Headers('x-socket-id') socketId: string) {
-        return this.chatsService.receiveKey(chatId, socketId);
+    receiveKey(@Param('chatId', ParseUUIDPipe) chatId: string, @UserId() userId: string) {
+        return this.chatsService.receiveKey(chatId, userId);
     }
 
-    @Post('join')
-    @ApiData(ChatEntity, true)
-    join(
-        @Body() favoriteChatsDto: FavoriteChatsDto,
-        @Headers('x-socket-id') socketId: string,
-    ): Promise<DataResponse<string | ChatEntity[]>> {
-        return this.chatsService.join(favoriteChatsDto.chats, socketId);
-    }
-
-    @Post('leave')
+    @Post(':chatId/listen')
     @ApiDataEmpty()
-    leave(
-        @Body() leaveChatsDto: LeaveChatsDto,
-        @Headers('x-socket-id') socketId: string,
-    ): Promise<DataResponse<object>> {
-        return this.chatsService.leave(leaveChatsDto.chatIds, socketId);
+    joinConnectionToChat(@Param('chatId', ParseUUIDPipe) chatId: string, @Body() body: SocketIdDto) {
+        return this.chatsService.joinConnectionToChat(body.socketId, chatId);
     }
 
-    @MessagePattern(TopicsEnum.ONLINE)
-    onlineCountUsers(message: OnlineCountUsers) {
-        const { roomName, onlineUsers } = message.data;
-        this.chatsService.updateMaxUsersOnline(roomName, onlineUsers);
-    }
-
-    @MessagePattern(TopicsEnum.PUT_SYSTEM_CHATS)
-    putSystemChats() {
-        this.chatsService.putSystemcChats();
+    @Post(':chatId/no_listen')
+    @ApiDataEmpty()
+    leaveConnectionFromChat(@Param('chatId', ParseUUIDPipe) chatId: string, @Body() body: SocketIdDto) {
+        return this.chatsService.leaveConnectionFromChat(body.socketId, chatId);
     }
 
     @Get('system_chats')
     @ApiData(ChatEntity, true)
     getSystemChats(): Promise<DataResponse<string | ChatEntity[]>> {
         return this.chatsService.getSystemChats();
+    }
+
+    @Post(':chatId/messages/read')
+    @ApiDataEmpty()
+    readMessage(
+        @UserId() userId: string,
+        @Param('chatId', ParseUUIDPipe) chatId: string,
+        @Body() body: ReadMessageDto,
+    ) {
+        return this.chatsService.readMessage(userId, chatId, body.number);
+    }
+
+    @Post(':chatId/join')
+    @ApiDataEmpty()
+    joinUserToChat(@UserId() userId: string, @Param('chatId', ParseUUIDPipe) chatId: string) {
+        return this.chatsService.joinUserToChat(userId, chatId);
+    }
+
+    @Post(':chatId/leave')
+    @ApiDataEmpty()
+    leaveUserFromChat(@UserId() userId: string, @Param('chatId', ParseUUIDPipe) chatId: string) {
+        return this.chatsService.leaveUserFromChat(userId, chatId);
     }
 }
