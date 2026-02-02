@@ -20,13 +20,18 @@ export class FilesService {
         );
     }
 
-    public async getFilesByMediaType(query: QueryGetFilesDto): Promise<{ files: FileEntity[]; nextOffset?: number }> {
-        const files = await this.fileRepository.findFilesByMediaType(query);
+    public async getFilesByMediaType(query: QueryGetFilesDto): Promise<{
+        files: FileEntity[];
+        count: number;
+        nextOffset?: number;
+    }> {
+        const [files, count] = await this.fileRepository.findFilesByMediaType(query);
 
         const nextOffset = files.length === query.limit && query.limit ? (query.offset || 0) + query.limit : undefined;
 
         return {
             files,
+            count,
             nextOffset,
         };
     }

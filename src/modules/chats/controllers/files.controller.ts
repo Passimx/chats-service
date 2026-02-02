@@ -1,9 +1,10 @@
 import { Controller, Get, Param, Query } from '@nestjs/common';
 import { EventPattern, Payload } from '@nestjs/microservices';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiExtraModels, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { FilesService } from '../services/files.service';
 import { MessageDto } from '../../queue/dto/message.dto';
 import { TranscriptionResponseDto } from '../dto/response/transcription-response.dto';
+import { FilesMediaTypeResponseDto } from '../dto/response/files-media-type';
 import { TopicsEnum } from '../../queue/types/topics.enum';
 import { ApiData } from '../../../common/swagger/api-data.decorator';
 import { QueryGetFilesDto } from '../dto/requests/query-get-files.dto';
@@ -25,14 +26,10 @@ export class FilesController {
     }
 
     @Get()
-    @ApiOperation({ summary: 'Get files by media type (or all files) with pagination' })
-    @ApiData(FileEntity, true)
-    async getFilesMediaType(@Query() query: QueryGetFilesDto): Promise<
-        DataResponse<{
-            files: FileEntity[];
-            nextOffset?: number;
-        }>
-    > {
+    @ApiExtraModels(FileEntity, FilesMediaTypeResponseDto)
+    @ApiOperation({ summary: 'Get files by fileType (or all) with pagination.' })
+    @ApiData(FilesMediaTypeResponseDto, false)
+    async getFilesMediaType(@Query() query: QueryGetFilesDto): Promise<DataResponse<FilesMediaTypeResponseDto>> {
         const result = await this.filesService.getFilesByMediaType(query);
 
         return new DataResponse(result);

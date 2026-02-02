@@ -2,11 +2,11 @@ import { FileEnum } from '../types/file.enum';
 
 export function getMediaTypeFromMimeType(mimeType: string): FileEnum {
     if (mimeType.startsWith('image/')) {
-        return FileEnum.IS_PHOTO;
+        return FileEnum.IS_MEDIA;
     }
 
     if (mimeType.startsWith('video/')) {
-        return FileEnum.IS_VIDEO;
+        return FileEnum.IS_MEDIA;
     }
 
     if (mimeType.startsWith('audio/')) {
@@ -36,19 +36,10 @@ export function getMimePattern(mediaType: string): string {
     return '%';
 }
 
-export function getMimeTypeFilter(mediaType?: FileEnum): { mimeType: { $like: string } } | undefined {
-    if (!mediaType) {
+export function getFileTypeFilter(fileType?: FileEnum): { fileType: FileEnum } | undefined {
+    if (!fileType) {
         return undefined;
     }
 
-    switch (mediaType) {
-        case FileEnum.IS_PHOTO:
-            return { mimeType: { $like: 'image/%' } };
-        case FileEnum.IS_VIDEO:
-            return { mimeType: { $like: 'video/%' } };
-        case FileEnum.IS_AUDIO:
-            return { mimeType: { $like: 'audio/%' } };
-        default:
-            return undefined;
-    }
+    return { fileType };
 }

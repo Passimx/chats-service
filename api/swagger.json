@@ -1069,7 +1069,7 @@
 		"/files": {
 			"get": {
 				"operationId": "FilesController_getFilesMediaType",
-				"summary": "Get files by media type (or all files) with pagination",
+				"summary": "Get files by fileType (or all) with pagination. Filter: is_media, is_file, is_audio, is_voice",
 				"parameters": [
 					{
 						"name": "chatId",
@@ -1087,10 +1087,8 @@
 							"enum": [
 								"is_voice",
 								"is_media",
-								"is_video",
 								"is_audio",
-								"is_document",
-								"is_photo"
+								"is_file"
 							],
 							"type": "string"
 						}
@@ -1136,10 +1134,7 @@
 													"example": true
 												},
 												"data": {
-													"type": "array",
-													"items": {
-														"$ref": "#/components/schemas/FileEntity"
-													}
+													"$ref": "#/components/schemas/FilesMediaTypeResponseDto"
 												}
 											},
 											"required": [
@@ -1195,10 +1190,8 @@
 							"enum": [
 								"is_voice",
 								"is_media",
-								"is_video",
 								"is_audio",
-								"is_document",
-								"is_photo"
+								"is_file"
 							],
 							"type": "string"
 						}
@@ -1300,10 +1293,8 @@
 							"enum": [
 								"is_voice",
 								"is_media",
-								"is_video",
 								"is_audio",
-								"is_document",
-								"is_photo"
+								"is_file"
 							],
 							"type": "string"
 						}
@@ -1936,10 +1927,8 @@
 						"enum": [
 							"is_voice",
 							"is_media",
-							"is_video",
 							"is_audio",
-							"is_document",
-							"is_photo"
+							"is_file"
 						]
 					},
 					"size": {
@@ -2032,6 +2021,30 @@
 					"to",
 					"event",
 					"data"
+				]
+			},
+			"FilesMediaTypeResponseDto": {
+				"type": "object",
+				"properties": {
+					"files": {
+						"description": "List of files (filtered by fileType when provided)",
+						"type": "array",
+						"items": {
+							"$ref": "#/components/schemas/FileEntity"
+						}
+					},
+					"count": {
+						"type": "number",
+						"description": "Total count of files matching the filter"
+					},
+					"nextOffset": {
+						"type": "number",
+						"description": "Offset for next page, absent when no more pages"
+					}
+				},
+				"required": [
+					"files",
+					"count"
 				]
 			}
 		}

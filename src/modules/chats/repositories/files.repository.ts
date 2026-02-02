@@ -2,17 +2,22 @@ import { FilterQuery, QueryOrder, SqlEntityRepository } from '@mikro-orm/postgre
 import { FileEntity } from '../entities/file.entity';
 import { QueryGetFilesDto } from '../dto/requests/query-get-files.dto';
 import { FileEnum } from '../types/file.enum';
-import { getMimeTypeFilter } from '../utils/file.utils';
+import { getFileTypeFilter } from '../utils/file.utils';
 
 export class FilesRepository extends SqlEntityRepository<FileEntity> {
     getFile(publicKeyHash: string, body: Partial<FileEntity>): Promise<FileEntity | null> {
         return this.findOne(body);
     }
 
-    public async findFilesByMediaType({ chatId, mediaType, limit, offset }: QueryGetFilesDto): Promise<FileEntity[]> {
+    public async findFilesByMediaType({
+        chatId,
+        mediaType,
+        limit,
+        offset,
+    }: QueryGetFilesDto): Promise<[FileEntity[], number]> {
         const where: FilterQuery<FileEntity> = {
             chatId,
-            ...getMimeTypeFilter(mediaType),
+            ...getFileTypeFilter(mediaType),
         };
 
         const options: { orderBy: { createdAt: QueryOrder }; limit?: number; offset?: number } = {
@@ -24,7 +29,7 @@ export class FilesRepository extends SqlEntityRepository<FileEntity> {
             options.offset = offset || 0;
         }
 
-        return this.find(where, options);
+        return this.findAndCount(where, options);
     }
 
     public async findNextFile(
@@ -35,7 +40,7 @@ export class FilesRepository extends SqlEntityRepository<FileEntity> {
         const where: FilterQuery<FileEntity> = {
             chatId,
             createdAt: { $gt: currentCreatedAt },
-            ...getMimeTypeFilter(mediaType),
+            ...getFileTypeFilter(mediaType),
         };
 
         return this.findOne(where, {
@@ -51,7 +56,7 @@ export class FilesRepository extends SqlEntityRepository<FileEntity> {
         const where: FilterQuery<FileEntity> = {
             chatId: chatId,
             createdAt: { $lt: currentCreatedAt },
-            ...getMimeTypeFilter(mediaType),
+            ...getFileTypeFilter(mediaType),
         };
 
         return this.findOne(where, {
