@@ -2,13 +2,13 @@ import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { ApiData } from '../../common/swagger/api-data.decorator';
 import { ApiDataEmpty } from '../../common/swagger/api-data-empty.decorator';
+import { Public } from '../../common/guards/auth/public.decorator';
+import { UserId } from '../../common/guards/auth/user.decorator';
 import { UsersService } from './users.service';
-import { CreateUserDto } from './dto/requests/create-user.dto';
-import { UserEntity } from './entities/user.entity';
-import { MeDto } from './dto/requests/me.dto';
-import { GetMeDto } from './dto/responses/get-me.dto';
 import { UpdateDto } from './dto/requests/update.dto';
 import { GetUserDto } from './dto/responses/get-user.dto';
+import { GetMeDto } from './dto/responses/get-me.dto';
+import { MeDto } from './dto/requests/me.dto';
 
 @ApiTags('Users')
 @Controller('users')
@@ -23,19 +23,14 @@ export class UsersController {
 
     @Post('me')
     @ApiData(GetMeDto)
+    @Public()
     getMe(@Body() body: MeDto): ReturnType<typeof this.usersService.getMe> {
         return this.usersService.getMe(body);
     }
 
-    @Post('create')
-    @ApiData(UserEntity)
-    createUser(@Body() body: CreateUserDto): ReturnType<typeof this.usersService.createUser> {
-        return this.usersService.createUser(body);
-    }
-
     @Patch('update')
     @ApiDataEmpty()
-    updateUser(@Body() body: UpdateDto) {
-        return this.usersService.updateUser(body);
+    updateUser(@UserId() userId: string, @Body() body: UpdateDto) {
+        return this.usersService.updateUser({ id: userId, ...body });
     }
 }

@@ -1,0 +1,8 @@
+import { createParamDecorator, ExecutionContext } from '@nestjs/common';
+import { CustomFastifyRequest } from './custom-fastify-request.type';
+
+export const UserId = createParamDecorator((_data: unknown, ctx: ExecutionContext): string => {
+    const request = ctx.switchToHttp().getRequest<CustomFastifyRequest>();
+
+    return request?.userId;
+});

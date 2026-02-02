@@ -25,7 +25,7 @@ export class MessageEntity extends CreatedEntity {
 
     @Index()
     @ApiProperty()
-    @Property({ length: 4096, nullable: true })
+    @Property({ length: 2 ** 12, nullable: true })
     readonly message?: string;
 
     @ApiProperty()

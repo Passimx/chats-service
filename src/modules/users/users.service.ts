@@ -8,6 +8,9 @@ import { ChatTypeEnum } from '../chats/types/chat-type.enum';
 import { ChatKeyEntity } from '../chats/entities/chat-key.entity';
 import { ChatsRepository } from '../chats/repositories/chats.repository';
 import { ChatKeysRepository } from '../chats/repositories/chat-keys.repository';
+import { QueueService } from '../queue/queue.service';
+import { TopicsEnum } from '../queue/types/topics.enum';
+import { EventsEnum } from '../queue/types/events.enum';
 import { UserEntity } from './entities/user.entity';
 import { UsersRepository } from './repositories/users.repository';
 import { MeDto } from './dto/requests/me.dto';
@@ -21,6 +24,7 @@ export class UsersService {
         private readonly usersRepository: UsersRepository,
         private readonly chatsRepository: ChatsRepository,
         private readonly chatKeysRepository: ChatKeysRepository,
+        private readonly queueService: QueueService,
     ) {}
 
     public async getUserByUserName(userName: string): Promise<DataResponse<GetUserDto | string>> {
@@ -65,19 +69,25 @@ export class UsersService {
     }
 
     public async getMe(body: MeDto): Promise<DataResponse<GetMeDto | string>> {
-        const user = await this.usersRepository.findOne({ ...body });
+        const user = await this.usersRepository.findOne({
+            ...body,
+        });
 
         if (!user) return new DataResponse(MessageErrorEnum.USER_NOT_FOUND);
 
-        return new DataResponse(new GetMeDto(user.encryptedRsaPrivateKey));
+        return new DataResponse(GetMeDto.getFromEntity(user));
     }
 
-    public async updateUser(body: UpdateDto): Promise<DataResponse<string | object>> {
-        const user = await this.usersRepository.findOne({ id: body.id, seedPhraseHash: body.seedPhraseHash });
+    public async updateUser(body: Partial<UserEntity>): Promise<DataResponse<string | object>> {
+        const user = await this.usersRepository.findOne({ id: body.id });
 
         if (!user) return new DataResponse(MessageErrorEnum.USER_NOT_FOUND);
 
         await this.usersRepository.nativeUpdate({ id: body.id }, { name: body.name });
+
+        const response = new DataResponse<UpdateDto>(body);
+
+        await this.queueService.sendMessage(TopicsEnum.EMIT_TO_USER_ROOM, body.id, EventsEnum.UPDATE_ME, response);
 
         return new DataResponse({});
     }

@@ -18,6 +18,7 @@ import { MessagesRepository } from '../repositories/messages.repository';
 import { FilesRepository } from '../repositories/files.repository';
 import { QueryGetMessagesDto } from '../dto/requests/query-get-messages.dto';
 import { UserEntity } from '../../users/entities/user.entity';
+import { ChatKeysRepository } from '../repositories/chat-keys.repository';
 import { ChatsService } from './chats.service';
 
 @Injectable()
@@ -30,6 +31,7 @@ export class MessagesService {
         private readonly chatsService: ChatsService,
         private readonly chatsRepository: ChatsRepository,
         private readonly filesRepository: FilesRepository,
+        private readonly chatKeysRepository: ChatKeysRepository,
     ) {}
 
     public async createMessage(
@@ -92,7 +94,7 @@ export class MessagesService {
 
             await fork.commit();
 
-            const newMessageEntity: MessageEntity | null = await this.messageRepository.findOne(
+            const newMessageEntity: MessageEntity | null = await this.messageRepository.findOneOrFail(
                 { id: messageEntity.id },
                 {
                     populate: ['parentMessage', 'files', 'parentMessage.files', 'user'],
@@ -100,31 +102,29 @@ export class MessagesService {
                 },
             );
 
-            if (!newMessageEntity) {
-                await fork.rollback();
-
-                return new DataResponse(MessageErrorEnum.MESSAGE_NOT_FOUND);
-            }
-
             const response = new DataResponse<MessageEntity | string>(newMessageEntity);
 
             // Отправляем запросы на транскрипцию для голосовых файлов
-            if (transcriptionVoice !== null) {
-                await this.sendTranscriptionRequests(messageEntity.files.getItems());
-            }
+            if (transcriptionVoice !== null) await this.sendTranscriptionRequests(messageEntity.files.getItems());
 
             if (newMessageEntity.number === 1) {
+                await this.chatKeysRepository.nativeUpdate({ chatId, isMember: false }, { isMember: true });
                 const chat = await this.chatsRepository.getChatById(chatId!);
 
                 const tasks: Promise<unknown>[] = chat!.keys.map(({ userId }) => {
                     const response = new DataResponse<ChatEntity>(this.chatsService.prepareDialogue(userId, chat!));
 
-                    return this.queueService.sendMessage(TopicsEnum.EMIT, userId, EventsEnum.CREATE_DIALOGUE, response);
+                    return this.queueService.sendMessage(
+                        TopicsEnum.EMIT_TO_USER_ROOM,
+                        userId,
+                        EventsEnum.JOIN_CHAT,
+                        response,
+                    );
                 });
                 await Promise.all(tasks);
             } else
                 await this.queueService.sendMessage(
-                    TopicsEnum.EMIT,
+                    TopicsEnum.EMIT_TO_CHAT,
                     String(chatId),
                     EventsEnum.CREATE_MESSAGE,
                     response,
@@ -139,8 +139,8 @@ export class MessagesService {
         }
     }
 
-    public async getMessages(socketId: string, query: QueryGetMessagesDto): Promise<DataResponse<MessageEntity[]>> {
-        const messages = await this.messageRepository.findMessages(socketId, query);
+    public async getMessages(userId: string, query: QueryGetMessagesDto): Promise<DataResponse<MessageEntity[]>> {
+        const messages = await this.messageRepository.findMessages(userId, query);
 
         return new DataResponse(messages);
     }

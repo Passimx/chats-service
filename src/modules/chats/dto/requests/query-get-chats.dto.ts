@@ -1,13 +1,13 @@
-import { IsArray, IsNotEmpty, IsOptional, IsString, IsUUID } from 'class-validator';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Transform } from 'class-transformer';
+import { IsNotEmpty, IsOptional, IsString, IsUUID } from 'class-validator';
+import { ApiPropertyOptional } from '@nestjs/swagger';
 import { IsInteger } from '../../decorators/is-integer.decorator';
 
 export class QueryGetChatsDto {
-    @ApiProperty({ description: 'Chat name' })
+    @ApiPropertyOptional({ description: 'Chat name' })
     @IsString()
     @IsNotEmpty()
-    readonly search!: string;
+    @IsOptional()
+    readonly search?: string;
 
     @ApiPropertyOptional({ description: 'Limit chat' })
     @IsInteger()
@@ -19,13 +19,8 @@ export class QueryGetChatsDto {
     @IsOptional()
     readonly offset?: number;
 
-    @IsUUID('all', { each: true })
-    @IsArray()
+    @ApiPropertyOptional({ description: 'chat ids' })
     @IsOptional()
-    @Transform(({ value }: { value: string }) => value.split(','))
-    @ApiPropertyOptional({
-        isArray: true,
-        type: String,
-    })
-    readonly notFavoriteChatIds?: string[];
+    @IsUUID('all', { each: true })
+    readonly chatIds?: string[];
 }

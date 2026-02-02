@@ -23,12 +23,20 @@ export class ChatKeyEntity extends CreatedEntity {
     readonly userId!: string;
 
     @ApiProperty({ nullable: true })
-    @Property({ length: 4096, nullable: true })
+    @Property({ length: 2 ** 12, nullable: true })
     readonly encryptionKey!: string;
 
     @ApiProperty()
     @Property({ default: false })
     readonly received!: boolean;
+
+    @ApiProperty()
+    @Property({ default: false })
+    readonly isMember!: boolean;
+
+    @ApiProperty()
+    @Property({ default: 0 })
+    readonly readMessageNumber!: number;
 
     @ApiProperty({ type: () => ChatEntity })
     @ManyToOne(() => ChatEntity, { lazy: true })

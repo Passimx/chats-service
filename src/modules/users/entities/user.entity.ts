@@ -1,6 +1,7 @@
-import { Entity, PrimaryKey, Property } from '@mikro-orm/core';
-import { ApiProperty } from '@nestjs/swagger';
+import { Collection, Entity, OneToMany, PrimaryKey, Property } from '@mikro-orm/core';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { UsersRepository } from '../repositories/users.repository';
+import { SessionEntity } from './session.entity';
 
 @Entity({ tableName: 'users', repository: () => UsersRepository })
 export class UserEntity {
@@ -25,14 +26,18 @@ export class UserEntity {
     readonly encryptedRsaPrivateKey!: string;
 
     @Property({ length: 2 ** 6, hidden: true })
-    readonly passwordHash?: string;
+    readonly passwordHash!: string;
 
     @Property({ length: 2 ** 6, hidden: true })
-    readonly seedPhraseHash?: string;
+    readonly seedPhraseHash!: string;
 
     @ApiProperty()
     @Property({ defaultRaw: 'NOW()' })
     readonly createdAt!: Date;
+
+    @ApiPropertyOptional({ type: () => SessionEntity, isArray: true })
+    @OneToMany(() => SessionEntity, (session) => session.user)
+    readonly sessions = new Collection<SessionEntity>(this);
 
     constructor(payload: Partial<UserEntity>) {
         Object.assign(this, payload);

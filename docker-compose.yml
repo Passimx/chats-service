@@ -59,6 +59,23 @@ services:
           done;
         ) & /opt/bitnami/scripts/kafka/run.sh
 
+  kafka-ui:
+    container_name: kafka-ui
+    image: provectuslabs/kafka-ui:latest
+    restart: always
+    depends_on:
+      - kafka
+    ports:
+      - ${KAFKA_UI_PORT:-8090}:${KAFKA_UI_PORT:-8080}
+    environment:
+      - KAFKA_CLUSTERS_0_NAME=local
+      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:${KAFKA_CLIENT_PORT-9092}
+      - KAFKA_CLUSTERS_0_PROPERTIES_SECURITY_PROTOCOL=SASL_PLAINTEXT
+      - KAFKA_CLUSTERS_0_PROPERTIES_SASL_MECHANISM=PLAIN
+      - KAFKA_CLUSTERS_0_PROPERTIES_SASL_JAAS_CONFIG=org.apache.kafka.common.security.plain.PlainLoginModule required username="${KAFKA_CLIENT_USERS-user}" password="${KAFKA_USER_PASSWORD-bitnami}";
+    networks:
+      - main
+    env_file: .env
 
 networks:
   main:

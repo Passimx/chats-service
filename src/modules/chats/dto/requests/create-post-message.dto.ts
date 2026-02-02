@@ -13,9 +13,9 @@ export class CreateMessageDto {
     @ApiPropertyOptional({
         description: 'Message',
         minLength: 1,
-        maxLength: 4096,
+        maxLength: 2 ** 12,
     })
-    @Length(1, 4096)
+    @Length(1, 2 ** 12)
     @IsOptional()
     readonly message?: string;
 
