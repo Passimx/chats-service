@@ -1,8 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsUUID } from 'class-validator';
+import { IsNotEmpty, IsString } from 'class-validator';
 
 export class SocketIdDto {
     @ApiProperty()
-    @IsUUID()
+    @IsString()
+    @IsNotEmpty()
     readonly socketId!: string;
 }
