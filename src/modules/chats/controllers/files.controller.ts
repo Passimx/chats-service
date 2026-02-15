@@ -1,11 +1,18 @@
-import { Controller } from '@nestjs/common';
+import { Controller, Get, Param, Query } from '@nestjs/common';
 import { EventPattern, Payload } from '@nestjs/microservices';
+import { ApiExtraModels, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { FilesService } from '../services/files.service';
 import { MessageDto } from '../../queue/dto/message.dto';
 import { TranscriptionResponseDto } from '../dto/response/transcription-response.dto';
+import { FilesMediaTypeResponseDto } from '../dto/response/files-media-type';
 import { TopicsEnum } from '../../queue/types/topics.enum';
+import { ApiData } from '../../../common/swagger/api-data.decorator';
+import { QueryGetFilesDto } from '../dto/requests/query-get-files.dto';
+import { DataResponse } from '../../../common/swagger/data-response.dto';
+import { FileEntity } from '../entities/file.entity';
 
-@Controller('transcription')
+@ApiTags('Files')
+@Controller('files')
 export class FilesController {
     constructor(private readonly filesService: FilesService) {}
 
@@ -16,5 +23,45 @@ export class FilesController {
         const response = body.data.data as TranscriptionResponseDto;
 
         return this.filesService.addTranscriptionVoice(response.fileId, response.transcription);
+    }
+
+    @Get()
+    @ApiExtraModels(FileEntity, FilesMediaTypeResponseDto)
+    @ApiOperation({ summary: 'Get files by fileType (or all) with pagination.' })
+    @ApiData(FilesMediaTypeResponseDto, false)
+    async getFilesMediaType(@Query() query: QueryGetFilesDto): Promise<DataResponse<FilesMediaTypeResponseDto>> {
+        const result = await this.filesService.getFilesByMediaType(query);
+
+        return new DataResponse(result);
+    }
+
+    @Get('next-file')
+    @ApiOperation({ summary: 'Get next file by media type' })
+    @ApiData(FileEntity, false)
+    async getNextFilesByMediaType(@Query() query: QueryGetFilesDto): Promise<DataResponse<FileEntity | null>> {
+        const result = await this.filesService.getNextFilesByMediaType(query);
+
+        return new DataResponse(result);
+    }
+
+    @Get('prev-file')
+    @ApiOperation({ summary: 'Get previous file by media type' })
+    @ApiData(FileEntity, false)
+    async getPrevByMediaType(@Query() query: QueryGetFilesDto): Promise<DataResponse<FileEntity | null>> {
+        const result = await this.filesService.getPrevFilesByMediaType(query);
+
+        return new DataResponse(result);
+    }
+
+    @Get(':fileId')
+    @ApiOperation({ summary: 'Get file by fileId with createdAt for navigation' })
+    @ApiData(FileEntity, false)
+    async getFileById(
+        @Param('fileId') fileId: string,
+        @Query('chatId') chatId: string,
+    ): Promise<DataResponse<FileEntity>> {
+        const result = await this.filesService.getFileById(fileId, chatId);
+
+        return new DataResponse(result);
     }
 }
